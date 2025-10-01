@@ -1,0 +1,29 @@
+[package]
+name = "honeylink-experience"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+honeylink-core = { path = "../core" }
+honeylink-crypto = { path = "../crypto" }
+honeylink-session-orchestrator = { path = "../session-orchestrator" }
+honeylink-policy-engine = { path = "../policy-engine" }
+honeylink-transport = { path = "../transport" }
+honeylink-qos-scheduler = { path = "../qos-scheduler" }
+honeylink-telemetry = { path = "../telemetry" }
+honeylink-physical-adapter = { path = "../physical-adapter" }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+wasm-bindgen = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
