@@ -1,0 +1,141 @@
+# Pre-commit hooks configuration for HoneyLink™
+# See https://pre-commit.com for more information
+#
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # ========== Rust Hooks ==========
+  - repo: local
+    hooks:
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt
+        args: ['--all', '--', '--check']
+        language: system
+        files: \.rs$
+        pass_filenames: false
+        description: 'Format Rust code with rustfmt'
+
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy
+        args: ['--workspace', '--all-targets', '--all-features', '--', '-D', 'warnings']
+        language: system
+        files: \.rs$
+        pass_filenames: false
+        description: 'Lint Rust code with clippy'
+
+      - id: cargo-test
+        name: cargo test
+        entry: cargo test
+        args: ['--workspace', '--all-features']
+        language: system
+        files: \.rs$
+        pass_filenames: false
+        stages: [push]  # Only run on push, not commit (too slow)
+        description: 'Run Rust tests'
+
+      - id: cargo-audit
+        name: cargo audit
+        entry: cargo audit
+        language: system
+        files: Cargo\.(toml|lock)$
+        pass_filenames: false
+        description: 'Audit Rust dependencies for vulnerabilities'
+
+      - id: cargo-deny
+        name: cargo deny
+        entry: cargo deny
+        args: ['check']
+        language: system
+        files: Cargo\.(toml|lock)$
+        pass_filenames: false
+        description: 'Check Rust dependency licenses'
+
+  # ========== TypeScript/JavaScript Hooks ==========
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: sh -c 'cd ui && pnpm exec eslint'
+        args: ['--max-warnings=0']
+        language: system
+        files: \.(ts|tsx|js|jsx)$
+        description: 'Lint TypeScript/JavaScript with ESLint'
+
+      - id: prettier
+        name: prettier
+        entry: sh -c 'cd ui && pnpm exec prettier'
+        args: ['--check']
+        language: system
+        files: \.(ts|tsx|js|jsx|json|css|md)$
+        description: 'Format code with Prettier'
+
+      - id: tsc
+        name: tsc
+        entry: sh -c 'cd ui && pnpm exec tsc'
+        args: ['--noEmit']
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames: false
+        description: 'TypeScript type checking'
+
+      - id: audit-native-deps
+        name: audit native dependencies
+        entry: node scripts/audit-native-deps.js
+        language: system
+        files: ui/package\.json$
+        pass_filenames: false
+        description: 'Check for C/C++ native dependencies in npm packages'
+
+  # ========== General Hooks ==========
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: ['--markdown-linebreak-ext=md']
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom YAML tags
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      - id: no-commit-to-branch
+        args: ['--branch', 'master', '--branch', 'main']
+
+  # ========== Markdown Linting ==========
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.43.0
+    hooks:
+      - id: markdownlint
+        args: ['--config', '.markdownlint.json']
+        description: 'Lint Markdown files'
+
+  # ========== Secret Scanning ==========
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: (package-lock\.json|pnpm-lock\.yaml|Cargo\.lock)
+        description: 'Detect secrets in code'
+
+# Global exclusions
+exclude: |
+  (?x)^(
+    .*/target/.*|
+    .*/dist/.*|
+    .*/build/.*|
+    .*/node_modules/.*|
+    .*\.min\.js|
+    .*\.bundle\.js|
+    .*pnpm-lock\.yaml|
+    .*package-lock\.json|
+    .*Cargo\.lock
+  )$
