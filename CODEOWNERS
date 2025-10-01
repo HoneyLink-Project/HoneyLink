@@ -1,0 +1,114 @@
+# HoneyLink™ Code Owners
+# 
+# This file defines ownership and review responsibilities for different parts of the codebase.
+# Each module has designated owners who are automatically requested for review on PRs.
+#
+# Format: <file-pattern> @username1 @username2
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# ========== Global Owners ==========
+# These owners are the default for everything in the repository
+* @honeylink-architects
+
+# ========== Documentation ==========
+/docs/**                        @honeylink-docs-team
+/spec/**                        @honeylink-specs-team @honeylink-architects
+/README.md                      @honeylink-docs-team
+/CONTRIBUTING.md                @honeylink-docs-team
+/TODO.md                        @honeylink-project-managers
+
+# ========== Rust Core Modules ==========
+
+# Core types and traits (critical - requires 2 approvals)
+/crates/core/**                 @honeylink-core-team @honeylink-architects
+
+# Crypto & Trust Anchor (critical - requires 2 approvals)
+/crates/crypto/**               @honeylink-security-team @honeylink-crypto-experts
+
+# Session Orchestrator
+/crates/session-orchestrator/** @honeylink-session-team @honeylink-architects
+
+# Policy & Profile Engine
+/crates/policy-engine/**        @honeylink-policy-team @honeylink-qos-team
+
+# Transport Abstraction
+/crates/transport/**            @honeylink-transport-team @honeylink-network-experts
+
+# QoS Scheduler
+/crates/qos-scheduler/**        @honeylink-qos-team @honeylink-performance-team
+
+# Telemetry & Insights
+/crates/telemetry/**            @honeylink-observability-team @honeylink-ops-team
+
+# Physical Adapter Layer
+/crates/physical-adapter/**     @honeylink-adapter-team @honeylink-network-experts
+
+# Experience Layer (SDK/UI binding)
+/crates/experience/**           @honeylink-sdk-team @honeylink-ui-team
+
+# ========== UI & Frontend ==========
+/ui/**                          @honeylink-ui-team @honeylink-ux-team
+
+# React components
+/ui/src/components/**           @honeylink-ui-team
+
+# Design system
+/ui/src/styles/**               @honeylink-design-team @honeylink-ux-team
+/ui/tailwind.config.js          @honeylink-design-team
+
+# Internationalization
+/ui/src/locales/**              @honeylink-i18n-team @honeylink-ui-team
+
+# ========== Infrastructure & DevOps ==========
+/infrastructure/**              @honeylink-devops-team @honeylink-sre-team
+/.github/workflows/**           @honeylink-devops-team
+/Cargo.toml                     @honeylink-core-team @honeylink-architects
+/rust-toolchain.toml            @honeylink-core-team
+
+# ========== Configuration & Tooling ==========
+/.vscode/**                     @honeylink-dev-experience-team
+/.editorconfig                  @honeylink-dev-experience-team
+/scripts/**                     @honeylink-devops-team
+
+# ESLint & Prettier configs
+/ui/eslint.config.js            @honeylink-ui-team
+/ui/.prettierrc.json            @honeylink-ui-team
+/ui/tsconfig.json               @honeylink-ui-team
+
+# ========== Security & Compliance ==========
+/spec/security/**               @honeylink-security-team @honeylink-compliance-team
+/spec/security/encryption.md    @honeylink-crypto-experts @honeylink-security-team
+/spec/security/key-management.md @honeylink-crypto-experts @honeylink-security-team
+
+# ========== Testing ==========
+/spec/testing/**                @honeylink-qa-team @honeylink-test-automation-team
+
+# ========== Deployment ==========
+/spec/deployment/**             @honeylink-devops-team @honeylink-sre-team @honeylink-release-managers
+
+# ========== Module-Specific Specs ==========
+/spec/modules/session-orchestrator.md     @honeylink-session-team
+/spec/modules/policy-profile-engine.md    @honeylink-policy-team
+/spec/modules/transport-abstraction.md    @honeylink-transport-team
+/spec/modules/crypto-trust-anchor.md      @honeylink-crypto-experts @honeylink-security-team
+/spec/modules/qos-scheduler.md            @honeylink-qos-team
+/spec/modules/telemetry-insights.md       @honeylink-observability-team
+/spec/modules/physical-adapter.md         @honeylink-adapter-team
+/spec/modules/experience-layer.md         @honeylink-sdk-team @honeylink-ui-team
+
+# ========== API Specifications ==========
+/spec/api/**                    @honeylink-api-team @honeylink-architects
+
+# ========== Notes & Governance ==========
+/spec/notes/decision-log.md     @honeylink-architects @honeylink-project-managers
+/spec/notes/governance.md       @honeylink-project-managers @honeylink-architects
+
+# ========== Architecture ==========
+/spec/architecture/**           @honeylink-architects
+/spec/architecture/overview.md  @honeylink-architects @honeylink-cto
+
+# ========== Performance & Benchmarking ==========
+/spec/performance/**            @honeylink-performance-team @honeylink-sre-team
+
+# ========== UI/UX Specifications ==========
+/spec/ui/**                     @honeylink-ux-team @honeylink-design-team @honeylink-ui-team
