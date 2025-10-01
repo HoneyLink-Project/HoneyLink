@@ -1,0 +1,20 @@
+[package]
+name = "honeylink-physical-adapter"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+honeylink-core = { path = "../core" }
+honeylink-transport = { path = "../transport" }
+
+tokio = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
