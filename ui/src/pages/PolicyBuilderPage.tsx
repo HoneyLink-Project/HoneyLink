@@ -1,5 +1,6 @@
 import { Eye, FileText, Save } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Card, CardContent, CardHeader, Input, Select } from '../components/ui';
 
 /**
@@ -44,6 +45,8 @@ interface ValidationErrors {
  * - Template preview modal
  */
 export const PolicyBuilderPage = () => {
+  const { t } = useTranslation();
+
   const [formData, setFormData] = useState<PolicyTemplate>({
     name: '',
     usage: 'low_latency',
@@ -60,28 +63,28 @@ export const PolicyBuilderPage = () => {
 
   // Usage type options
   const usageOptions = [
-    { value: 'low_latency', label: '低遅延 (Low Latency)' },
-    { value: 'realtime_audio', label: 'リアルタイム音声 (Real-time Audio)' },
-    { value: 'media_8k', label: '8Kメディア (8K Media)' },
-    { value: 'gaming', label: 'ゲーミング (Gaming)' },
-    { value: 'iot_lowpower', label: 'IoT省電力 (IoT Low Power)' },
+    { value: 'low_latency', label: t('policy_builder.usage_types.low_latency') },
+    { value: 'realtime_audio', label: t('policy_builder.usage_types.realtime_audio') },
+    { value: 'media_8k', label: t('policy_builder.usage_types.media_8k') },
+    { value: 'gaming', label: t('policy_builder.usage_types.gaming') },
+    { value: 'iot_lowpower', label: t('policy_builder.usage_types.iot_lowpower') },
   ];
 
   // FEC mode options
   const fecModeOptions = [
-    { value: 'NONE', label: 'なし (NONE)' },
-    { value: 'LIGHT', label: '軽 (LIGHT - 1/4)' },
-    { value: 'MEDIUM', label: '中 (MEDIUM - 1/2)' },
-    { value: 'HEAVY', label: '重 (HEAVY - 3/4)' },
+    { value: 'NONE', label: t('policy_builder.fec_modes.none') },
+    { value: 'LIGHT', label: t('policy_builder.fec_modes.light') },
+    { value: 'MEDIUM', label: t('policy_builder.fec_modes.medium') },
+    { value: 'HEAVY', label: t('policy_builder.fec_modes.heavy') },
   ];
 
   // Priority options
   const priorityOptions = [
-    { value: '1', label: 'Level 1 (最高)' },
-    { value: '2', label: 'Level 2 (高)' },
-    { value: '3', label: 'Level 3 (中)' },
-    { value: '4', label: 'Level 4 (低)' },
-    { value: '5', label: 'Level 5 (最低)' },
+    { value: '1', label: t('policy_builder.priority_levels.1') },
+    { value: '2', label: t('policy_builder.priority_levels.2') },
+    { value: '3', label: t('policy_builder.priority_levels.3') },
+    { value: '4', label: t('policy_builder.priority_levels.4') },
+    { value: '5', label: t('policy_builder.priority_levels.5') },
   ];
 
   // Validate form
@@ -90,26 +93,26 @@ export const PolicyBuilderPage = () => {
 
     // Name validation
     if (!formData.name.trim()) {
-      newErrors.name = 'テンプレート名を入力してください';
+      newErrors.name = t('policy_builder.validation.name_required');
     } else if (formData.name.length < 3) {
-      newErrors.name = 'テンプレート名は3文字以上で入力してください';
+      newErrors.name = t('policy_builder.validation.name_min_length');
     }
 
     // Latency validation (1-50ms from wireframes.md)
     if (formData.latencyTarget < 1 || formData.latencyTarget > 50) {
-      newErrors.latencyTarget = '遅延目標は1-50msの範囲で指定してください';
+      newErrors.latencyTarget = t('policy_builder.validation.latency_range');
     }
 
     // Bandwidth validation (10-5000Mbps from wireframes.md)
     if (formData.bandwidthMin < 10 || formData.bandwidthMin > 5000) {
-      newErrors.bandwidthMin = '帯域下限は10-5000Mbpsの範囲で指定してください';
+      newErrors.bandwidthMin = t('policy_builder.validation.bandwidth_range');
     }
 
     // Schedule validation
     const start = new Date(formData.scheduleStart);
     const end = new Date(formData.scheduleEnd);
     if (start >= end) {
-      newErrors.scheduleEnd = '終了日は開始日より後の日付を指定してください';
+      newErrors.scheduleEnd = t('policy_builder.validation.schedule_end_after_start');
     }
 
     setErrors(newErrors);
@@ -148,30 +151,30 @@ export const PolicyBuilderPage = () => {
       {/* Header */}
       <div>
         <h1 className="text-display font-bold text-text-primary dark:text-text-dark">
-          Policy Builder
+          {t('policy_builder.title')}
         </h1>
         <p className="text-sm text-text-secondary mt-1">
-          Create and manage QoS profile templates
+          {t('policy_builder.subtitle')}
         </p>
       </div>
 
       {/* Template Form */}
       <Card>
         <CardHeader
-          title="プロファイルテンプレート作成"
-          subtitle="用途に応じたQoS設定を定義します"
+          title={t('policy_builder.card_title')}
+          subtitle={t('policy_builder.card_subtitle')}
         />
         <CardContent>
           <div className="space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
               <h3 className="text-subheading font-semibold text-text-primary dark:text-text-dark">
-                基本情報
+                {t('policy_builder.form.basic_info')}
               </h3>
 
               <Input
-                label="テンプレート名"
-                placeholder="例: 低遅延ゲーミング用"
+                label={t('policy_builder.form.template_name')}
+                placeholder={t('policy_builder.form.template_name_placeholder')}
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 error={errors.name}
@@ -179,8 +182,8 @@ export const PolicyBuilderPage = () => {
               />
 
               <Select
-                label="用途"
-                helperText="テンプレートの主な用途を選択してください"
+                label={t('policy_builder.form.usage')}
+                helperText={t('policy_builder.form.usage_help')}
                 options={usageOptions}
                 value={formData.usage}
                 onChange={(e) => handleChange('usage', e.target.value)}
@@ -190,13 +193,13 @@ export const PolicyBuilderPage = () => {
             {/* QoS Settings */}
             <div className="space-y-4">
               <h3 className="text-subheading font-semibold text-text-primary dark:text-text-dark">
-                QoS設定
+                {t('policy_builder.form.qos_settings')}
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="遅延目標 (ms)"
-                  helperText="1-50msの範囲で指定"
+                  label={t('policy_builder.form.latency_target')}
+                  helperText={t('policy_builder.form.latency_help')}
                   type="number"
                   min={1}
                   max={50}
@@ -207,8 +210,8 @@ export const PolicyBuilderPage = () => {
                 />
 
                 <Input
-                  label="帯域下限 (Mbps)"
-                  helperText="10-5000Mbpsの範囲で指定"
+                  label={t('policy_builder.form.bandwidth_min')}
+                  helperText={t('policy_builder.form.bandwidth_help')}
                   type="number"
                   min={10}
                   max={5000}
@@ -220,8 +223,8 @@ export const PolicyBuilderPage = () => {
               </div>
 
               <Select
-                label="FECモード"
-                helperText="Forward Error Correctionの強度を選択"
+                label={t('policy_builder.form.fec_mode')}
+                helperText={t('policy_builder.form.fec_help')}
                 options={fecModeOptions}
                 value={formData.fecMode}
                 onChange={(e) => handleChange('fecMode', e.target.value as PolicyTemplate['fecMode'])}
@@ -231,12 +234,12 @@ export const PolicyBuilderPage = () => {
             {/* Schedule Settings */}
             <div className="space-y-4">
               <h3 className="text-subheading font-semibold text-text-primary dark:text-text-dark">
-                スケジュール設定
+                {t('policy_builder.form.schedule_settings')}
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="有効期間 (開始)"
+                  label={t('policy_builder.form.schedule_start')}
                   type="date"
                   value={formData.scheduleStart}
                   onChange={(e) => handleChange('scheduleStart', e.target.value)}
@@ -245,7 +248,7 @@ export const PolicyBuilderPage = () => {
                 />
 
                 <Input
-                  label="有効期間 (終了)"
+                  label={t('policy_builder.form.schedule_end')}
                   type="date"
                   value={formData.scheduleEnd}
                   onChange={(e) => handleChange('scheduleEnd', e.target.value)}
@@ -255,8 +258,8 @@ export const PolicyBuilderPage = () => {
               </div>
 
               <Select
-                label="優先度"
-                helperText="複数のプロファイルが競合する場合の優先順位"
+                label={t('policy_builder.form.priority')}
+                helperText={t('policy_builder.form.priority_help')}
                 options={priorityOptions}
                 value={formData.priority.toString()}
                 onChange={(e) => handleChange('priority', parseInt(e.target.value, 10))}
@@ -271,7 +274,7 @@ export const PolicyBuilderPage = () => {
                 onClick={handlePreview}
                 className="flex-1"
               >
-                プレビュー
+                {t('policy_builder.buttons.preview')}
               </Button>
               <Button
                 variant="primary"
@@ -279,7 +282,7 @@ export const PolicyBuilderPage = () => {
                 onClick={handleSave}
                 className="flex-1"
               >
-                保存
+                {t('policy_builder.buttons.save')}
               </Button>
             </div>
           </div>
@@ -294,7 +297,7 @@ export const PolicyBuilderPage = () => {
               <FileText size={20} className="text-error mt-0.5" />
               <div>
                 <div className="font-semibold text-text-primary dark:text-text-dark mb-2">
-                  入力内容を確認してください
+                  {t('policy_builder.validation.title')}
                 </div>
                 <ul className="text-sm text-text-secondary space-y-1 list-disc list-inside">
                   {Object.values(errors).map((error, index) => (
@@ -311,39 +314,39 @@ export const PolicyBuilderPage = () => {
       {isPreviewOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <Card className="max-w-2xl w-full m-4">
-            <CardHeader title="テンプレートプレビュー" />
+            <CardHeader title={t('policy_builder.preview.title')} />
             <CardContent>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-text-secondary">名称:</span>
+                  <span className="text-text-secondary">{t('policy_builder.preview.name')}</span>
                   <span className="font-medium text-text-primary dark:text-text-dark">{formData.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-text-secondary">用途:</span>
+                  <span className="text-text-secondary">{t('policy_builder.preview.usage')}</span>
                   <span className="font-medium text-text-primary dark:text-text-dark">
                     {usageOptions.find((opt) => opt.value === formData.usage)?.label}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-text-secondary">遅延目標:</span>
+                  <span className="text-text-secondary">{t('policy_builder.preview.latency_target')}</span>
                   <span className="font-medium text-text-primary dark:text-text-dark">{formData.latencyTarget} ms</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-text-secondary">帯域下限:</span>
+                  <span className="text-text-secondary">{t('policy_builder.preview.bandwidth_min')}</span>
                   <span className="font-medium text-text-primary dark:text-text-dark">{formData.bandwidthMin} Mbps</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-text-secondary">FECモード:</span>
+                  <span className="text-text-secondary">{t('policy_builder.preview.fec_mode')}</span>
                   <span className="font-medium text-text-primary dark:text-text-dark">{formData.fecMode}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-text-secondary">優先度:</span>
+                  <span className="text-text-secondary">{t('policy_builder.preview.priority')}</span>
                   <span className="font-medium text-text-primary dark:text-text-dark">Level {formData.priority}</span>
                 </div>
               </div>
               <div className="mt-6 flex justify-end">
                 <Button variant="primary" onClick={() => setIsPreviewOpen(false)}>
-                  閉じる
+                  {t('policy_builder.buttons.close')}
                 </Button>
               </div>
             </CardContent>

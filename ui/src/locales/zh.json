@@ -135,6 +135,8 @@
   "policy_builder": {
     "title": "策略构建器",
     "subtitle": "创建和管理QoS配置文件模板",
+    "card_title": "创建配置文件模板",
+    "card_subtitle": "根据用例定义QoS设置",
     "form": {
       "basic_info": "基本信息",
       "qos_settings": "QoS设置",
@@ -176,7 +178,25 @@
     },
     "buttons": {
       "preview": "预览",
-      "save": "保存"
+      "save": "保存",
+      "close": "关闭"
+    },
+    "validation": {
+      "title": "请检查您的输入",
+      "name_required": "请输入模板名称",
+      "name_min_length": "模板名称必须至少3个字符",
+      "latency_range": "延迟目标必须在1-50ms之间",
+      "bandwidth_range": "最小带宽必须在10-5000Mbps之间",
+      "schedule_end_after_start": "结束日期必须晚于开始日期"
+    },
+    "preview": {
+      "title": "模板预览",
+      "name": "名称:",
+      "usage": "用途:",
+      "latency_target": "延迟目标:",
+      "bandwidth_min": "最小带宽:",
+      "fec_mode": "FEC模式:",
+      "priority": "优先级:"
     },
     "toast": {
       "save_success": "策略模板保存成功",

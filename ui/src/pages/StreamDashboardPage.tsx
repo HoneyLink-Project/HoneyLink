@@ -1,9 +1,9 @@
 import { AlertCircle, ArrowDown, ArrowUp, CheckCircle2, Clock, Settings, TrendingUp } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, CardContent, CardHeader } from '../components/ui';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useStreams, useUpdateStreamPriority } from '../api/hooks';
+import { Button, Card, CardContent, CardHeader } from '../components/ui';
 
 /**
  * Stream status interface
@@ -49,7 +49,7 @@ interface TimelineEvent {
  */
 export const StreamDashboardPage = () => {
   const { t } = useTranslation();
-  
+
   // Fetch streams from API (auto-refresh every 5s)
   const { data: apiStreams } = useStreams();
   const updatePriorityMutation = useUpdateStreamPriority();
@@ -188,7 +188,7 @@ export const StreamDashboardPage = () => {
     // Determine new priority (current priority not tracked in this mock)
     // In real implementation, track current priority per stream
     const newPriority = direction === 'up' ? 1 : 2; // Simplified logic
-    
+
     updatePriorityMutation.mutate(
       { streamId, priority: newPriority },
       {

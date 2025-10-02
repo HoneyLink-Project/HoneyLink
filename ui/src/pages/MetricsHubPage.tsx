@@ -1,9 +1,9 @@
 import { AlertTriangle, CheckCircle, Clock, Shield, TrendingUp, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CartesianGrid, Cell, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from 'recharts';
+import { useLatencyHeatmap, useMetrics } from '../api/hooks';
 import { Card, CardContent, CardHeader, Select } from '../components/ui';
-import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { useMetrics, useLatencyHeatmap } from '../api/hooks';
 
 /**
  * KPI metric interface
@@ -47,7 +47,7 @@ interface AlertEntry {
  */
 export const MetricsHubPage = () => {
   const { t } = useTranslation();
-  
+
   const [period, setPeriod] = useState('24h');
   const [role, setRole] = useState('all');
   const [deviceFilter, setDeviceFilter] = useState('all');

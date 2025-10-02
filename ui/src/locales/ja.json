@@ -135,6 +135,8 @@
   "policy_builder": {
     "title": "Policy Builder",
     "subtitle": "QoS profile templates を作成・管理",
+    "card_title": "プロファイルテンプレート作成",
+    "card_subtitle": "用途に応じたQoS設定を定義します",
     "form": {
       "basic_info": "基本情報",
       "qos_settings": "QoS設定",
@@ -176,7 +178,25 @@
     },
     "buttons": {
       "preview": "プレビュー",
-      "save": "保存"
+      "save": "保存",
+      "close": "閉じる"
+    },
+    "validation": {
+      "title": "入力内容を確認してください",
+      "name_required": "テンプレート名を入力してください",
+      "name_min_length": "テンプレート名は3文字以上で入力してください",
+      "latency_range": "遅延目標は1-50msの範囲で指定してください",
+      "bandwidth_range": "帯域下限は10-5000Mbpsの範囲で指定してください",
+      "schedule_end_after_start": "終了日は開始日より後の日付を指定してください"
+    },
+    "preview": {
+      "title": "テンプレートプレビュー",
+      "name": "名称:",
+      "usage": "用途:",
+      "latency_target": "遅延目標:",
+      "bandwidth_min": "帯域下限:",
+      "fec_mode": "FECモード:",
+      "priority": "優先度:"
     },
     "toast": {
       "save_success": "ポリシーテンプレートを保存しました",

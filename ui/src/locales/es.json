@@ -135,6 +135,8 @@
   "policy_builder": {
     "title": "Constructor de Políticas",
     "subtitle": "Crear y gestionar plantillas de perfil QoS",
+    "card_title": "Crear Plantilla de Perfil",
+    "card_subtitle": "Definir configuración QoS según caso de uso",
     "form": {
       "basic_info": "Información Básica",
       "qos_settings": "Configuración QoS",
@@ -176,7 +178,25 @@
     },
     "buttons": {
       "preview": "Vista Previa",
-      "save": "Guardar"
+      "save": "Guardar",
+      "close": "Cerrar"
+    },
+    "validation": {
+      "title": "Por favor revise su entrada",
+      "name_required": "Por favor ingrese el nombre de la plantilla",
+      "name_min_length": "El nombre de la plantilla debe tener al menos 3 caracteres",
+      "latency_range": "El objetivo de latencia debe estar entre 1-50ms",
+      "bandwidth_range": "El mínimo de ancho de banda debe estar entre 10-5000Mbps",
+      "schedule_end_after_start": "La fecha de finalización debe ser posterior a la fecha de inicio"
+    },
+    "preview": {
+      "title": "Vista Previa de Plantilla",
+      "name": "Nombre:",
+      "usage": "Uso:",
+      "latency_target": "Objetivo de Latencia:",
+      "bandwidth_min": "Ancho de Banda Mínimo:",
+      "fec_mode": "Modo FEC:",
+      "priority": "Prioridad:"
     },
     "toast": {
       "save_success": "Plantilla de política guardada exitosamente",
