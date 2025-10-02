@@ -85,9 +85,12 @@
     }
   },
   "stream_dashboard": {
-    "title": "ストリーム制御",
-    "subtitle": "アクティブセッションのQoS最適化",
+    "title": "Stream Dashboard",
+    "subtitle": "{{count}}個のアクティブなストリーム",
     "kpi": {
+      "title": "KPI達成率",
+      "description": "Overall performance metric",
+      "target": "Target: ≥95%",
       "active_sessions": "アクティブセッション数",
       "avg_latency": "平均遅延",
       "achievement_rate": "KPI達成率"
@@ -95,9 +98,18 @@
     "status": {
       "optimal": "最適",
       "degraded": "劣化",
-      "critical": "危険"
+      "critical": "警告"
+    },
+    "metrics": {
+      "latency": "Latency",
+      "jitter": "Jitter",
+      "packet_loss": "Packet Loss",
+      "bandwidth": "Bandwidth",
+      "fec_rate": "FEC Rate:"
     },
     "chart": {
+      "title": "リアルタイムチャート",
+      "subtitle": "Latency over time (last 5 minutes)",
       "latency": "遅延 (ms)",
       "jitter": "ジッタ (ms)",
       "packet_loss": "パケット損失率 (%)",
@@ -105,8 +117,15 @@
     },
     "priority": {
       "title": "優先度",
+      "increase": "Increase priority",
+      "decrease": "Decrease priority",
+      "settings": "Stream settings",
       "up": "優先度を上げる",
       "down": "優先度を下げる"
+    },
+    "timeline": {
+      "title": "イベントタイムライン",
+      "subtitle": "{{count}}件の最近のイベント"
     },
     "toast": {
       "priority_success": "優先度を{{priority}}に変更しました",

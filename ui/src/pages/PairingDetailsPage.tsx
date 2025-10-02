@@ -1,8 +1,8 @@
-import { ArrowLeft, Shield, CheckCircle, Plus, PhoneOff, Clock, FileText, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, CheckCircle2, Clock, FileText, PhoneOff, Plus, Shield, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Card, CardHeader, CardContent, Select } from '../components/ui';
+import { Button, Card, CardContent, CardHeader, Select } from '../components/ui';
 
 /**
  * Session log entry interface
@@ -16,14 +16,14 @@ interface SessionLogEntry {
 
 /**
  * WF-02: Pairing Details Page
- * 
+ *
  * Features:
  * - Device pairing status display
  * - Security status indicator (mutual authentication)
  * - Profile selection dropdown
  * - Session event log table
  * - Stream addition and disconnection actions
- * 
+ *
  * TODO (Task 4.3 Part 3):
  * - Integrate with POST /devices/{id}/pair API
  * - Real-time session log updates (WebSocket/SSE)

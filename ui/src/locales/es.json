@@ -86,8 +86,11 @@
   },
   "stream_dashboard": {
     "title": "Panel de Transmisión",
-    "subtitle": "Optimización de QoS para sesiones activas",
+    "subtitle": "{{count}} transmisión(es) activa(s)",
     "kpi": {
+      "title": "Tasa de Logro de KPI",
+      "description": "Métrica de rendimiento general",
+      "target": "Objetivo: ≥95%",
       "active_sessions": "Sesiones Activas",
       "avg_latency": "Latencia Promedio",
       "achievement_rate": "Logro de KPI"
@@ -97,7 +100,16 @@
       "degraded": "Degradado",
       "critical": "Crítico"
     },
+    "metrics": {
+      "latency": "Latencia",
+      "jitter": "Jitter",
+      "packet_loss": "Pérdida de Paquetes",
+      "bandwidth": "Ancho de Banda",
+      "fec_rate": "Tasa FEC:"
+    },
     "chart": {
+      "title": "Gráfico en Tiempo Real",
+      "subtitle": "Latencia a lo largo del tiempo (últimos 5 minutos)",
       "latency": "Latencia (ms)",
       "jitter": "Jitter (ms)",
       "packet_loss": "Pérdida de Paquetes (%)",
@@ -105,8 +117,15 @@
     },
     "priority": {
       "title": "Prioridad",
+      "increase": "Aumentar prioridad",
+      "decrease": "Disminuir prioridad",
+      "settings": "Configuración de transmisión",
       "up": "Aumentar Prioridad",
       "down": "Disminuir Prioridad"
+    },
+    "timeline": {
+      "title": "Línea de Tiempo de Eventos",
+      "subtitle": "{{count}} eventos recientes"
     },
     "toast": {
       "priority_success": "Prioridad cambiada a {{priority}}",

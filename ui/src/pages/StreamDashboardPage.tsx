@@ -1,5 +1,6 @@
 import { AlertCircle, ArrowDown, ArrowUp, CheckCircle2, Clock, Settings, TrendingUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Card, CardContent, CardHeader } from '../components/ui';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useStreams, useUpdateStreamPriority } from '../api/hooks';
@@ -47,6 +48,8 @@ interface TimelineEvent {
  * - Priority adjustment API (PUT /sessions/{id}/priority)
  */
 export const StreamDashboardPage = () => {
+  const { t } = useTranslation();
+  
   // Fetch streams from API (auto-refresh every 5s)
   const { data: apiStreams } = useStreams();
   const updatePriorityMutation = useUpdateStreamPriority();
@@ -160,9 +163,9 @@ export const StreamDashboardPage = () => {
   // Get status badge
   const getStatusBadge = (status: StreamStatus['status']) => {
     const config = {
-      optimal: { label: '最適', className: 'text-success bg-success/10' },
-      degraded: { label: '劣化', className: 'text-warning bg-warning/10' },
-      critical: { label: '警告', className: 'text-error bg-error/10' },
+      optimal: { label: t('stream_dashboard.status.optimal'), className: 'text-success bg-success/10' },
+      degraded: { label: t('stream_dashboard.status.degraded'), className: 'text-warning bg-warning/10' },
+      critical: { label: t('stream_dashboard.status.critical'), className: 'text-error bg-error/10' },
     };
     const { label, className } = config[status];
     return <span className={`px-2 py-1 rounded text-xs font-medium ${className}`}>{label}</span>;
@@ -206,10 +209,10 @@ export const StreamDashboardPage = () => {
       {/* Header */}
       <div>
         <h1 className="text-display font-bold text-text-primary dark:text-text-dark">
-          Stream Dashboard
+          {t('stream_dashboard.title')}
         </h1>
         <p className="text-sm text-text-secondary mt-1">
-          {streams.length} active stream{streams.length !== 1 ? 's' : ''}
+          {t('stream_dashboard.subtitle', { count: streams.length })}
         </p>
       </div>
 
@@ -220,16 +223,16 @@ export const StreamDashboardPage = () => {
             <TrendingUp size={32} className="text-success" />
             <div>
               <div className="text-heading font-semibold text-text-primary dark:text-text-dark">
-                KPI達成率
+                {t('stream_dashboard.kpi.title')}
               </div>
               <div className="text-sm text-text-secondary">
-                Overall performance metric
+                {t('stream_dashboard.kpi.description')}
               </div>
             </div>
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold text-success">{kpiAchievement}%</div>
-            <div className="text-xs text-text-secondary">Target: ≥95%</div>
+            <div className="text-xs text-text-secondary">{t('stream_dashboard.kpi.target')}</div>
           </div>
         </CardContent>
       </Card>
@@ -248,25 +251,25 @@ export const StreamDashboardPage = () => {
                 {/* Metrics Grid */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-xs text-text-secondary mb-1">Latency</div>
+                    <div className="text-xs text-text-secondary mb-1">{t('stream_dashboard.metrics.latency')}</div>
                     <div className="text-lg font-semibold text-text-primary dark:text-text-dark">
                       {stream.latency} ms
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-text-secondary mb-1">Jitter</div>
+                    <div className="text-xs text-text-secondary mb-1">{t('stream_dashboard.metrics.jitter')}</div>
                     <div className="text-lg font-semibold text-text-primary dark:text-text-dark">
                       {stream.jitter} ms
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-text-secondary mb-1">Packet Loss</div>
+                    <div className="text-xs text-text-secondary mb-1">{t('stream_dashboard.metrics.packet_loss')}</div>
                     <div className="text-lg font-semibold text-text-primary dark:text-text-dark">
                       {stream.packetLoss.toFixed(1)}%
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-text-secondary mb-1">Bandwidth</div>
+                    <div className="text-xs text-text-secondary mb-1">{t('stream_dashboard.metrics.bandwidth')}</div>
                     <div className="text-lg font-semibold text-text-primary dark:text-text-dark">
                       {stream.bandwidth} Mbps
                     </div>
@@ -276,7 +279,7 @@ export const StreamDashboardPage = () => {
                 {/* FEC Rate */}
                 <div className="flex items-center justify-between pt-2 border-t border-text-secondary/10">
                   <div className="text-sm text-text-secondary">
-                    FEC Rate: <span className="font-medium text-text-primary dark:text-text-dark">{stream.fecRate}</span>
+                    {t('stream_dashboard.metrics.fec_rate')} <span className="font-medium text-text-primary dark:text-text-dark">{stream.fecRate}</span>
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -284,7 +287,7 @@ export const StreamDashboardPage = () => {
                       size="sm"
                       icon={<ArrowUp size={14} />}
                       onClick={() => handlePriorityChange(stream.id, 'up')}
-                      aria-label="Increase priority"
+                      aria-label={t('stream_dashboard.priority.increase')}
                     >
                       {''}
                     </Button>
@@ -293,7 +296,7 @@ export const StreamDashboardPage = () => {
                       size="sm"
                       icon={<ArrowDown size={14} />}
                       onClick={() => handlePriorityChange(stream.id, 'down')}
-                      aria-label="Decrease priority"
+                      aria-label={t('stream_dashboard.priority.decrease')}
                     >
                       {''}
                     </Button>
@@ -301,7 +304,7 @@ export const StreamDashboardPage = () => {
                       variant="ghost"
                       size="sm"
                       icon={<Settings size={14} />}
-                      aria-label="Stream settings"
+                      aria-label={t('stream_dashboard.priority.settings')}
                     >
                       {''}
                     </Button>
@@ -315,7 +318,7 @@ export const StreamDashboardPage = () => {
 
       {/* Real-time Chart */}
       <Card>
-        <CardHeader title="リアルタイムチャート" subtitle="Latency over time (last 5 minutes)" />
+        <CardHeader title={t('stream_dashboard.chart.title')} subtitle={t('stream_dashboard.chart.subtitle')} />
         <CardContent>
           <ResponsiveContainer width="100%" height={256}>
             <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -372,8 +375,8 @@ export const StreamDashboardPage = () => {
       {/* Event Timeline */}
       <Card>
         <CardHeader
-          title="イベントタイムライン"
-          subtitle={`${timelineEvents.length} recent events`}
+          title={t('stream_dashboard.timeline.title')}
+          subtitle={t('stream_dashboard.timeline.subtitle', { count: timelineEvents.length })}
         />
         <CardContent className="p-0">
           <div className="divide-y divide-text-secondary/10">

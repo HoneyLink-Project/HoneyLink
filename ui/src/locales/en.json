@@ -86,8 +86,11 @@
   },
   "stream_dashboard": {
     "title": "Stream Dashboard",
-    "subtitle": "QoS optimization for active sessions",
+    "subtitle": "{{count}} active stream(s)",
     "kpi": {
+      "title": "KPI Achievement Rate",
+      "description": "Overall performance metric",
+      "target": "Target: ≥95%",
       "active_sessions": "Active Sessions",
       "avg_latency": "Avg Latency",
       "achievement_rate": "KPI Achievement"
@@ -97,7 +100,16 @@
       "degraded": "Degraded",
       "critical": "Critical"
     },
+    "metrics": {
+      "latency": "Latency",
+      "jitter": "Jitter",
+      "packet_loss": "Packet Loss",
+      "bandwidth": "Bandwidth",
+      "fec_rate": "FEC Rate:"
+    },
     "chart": {
+      "title": "Real-time Chart",
+      "subtitle": "Latency over time (last 5 minutes)",
       "latency": "Latency (ms)",
       "jitter": "Jitter (ms)",
       "packet_loss": "Packet Loss (%)",
@@ -105,8 +117,15 @@
     },
     "priority": {
       "title": "Priority",
+      "increase": "Increase priority",
+      "decrease": "Decrease priority",
+      "settings": "Stream settings",
       "up": "Increase Priority",
       "down": "Decrease Priority"
+    },
+    "timeline": {
+      "title": "Event Timeline",
+      "subtitle": "{{count}} recent events"
     },
     "toast": {
       "priority_success": "Priority changed to {{priority}}",

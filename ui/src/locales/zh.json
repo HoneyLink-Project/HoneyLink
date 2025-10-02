@@ -86,8 +86,11 @@
   },
   "stream_dashboard": {
     "title": "流控制面板",
-    "subtitle": "活动会话的QoS优化",
+    "subtitle": "{{count}}个活动流",
     "kpi": {
+      "title": "KPI达成率",
+      "description": "整体性能指标",
+      "target": "目标: ≥95%",
       "active_sessions": "活动会话",
       "avg_latency": "平均延迟",
       "achievement_rate": "KPI达成率"
@@ -97,7 +100,16 @@
       "degraded": "降级",
       "critical": "危急"
     },
+    "metrics": {
+      "latency": "延迟",
+      "jitter": "抖动",
+      "packet_loss": "丢包",
+      "bandwidth": "带宽",
+      "fec_rate": "FEC率:"
+    },
     "chart": {
+      "title": "实时图表",
+      "subtitle": "延迟随时间变化(最近5分钟)",
       "latency": "延迟 (ms)",
       "jitter": "抖动 (ms)",
       "packet_loss": "丢包率 (%)",
@@ -105,8 +117,15 @@
     },
     "priority": {
       "title": "优先级",
+      "increase": "提高优先级",
+      "decrease": "降低优先级",
+      "settings": "流设置",
       "up": "提高优先级",
       "down": "降低优先级"
+    },
+    "timeline": {
+      "title": "事件时间线",
+      "subtitle": "{{count}}个最近事件"
     },
     "toast": {
       "priority_success": "优先级已更改为 {{priority}}",
