@@ -1,6 +1,8 @@
-import { AlertTriangle, BarChart3, CheckCircle, Clock, Shield, TrendingUp, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Shield, TrendingUp, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, Select } from '../components/ui';
+import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { useMetrics, useLatencyHeatmap } from '../api/hooks';
 
 /**
  * KPI metric interface
@@ -47,6 +49,10 @@ export const MetricsHubPage = () => {
   const [role, setRole] = useState('all');
   const [deviceFilter, setDeviceFilter] = useState('all');
 
+  // Fetch metrics from API (auto-refresh every 30s)
+  const { data: metricsData } = useMetrics(period, role, deviceFilter);
+  const { data: heatmapDataApi } = useLatencyHeatmap(period);
+
   // Period options
   const periodOptions = [
     { value: '1h', label: '過去1時間' },
@@ -72,8 +78,8 @@ export const MetricsHubPage = () => {
     { value: 'iot', label: 'IoT Device' },
   ];
 
-  // Mock KPI data (TODO: Fetch from API)
-  const [kpis] = useState<KPIMetric[]>([
+  // Use API data or fallback to mock data
+  const mockKpis: KPIMetric[] = [
     {
       id: 'success_rate',
       label: '接続成功率',
@@ -101,10 +107,9 @@ export const MetricsHubPage = () => {
       status: 'good',
       change: 0.1,
     },
-  ]);
+  ];
 
-  // Mock alert data (TODO: Fetch from API)
-  const [alerts] = useState<AlertEntry[]>([
+  const mockAlerts: AlertEntry[] = [
     {
       timestamp: new Date(Date.now() - 600000), // 10 min ago
       type: 'latency_spike',
@@ -129,7 +134,12 @@ export const MetricsHubPage = () => {
       device: 'HL-EDGE-0003',
       status: 'resolved',
     },
-  ]);
+  ];
+
+  const kpis = metricsData?.kpis || mockKpis;
+  const alerts = metricsData?.alerts || mockAlerts;
+  const uptimeValue = metricsData?.uptime || 99.8;
+  const mttrValue = metricsData?.mttr || 4.2;
 
   // Get KPI status icon
   const getKPIStatusIcon = (status: KPIMetric['status']) => {
@@ -241,24 +251,64 @@ export const MetricsHubPage = () => {
         ))}
       </div>
 
-      {/* Heatmap Visualization Placeholder */}
+      {/* Heatmap Visualization */}
       <Card>
         <CardHeader
-          title="可視化"
-          subtitle="Latency heatmap over time"
+          title="レイテンシ分布"
+          subtitle="Latency heatmap across devices and time"
         />
         <CardContent>
-          <div className="h-80 flex items-center justify-center bg-surface-alt/30 dark:bg-surface-dark/30 rounded border-2 border-dashed border-text-secondary/30">
-            <div className="text-center">
-              <BarChart3 size={48} className="mx-auto text-text-secondary mb-3" />
-              <div className="text-sm font-medium text-text-primary dark:text-text-dark mb-1">
-                Heatmap visualization
-              </div>
-              <div className="text-xs text-text-secondary">
-                TODO: Integrate recharts heatmap for latency distribution
+          {heatmapDataApi && heatmapDataApi.length > 0 ? (
+            <ResponsiveContainer width="100%" height={320}>
+              <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 40 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
+                <XAxis
+                  type="category"
+                  dataKey="x"
+                  name="Time"
+                  stroke="#6b7280"
+                  fontSize={12}
+                  label={{ value: 'Time', position: 'insideBottom', offset: -10, style: { fill: '#6b7280', fontSize: 12 } }}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="y"
+                  name="Device"
+                  stroke="#6b7280"
+                  fontSize={12}
+                  label={{ value: 'Device', angle: -90, position: 'insideLeft', style: { fill: '#6b7280', fontSize: 12 } }}
+                />
+                <ZAxis type="number" dataKey="value" range={[100, 500]} name="Latency (ms)" />
+                <Tooltip
+                  cursor={{ strokeDasharray: '3 3' }}
+                  contentStyle={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                  }}
+                  formatter={(value: number) => [`${value.toFixed(1)} ms`, 'Latency']}
+                />
+                <Scatter data={heatmapDataApi}>
+                  {heatmapDataApi.map((entry, index) => {
+                    // Color scale: Green (0-8ms) -> Yellow (8-15ms) -> Red (15+ms)
+                    const latency = entry.value;
+                    let fillColor = '#10b981'; // green (good)
+                    if (latency > 15) fillColor = '#ef4444'; // red (critical)
+                    else if (latency > 8) fillColor = '#f59e0b'; // yellow/orange (warning)
+                    return <Cell key={`cell-${index}`} fill={fillColor} />;
+                  })}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-80 flex items-center justify-center bg-surface-alt/30 dark:bg-surface-dark/30 rounded">
+              <div className="text-center text-text-secondary">
+                <div className="text-sm font-medium mb-1">No heatmap data available</div>
+                <div className="text-xs">Waiting for metrics...</div>
               </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
@@ -337,14 +387,14 @@ export const MetricsHubPage = () => {
                 <Shield className="text-success" size={20} />
                 <span className="text-sm font-medium text-text-secondary">Uptime</span>
               </div>
-              <div className="text-2xl font-bold text-success">99.8%</div>
+              <div className="text-2xl font-bold text-success">{uptimeValue.toFixed(1)}%</div>
             </div>
             <div>
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Clock className="text-text-secondary" size={20} />
                 <span className="text-sm font-medium text-text-secondary">MTTR</span>
               </div>
-              <div className="text-2xl font-bold text-text-primary dark:text-text-dark">4.2 min</div>
+              <div className="text-2xl font-bold text-text-primary dark:text-text-dark">{mttrValue.toFixed(1)} min</div>
             </div>
           </div>
         </CardContent>
@@ -352,3 +402,6 @@ export const MetricsHubPage = () => {
     </div>
   );
 };
+
+// Default export for code splitting (React.lazy)
+export default MetricsHubPage;
