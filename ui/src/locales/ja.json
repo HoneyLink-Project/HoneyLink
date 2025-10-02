@@ -187,10 +187,22 @@
     "title": "メトリクスハブ",
     "subtitle": "システム全体の監視とアラート管理",
     "filters": {
-      "time_range": "期間フィルタ",
+      "time_range": "期間",
+      "role": "ロール",
       "severity": "重要度フィルタ",
-      "device": "デバイスフィルタ",
+      "device": "デバイス",
       "all": "全て"
+    },
+    "heatmap": {
+      "title": "レイテンシ分布",
+      "subtitle": "Latency heatmap across devices and time",
+      "no_data": "No heatmap data available",
+      "waiting": "Waiting for metrics..."
+    },
+    "summary": {
+      "active_alerts": "Active Alerts",
+      "uptime": "Uptime",
+      "mttr": "MTTR"
     },
     "kpis": {
       "title": "主要KPI",

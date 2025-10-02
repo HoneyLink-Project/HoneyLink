@@ -187,10 +187,22 @@
     "title": "Centro de Métricas",
     "subtitle": "Monitoreo del sistema y gestión de alertas",
     "filters": {
-      "time_range": "Filtro de Rango de Tiempo",
-      "severity": "Filtro de Severidad",
-      "device": "Filtro de Dispositivo",
+      "time_range": "Rango de Tiempo",
+      "role": "Rol",
+      "severity": "Severidad",
+      "device": "Dispositivo",
       "all": "Todos"
+    },
+    "heatmap": {
+      "title": "Distribución de Latencia",
+      "subtitle": "Mapa de calor de latencia en dispositivos y tiempo",
+      "no_data": "No hay datos de mapa de calor disponibles",
+      "waiting": "Esperando métricas..."
+    },
+    "summary": {
+      "active_alerts": "Alertas Activas",
+      "uptime": "Tiempo de Actividad",
+      "mttr": "MTTR"
     },
     "kpis": {
       "title": "Indicadores Clave de Rendimiento",

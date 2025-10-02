@@ -187,10 +187,22 @@
     "title": "指标中心",
     "subtitle": "系统范围监控和警报管理",
     "filters": {
-      "time_range": "时间范围筛选",
+      "time_range": "时间范围",
+      "role": "角色",
       "severity": "严重性筛选",
-      "device": "设备筛选",
+      "device": "设备",
       "all": "全部"
+    },
+    "heatmap": {
+      "title": "延迟分布",
+      "subtitle": "设备和时间的延迟热图",
+      "no_data": "没有可用的热图数据",
+      "waiting": "等待指标..."
+    },
+    "summary": {
+      "active_alerts": "活动警报",
+      "uptime": "运行时间",
+      "mttr": "MTTR"
     },
     "kpis": {
       "title": "关键绩效指标",

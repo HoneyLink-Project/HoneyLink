@@ -187,10 +187,22 @@
     "title": "Metrics Hub",
     "subtitle": "System-wide monitoring and alert management",
     "filters": {
-      "time_range": "Time Range Filter",
-      "severity": "Severity Filter",
-      "device": "Device Filter",
+      "time_range": "Time Range",
+      "role": "Role",
+      "severity": "Severity",
+      "device": "Device",
       "all": "All"
+    },
+    "heatmap": {
+      "title": "Latency Distribution",
+      "subtitle": "Latency heatmap across devices and time",
+      "no_data": "No heatmap data available",
+      "waiting": "Waiting for metrics..."
+    },
+    "summary": {
+      "active_alerts": "Active Alerts",
+      "uptime": "Uptime",
+      "mttr": "MTTR"
     },
     "kpis": {
       "title": "Key Performance Indicators",

@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle, Clock, Shield, TrendingUp, XCircle } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, Select } from '../components/ui';
 import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useMetrics, useLatencyHeatmap } from '../api/hooks';
@@ -45,6 +46,8 @@ interface AlertEntry {
  * - Alert acknowledgment (PUT /alerts/{id}/acknowledge)
  */
 export const MetricsHubPage = () => {
+  const { t } = useTranslation();
+  
   const [period, setPeriod] = useState('24h');
   const [role, setRole] = useState('all');
   const [deviceFilter, setDeviceFilter] = useState('all');
@@ -156,9 +159,9 @@ export const MetricsHubPage = () => {
   // Get alert severity badge
   const getAlertSeverityBadge = (severity: AlertEntry['severity']) => {
     const config = {
-      info: { label: 'Info', className: 'text-text-secondary bg-surface-alt dark:bg-surface-dark' },
-      warning: { label: 'Warning', className: 'text-warning bg-warning/10' },
-      error: { label: 'Error', className: 'text-error bg-error/10' },
+      info: { label: t('metrics_hub.severity.info'), className: 'text-text-secondary bg-surface-alt dark:bg-surface-dark' },
+      warning: { label: t('metrics_hub.severity.warning'), className: 'text-warning bg-warning/10' },
+      error: { label: t('metrics_hub.severity.error'), className: 'text-error bg-error/10' },
     };
     const { label, className } = config[severity];
     return <span className={`px-2 py-1 rounded text-xs font-medium ${className}`}>{label}</span>;
@@ -167,9 +170,9 @@ export const MetricsHubPage = () => {
   // Get alert status badge
   const getAlertStatusBadge = (status: AlertEntry['status']) => {
     const config = {
-      active: { label: 'Active', className: 'text-error bg-error/10' },
-      acknowledged: { label: 'Ack', className: 'text-warning bg-warning/10' },
-      resolved: { label: 'Resolved', className: 'text-success bg-success/10' },
+      active: { label: t('metrics_hub.alert_status.active'), className: 'text-error bg-error/10' },
+      acknowledged: { label: t('metrics_hub.alert_status.acknowledged'), className: 'text-warning bg-warning/10' },
+      resolved: { label: t('metrics_hub.alert_status.resolved'), className: 'text-success bg-success/10' },
     };
     const { label, className } = config[status];
     return <span className={`px-2 py-1 rounded text-xs font-medium ${className}`}>{label}</span>;
@@ -190,10 +193,10 @@ export const MetricsHubPage = () => {
       {/* Header */}
       <div>
         <h1 className="text-display font-bold text-text-primary dark:text-text-dark">
-          Metrics Hub
+          {t('metrics_hub.title')}
         </h1>
         <p className="text-sm text-text-secondary mt-1">
-          Real-time KPI monitoring and alert management
+          {t('metrics_hub.subtitle')}
         </p>
       </div>
 
@@ -202,19 +205,19 @@ export const MetricsHubPage = () => {
         <CardContent className="py-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Select
-              label="期間"
+              label={t('metrics_hub.filters.time_range')}
               options={periodOptions}
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
             />
             <Select
-              label="ロール"
+              label={t('metrics_hub.filters.role')}
               options={roleOptions}
               value={role}
               onChange={(e) => setRole(e.target.value)}
             />
             <Select
-              label="デバイス"
+              label={t('metrics_hub.filters.device')}
               options={deviceFilterOptions}
               value={deviceFilter}
               onChange={(e) => setDeviceFilter(e.target.value)}
@@ -254,8 +257,8 @@ export const MetricsHubPage = () => {
       {/* Heatmap Visualization */}
       <Card>
         <CardHeader
-          title="レイテンシ分布"
-          subtitle="Latency heatmap across devices and time"
+          title={t('metrics_hub.heatmap.title')}
+          subtitle={t('metrics_hub.heatmap.subtitle')}
         />
         <CardContent>
           {heatmapDataApi && heatmapDataApi.length > 0 ? (
@@ -304,8 +307,8 @@ export const MetricsHubPage = () => {
           ) : (
             <div className="h-80 flex items-center justify-center bg-surface-alt/30 dark:bg-surface-dark/30 rounded">
               <div className="text-center text-text-secondary">
-                <div className="text-sm font-medium mb-1">No heatmap data available</div>
-                <div className="text-xs">Waiting for metrics...</div>
+                <div className="text-sm font-medium mb-1">{t('metrics_hub.heatmap.no_data')}</div>
+                <div className="text-xs">{t('metrics_hub.heatmap.waiting')}</div>
               </div>
             </div>
           )}
@@ -315,7 +318,7 @@ export const MetricsHubPage = () => {
       {/* Alert List */}
       <Card>
         <CardHeader
-          title="アラート一覧"
+          title={t('metrics_hub.alerts.title')}
           subtitle={`${alerts.length} alerts in ${periodOptions.find((p) => p.value === period)?.label.toLowerCase()}`}
         />
         <CardContent className="p-0">
@@ -326,20 +329,20 @@ export const MetricsHubPage = () => {
                   <th className="text-left px-4 py-3 text-sm font-semibold text-text-primary dark:text-text-dark">
                     <div className="flex items-center gap-2">
                       <Clock size={16} />
-                      時刻
+                      {t('metrics_hub.alerts.timestamp')}
                     </div>
                   </th>
                   <th className="text-left px-4 py-3 text-sm font-semibold text-text-primary dark:text-text-dark">
-                    種別
+                    {t('metrics_hub.alerts.type')}
                   </th>
                   <th className="text-left px-4 py-3 text-sm font-semibold text-text-primary dark:text-text-dark">
-                    詳細
+                    {t('metrics_hub.alerts.details')}
                   </th>
                   <th className="text-left px-4 py-3 text-sm font-semibold text-text-primary dark:text-text-dark">
-                    デバイス
+                    {t('metrics_hub.alerts.device')}
                   </th>
                   <th className="text-left px-4 py-3 text-sm font-semibold text-text-primary dark:text-text-dark">
-                    対応状況
+                    {t('metrics_hub.alerts.status')}
                   </th>
                 </tr>
               </thead>
@@ -376,7 +379,7 @@ export const MetricsHubPage = () => {
             <div>
               <div className="flex items-center justify-center gap-2 mb-2">
                 <TrendingUp className="text-success" size={20} />
-                <span className="text-sm font-medium text-text-secondary">Active Alerts</span>
+                <span className="text-sm font-medium text-text-secondary">{t('metrics_hub.summary.active_alerts')}</span>
               </div>
               <div className="text-2xl font-bold text-error">
                 {alerts.filter((a) => a.status === 'active').length}
@@ -385,14 +388,14 @@ export const MetricsHubPage = () => {
             <div>
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Shield className="text-success" size={20} />
-                <span className="text-sm font-medium text-text-secondary">Uptime</span>
+                <span className="text-sm font-medium text-text-secondary">{t('metrics_hub.summary.uptime')}</span>
               </div>
               <div className="text-2xl font-bold text-success">{uptimeValue.toFixed(1)}%</div>
             </div>
             <div>
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Clock className="text-text-secondary" size={20} />
-                <span className="text-sm font-medium text-text-secondary">MTTR</span>
+                <span className="text-sm font-medium text-text-secondary">{t('metrics_hub.summary.mttr')}</span>
               </div>
               <div className="text-2xl font-bold text-text-primary dark:text-text-dark">{mttrValue.toFixed(1)} min</div>
             </div>
