@@ -1,17 +1,22 @@
 {
   "common": {
     "loading": "Cargando...",
-    "error": "Se produjo un error",
+    "error": "Ocurrió un error",
     "success": "Éxito",
     "cancel": "Cancelar",
     "save": "Guardar",
     "delete": "Eliminar",
     "edit": "Editar",
-    "back": "Volver",
+    "back": "Atrás",
     "next": "Siguiente",
     "previous": "Anterior",
     "confirm": "Confirmar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "connect": "Conectar",
+    "details": "Detalles",
+    "time_just_now": "Justo ahora",
+    "time_minutes_ago": "Hace {{count}} minuto(s)",
+    "time_hours_ago": "Hace {{count}} hora(s)"
   },
   "device_list": {
     "title": "Dispositivos Cercanos",
@@ -19,23 +24,32 @@
     "scan_button": "Escanear Dispositivos",
     "scanning": "Escaneando...",
     "no_devices": "No se encontraron dispositivos",
-    "device_count": "{{count}} dispositivo(s)",
-    "signal_strength": "Intensidad de Señal",
-    "last_seen": "Última Vez Visto",
+    "devices_found": "{{count}} dispositivo(s) encontrado(s)",
+    "search_placeholder": "Buscar por nombre, ID o perfil...",
+    "filter_all": "Todos los Tipos",
+    "adjust_filters": "Intenta ajustar tus filtros",
+    "scan_prompt": "Haz clic en \"Escanear Dispositivos\" para descubrir dispositivos cercanos",
+    "signal": "Señal",
+    "profiles": "Perfiles",
+    "last_seen": "Última vez visto",
+    "sort_name": "Nombre",
+    "sort_signal": "Intensidad de Señal",
+    "sort_last_seen": "Última Vez Visto",
+    "type_smartphone": "Teléfono Inteligente",
+    "type_tablet": "Tableta",
+    "type_laptop": "Portátil",
+    "type_iot": "Dispositivo IoT",
+    "type_other": "Otro",
+    "scan_modal_title": "Escanear Dispositivos",
+    "start_scan": "Iniciar Escaneo",
+    "scan_modal_content": "Haz clic en \"Iniciar Escaneo\" para descubrir dispositivos cercanos. Esto utilizará Bluetooth y Wi-Fi para encontrar dispositivos compatibles.",
     "status": {
       "online": "En Línea",
       "offline": "Fuera de Línea",
       "paired": "Emparejado"
     },
-    "type": {
-      "smartphone": "Teléfono Inteligente",
-      "tablet": "Tableta",
-      "laptop": "Portátil",
-      "iot": "Dispositivo IoT",
-      "other": "Otro"
-    },
     "toast": {
-      "scan_success": "Se encontraron {{count}} dispositivo(s)",
+      "scan_success": "{{count}} dispositivo(s) detectado(s)",
       "scan_error": "Error al escanear dispositivos"
     }
   },

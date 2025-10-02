@@ -1,5 +1,6 @@
 import { Smartphone, Signal, Wifi, Search, RefreshCw, ArrowUpDown } from 'lucide-react';
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, CardContent, CardHeader, Input, Modal, ModalFooter, Select } from '../components/ui';
 
@@ -38,6 +39,7 @@ by Devices)
  * - Device detail navigation
  */
 export const DeviceListPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<Device['type'] | ''>('');
@@ -87,18 +89,18 @@ export const DeviceListPage = () => {
   ]);
 
   const deviceTypes = [
-    { value: '', label: 'All Types' },
-    { value: 'smartphone', label: 'Smartphone' },
-    { value: 'tablet', label: 'Tablet' },
-    { value: 'laptop', label: 'Laptop' },
-    { value: 'iot', label: 'IoT Device' },
-    { value: 'other', label: 'Other' },
+    { value: '', label: t('device_list.filter_all') },
+    { value: 'smartphone', label: t('device_list.type_smartphone') },
+    { value: 'tablet', label: t('device_list.type_tablet') },
+    { value: 'laptop', label: t('device_list.type_laptop') },
+    { value: 'iot', label: t('device_list.type_iot') },
+    { value: 'other', label: t('device_list.type_other') },
   ];
 
   const sortOptions = [
-    { value: 'name', label: 'Name' },
-    { value: 'signalStrength', label: 'Signal Strength' },
-    { value: 'lastSeen', label: 'Last Seen' },
+    { value: 'name', label: t('device_list.sort_name') },
+    { value: 'signalStrength', label: t('device_list.sort_signal') },
+    { value: 'lastSeen', label: t('device_list.sort_last_seen') },
   ];
 
   // Filter and sort devices
@@ -173,11 +175,11 @@ export const DeviceListPage = () => {
   // Format last seen time
   const formatLastSeen = (date: Date) => {
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (seconds < 60) return 'Just now';
+    if (seconds < 60) return t('common.time_just_now');
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    if (minutes < 60) return t('common.time_minutes_ago', { count: minutes });
     const hours = Math.floor(minutes / 60);
-    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    return t('common.time_hours_ago', { count: hours });
   };
 
   return (
@@ -186,10 +188,10 @@ export const DeviceListPage = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-display font-bold text-text-primary dark:text-text-dark">
-            Nearby Devices
+            {t('device_list.title')}
           </h1>
           <p className="text-sm text-text-secondary mt-1">
-            {filteredDevices.length} device{filteredDevices.length !== 1 ? 's' : ''} found
+            {t('device_list.devices_found', { count: filteredDevices.length })}
           </p>
         </div>
         <Button
@@ -198,7 +200,7 @@ export const DeviceListPage = () => {
           onClick={() => setShowScanModal(true)}
           disabled={isScanning}
         >
-          {isScanning ? 'Scanning...' : 'Scan Devices'}
+          {isScanning ? t('device_list.scanning') : t('device_list.scan_button')}
         </Button>
       </div>
 
@@ -207,7 +209,7 @@ export const DeviceListPage = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
             <Input
-              placeholder="Search by name, ID, or profile..."
+              placeholder={t('device_list.search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               icon={<Search size={18} />}
@@ -244,14 +246,14 @@ export const DeviceListPage = () => {
           <div className="text-center py-12">
             <Wifi size={48} className="mx-auto text-text-secondary mb-4" />
             <h3 className="text-heading font-semibold text-text-primary dark:text-text-dark mb-2">
-              No devices found
+              {t('device_list.no_devices')}
             </h3>
             <p className="text-text-secondary mb-4">
-              {searchQuery || filterType ? 'Try adjusting your filters' : 'Click "Scan Devices" to discover nearby devices'}
+              {searchQuery || filterType ? t('device_list.adjust_filters') : t('device_list.scan_prompt')}
             </p>
             {!isScanning && (
               <Button variant="primary" icon={<Smartphone size={18} />} onClick={() => setShowScanModal(true)}>
-                Scan Devices
+                {t('device_list.scan_button')}
               </Button>
             )}
           </div>
@@ -281,13 +283,13 @@ export const DeviceListPage = () => {
                 <div className="space-y-3">
                   {/* Signal Strength */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-secondary">Signal:</span>
+                    <span className="text-sm text-text-secondary">{t('device_list.signal')}:</span>
                     {renderSignalStrength(device.signalStrength)}
                   </div>
 
                   {/* Supported Profiles */}
                   <div>
-                    <span className="text-sm text-text-secondary block mb-1">Profiles:</span>
+                    <span className="text-sm text-text-secondary block mb-1">{t('device_list.profiles')}:</span>
                     <div className="flex flex-wrap gap-1">
                       {device.profiles.map((profile) => (
                         <span
@@ -302,7 +304,7 @@ export const DeviceListPage = () => {
 
                   {/* Last Seen */}
                   <div className="flex items-center justify-between text-sm text-text-secondary">
-                    <span>Last seen:</span>
+                    <span>{t('device_list.last_seen')}:</span>
                     <span>{formatLastSeen(device.lastSeen)}</span>
                   </div>
 
@@ -315,10 +317,10 @@ export const DeviceListPage = () => {
                       disabled={device.status === 'offline'}
                       className="flex-1"
                     >
-                      Connect
+                      {t('common.connect')}
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => navigate(`/devices/${device.id}`)}>
-                      Details
+                      {t('common.details')}
                     </Button>
                   </div>
                 </div>
@@ -332,17 +334,17 @@ export const DeviceListPage = () => {
       <Modal
         isOpen={showScanModal}
         onClose={() => setShowScanModal(false)}
-        title="Scan for Devices"
+        title={t('device_list.scan_modal_title')}
         footer={
           <ModalFooter
             onCancel={() => setShowScanModal(false)}
             onConfirm={handleScan}
-            confirmText="Start Scan"
+            confirmText={t('device_list.start_scan')}
           />
         }
       >
         <p className="text-text-primary dark:text-text-dark">
-          Click "Start Scan" to discover nearby devices. This will use Bluetooth and Wi-Fi to find compatible devices.
+          {t('device_list.scan_modal_content')}
         </p>
       </Modal>
     </div>

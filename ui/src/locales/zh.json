@@ -11,7 +11,12 @@
     "next": "下一步",
     "previous": "上一步",
     "confirm": "确认",
-    "close": "关闭"
+    "close": "关闭",
+    "connect": "连接",
+    "details": "详情",
+    "time_just_now": "刚刚",
+    "time_minutes_ago": "{{count}}分钟前",
+    "time_hours_ago": "{{count}}小时前"
   },
   "device_list": {
     "title": "附近设备",
@@ -19,23 +24,32 @@
     "scan_button": "扫描设备",
     "scanning": "扫描中...",
     "no_devices": "未找到设备",
-    "device_count": "{{count}} 台设备",
-    "signal_strength": "信号强度",
+    "devices_found": "找到 {{count}} 台设备",
+    "search_placeholder": "按名称、ID或配置文件搜索...",
+    "filter_all": "所有类型",
+    "adjust_filters": "请调整过滤器",
+    "scan_prompt": "点击\"扫描设备\"发现附近设备",
+    "signal": "信号",
+    "profiles": "配置文件",
     "last_seen": "最后检测",
+    "sort_name": "名称",
+    "sort_signal": "信号强度",
+    "sort_last_seen": "最后检测",
+    "type_smartphone": "智能手机",
+    "type_tablet": "平板电脑",
+    "type_laptop": "笔记本电脑",
+    "type_iot": "物联网设备",
+    "type_other": "其他",
+    "scan_modal_title": "扫描设备",
+    "start_scan": "开始扫描",
+    "scan_modal_content": "点击\"开始扫描\"以发现附近的设备。这将使用蓝牙和Wi-Fi查找兼容的设备。",
     "status": {
       "online": "在线",
       "offline": "离线",
       "paired": "已配对"
     },
-    "type": {
-      "smartphone": "智能手机",
-      "tablet": "平板电脑",
-      "laptop": "笔记本电脑",
-      "iot": "物联网设备",
-      "other": "其他"
-    },
     "toast": {
-      "scan_success": "发现 {{count}} 台设备",
+      "scan_success": "检测到 {{count}} 台设备",
       "scan_error": "设备扫描失败"
     }
   },

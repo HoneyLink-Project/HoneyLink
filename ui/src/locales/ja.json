@@ -11,7 +11,12 @@
     "next": "次へ",
     "previous": "前へ",
     "confirm": "確認",
-    "close": "閉じる"
+    "close": "閉じる",
+    "connect": "接続",
+    "details": "詳細",
+    "time_just_now": "たった今",
+    "time_minutes_ago": "{{count}}分前",
+    "time_hours_ago": "{{count}}時間前"
   },
   "device_list": {
     "title": "近接デバイス",
@@ -19,20 +24,29 @@
     "scan_button": "デバイスをスキャン",
     "scanning": "スキャン中...",
     "no_devices": "デバイスが見つかりません",
-    "device_count": "{{count}}台のデバイス",
-    "signal_strength": "信号強度",
+    "devices_found": "{{count}}台のデバイスが見つかりました",
+    "search_placeholder": "名前、ID、プロファイルで検索...",
+    "filter_all": "すべてのタイプ",
+    "adjust_filters": "フィルターを調整してください",
+    "scan_prompt": "「デバイスをスキャン」をクリックして近くのデバイスを検出",
+    "signal": "信号",
+    "profiles": "プロファイル",
     "last_seen": "最終確認",
+    "sort_name": "名前",
+    "sort_signal": "信号強度",
+    "sort_last_seen": "最終確認",
+    "type_smartphone": "スマートフォン",
+    "type_tablet": "タブレット",
+    "type_laptop": "ノートPC",
+    "type_iot": "IoTデバイス",
+    "type_other": "その他",
+    "scan_modal_title": "デバイスをスキャン",
+    "start_scan": "スキャン開始",
+    "scan_modal_content": "「スキャン開始」をクリックすると、近くのデバイスを検出します。Bluetoothとwi-Fi を使用して互換性のあるデバイスを見つけます。",
     "status": {
       "online": "オンライン",
       "offline": "オフライン",
       "paired": "ペアリング済み"
-    },
-    "type": {
-      "smartphone": "スマートフォン",
-      "tablet": "タブレット",
-      "laptop": "ノートPC",
-      "iot": "IoTデバイス",
-      "other": "その他"
     },
     "toast": {
       "scan_success": "{{count}}台のデバイスを検出しました",

@@ -1,18 +1,18 @@
 /**
  * i18next configuration for HoneyLink UI
- * 
+ *
  * Supported languages: en (English), ja (日本語), es (Español), zh (中文)
  * Default: Japanese (ja)
  */
 
 import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { initReactI18next } from 'react-i18next';
 
 // Translation resources
 import en from './locales/en.json';
-import ja from './locales/ja.json';
 import es from './locales/es.json';
+import ja from './locales/ja.json';
 import zh from './locales/zh.json';
 
 i18n

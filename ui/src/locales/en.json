@@ -11,7 +11,12 @@
     "next": "Next",
     "previous": "Previous",
     "confirm": "Confirm",
-    "close": "Close"
+    "close": "Close",
+    "connect": "Connect",
+    "details": "Details",
+    "time_just_now": "Just now",
+    "time_minutes_ago": "{{count}} minute(s) ago",
+    "time_hours_ago": "{{count}} hour(s) ago"
   },
   "device_list": {
     "title": "Nearby Devices",
@@ -19,23 +24,32 @@
     "scan_button": "Scan Devices",
     "scanning": "Scanning...",
     "no_devices": "No devices found",
-    "device_count": "{{count}} device(s)",
-    "signal_strength": "Signal Strength",
-    "last_seen": "Last Seen",
+    "devices_found": "{{count}} device(s) found",
+    "search_placeholder": "Search by name, ID, or profile...",
+    "filter_all": "All Types",
+    "adjust_filters": "Try adjusting your filters",
+    "scan_prompt": "Click \"Scan Devices\" to discover nearby devices",
+    "signal": "Signal",
+    "profiles": "Profiles",
+    "last_seen": "Last seen",
+    "sort_name": "Name",
+    "sort_signal": "Signal Strength",
+    "sort_last_seen": "Last Seen",
+    "type_smartphone": "Smartphone",
+    "type_tablet": "Tablet",
+    "type_laptop": "Laptop",
+    "type_iot": "IoT Device",
+    "type_other": "Other",
+    "scan_modal_title": "Scan for Devices",
+    "start_scan": "Start Scan",
+    "scan_modal_content": "Click \"Start Scan\" to discover nearby devices. This will use Bluetooth and Wi-Fi to find compatible devices.",
     "status": {
       "online": "Online",
       "offline": "Offline",
       "paired": "Paired"
     },
-    "type": {
-      "smartphone": "Smartphone",
-      "tablet": "Tablet",
-      "laptop": "Laptop",
-      "iot": "IoT Device",
-      "other": "Other"
-    },
     "toast": {
-      "scan_success": "Found {{count}} device(s)",
+      "scan_success": "{{count}} device(s) detected",
       "scan_error": "Device scan failed"
     }
   },
