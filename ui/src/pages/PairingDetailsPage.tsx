@@ -1,5 +1,6 @@
 import { ArrowLeft, Shield, CheckCircle, Plus, PhoneOff, Clock, FileText, CheckCircle2, XCircle } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Card, CardHeader, CardContent, Select } from '../components/ui';
 
@@ -30,6 +31,7 @@ interface SessionLogEntry {
  * - Stream management (POST /sessions)
  */
 export const PairingDetailsPage = () => {
+  const { t } = useTranslation();
   const { id: deviceId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedProfile, setSelectedProfile] = useState('LL_INPUT');
@@ -46,10 +48,10 @@ export const PairingDetailsPage = () => {
 
   // Profile options with descriptions
   const profileOptions = [
-    { value: 'LL_INPUT', label: '低遅延入力 (LL_INPUT)' },
-    { value: 'RT_AUDIO', label: 'リアルタイム音声 (RT_AUDIO)' },
-    { value: 'MEDIA_8K', label: '8Kメディア (MEDIA_8K)' },
-    { value: 'GAMING', label: 'ゲーミング (GAMING)' },
+    { value: 'LL_INPUT', label: t('pairing.profiles.ll_input') },
+    { value: 'RT_AUDIO', label: t('pairing.profiles.rt_audio') },
+    { value: 'MEDIA_8K', label: t('pairing.profiles.media_8k') },
+    { value: 'GAMING', label: t('pairing.profiles.gaming') },
   ];
 
   // Mock session log (TODO: Fetch from API)
@@ -109,9 +111,9 @@ export const PairingDetailsPage = () => {
   // Render result badge
   const renderResultBadge = (result: SessionLogEntry['result']) => {
     const config = {
-      success: { icon: CheckCircle2, className: 'text-success', label: '成功' },
-      warning: { icon: FileText, className: 'text-warning', label: '警告' },
-      error: { icon: XCircle, className: 'text-error', label: 'エラー' },
+      success: { icon: CheckCircle2, className: 'text-success', label: t('pairing.result_success') },
+      warning: { icon: FileText, className: 'text-warning', label: t('pairing.result_warning') },
+      error: { icon: XCircle, className: 'text-error', label: t('pairing.result_error') },
     };
     const { icon: Icon, className, label } = config[result];
     return (
@@ -127,7 +129,7 @@ export const PairingDetailsPage = () => {
       {/* Header with Back Button */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" icon={<ArrowLeft size={18} />} onClick={() => navigate('/devices')}>
-          Back
+          {t('common.back')}
         </Button>
         <div>
           <h1 className="text-display font-bold text-text-primary dark:text-text-dark">
@@ -140,11 +142,11 @@ export const PairingDetailsPage = () => {
       {/* Security Status Card */}
       <Card>
         <CardHeader
-          title="セキュリティステータス"
+          title={t('pairing.security_status')}
           action={
             <div className="flex items-center gap-2 text-success">
               <Shield size={20} className="fill-success" />
-              <span className="font-medium">相互認証済</span>
+              <span className="font-medium">{t('pairing.mutual_auth_complete')}</span>
             </div>
           }
         />
@@ -166,13 +168,13 @@ export const PairingDetailsPage = () => {
 
       {/* Profile Selection Card */}
       <Card>
-        <CardHeader title="プロファイル選択" />
+        <CardHeader title={t('pairing.profile_selection')} />
         <CardContent>
           <div className="space-y-4">
             <div>
               <Select
-                label="QoSプロファイル"
-                helperText="用途に応じた最適なプロファイルを選択してください"
+                label={t('pairing.qos_profile')}
+                helperText={t('pairing.profile_help')}
                 options={profileOptions}
                 value={selectedProfile}
                 onChange={(e) => setSelectedProfile(e.target.value)}
@@ -186,10 +188,10 @@ export const PairingDetailsPage = () => {
                 disabled={!isPaired}
                 className="flex-1"
               >
-                ストリーム追加
+                {t('pairing.add_stream')}
               </Button>
               <Button variant="danger" icon={<PhoneOff size={18} />} onClick={handleDisconnect} disabled={!isPaired}>
-                切断
+                {t('pairing.disconnect')}
               </Button>
             </div>
           </div>
@@ -199,8 +201,8 @@ export const PairingDetailsPage = () => {
       {/* Session Log Table */}
       <Card>
         <CardHeader
-          title="セッションログ"
-          subtitle={`${sessionLog.length}件のイベント`}
+          title={t('pairing.session_log')}
+          subtitle={t('pairing.events_count', { count: sessionLog.length })}
         />
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -210,17 +212,17 @@ export const PairingDetailsPage = () => {
                   <th className="text-left px-4 py-3 text-sm font-semibold text-text-primary dark:text-text-dark">
                     <div className="flex items-center gap-2">
                       <Clock size={16} />
-                      時刻
+                      {t('pairing.time')}
                     </div>
                   </th>
                   <th className="text-left px-4 py-3 text-sm font-semibold text-text-primary dark:text-text-dark">
                     <div className="flex items-center gap-2">
                       <FileText size={16} />
-                      イベント
+                      {t('pairing.event')}
                     </div>
                   </th>
                   <th className="text-left px-4 py-3 text-sm font-semibold text-text-primary dark:text-text-dark">
-                    結果
+                    {t('pairing.result')}
                   </th>
                 </tr>
               </thead>

@@ -1,5 +1,5 @@
-import { Smartphone, Signal, Wifi, Search, RefreshCw, ArrowUpDown } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { ArrowUpDown, RefreshCw, Search, Signal, Smartphone, Wifi } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, CardContent, CardHeader, Input, Modal, ModalFooter, Select } from '../components/ui';
@@ -24,7 +24,7 @@ type SortOrder = 'asc' | 'desc';
  * WF-01: Device List Page (Near
 
 by Devices)
- * 
+ *
  * Features:
  * - Device discovery with search and filters
  * - Signal strength display (1-5 stars)
@@ -32,7 +32,7 @@ by Devices)
  * - Sort by name, signal, last seen
  * - Scan retry with loading state
  * - Responsive grid layout
- * 
+ *
  * TODO (Task 4.3 Part 2):
  * - Integrate with POST /devices API
  * - Real-time device discovery (WebSocket/SSE)
