@@ -1,0 +1,176 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "发生错误",
+    "success": "成功",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "confirm": "确认",
+    "close": "关闭"
+  },
+  "device_list": {
+    "title": "附近设备",
+    "subtitle": "通过蓝牙检测到的设备列表",
+    "scan_button": "扫描设备",
+    "scanning": "扫描中...",
+    "no_devices": "未找到设备",
+    "device_count": "{{count}} 台设备",
+    "signal_strength": "信号强度",
+    "last_seen": "最后检测",
+    "status": {
+      "online": "在线",
+      "offline": "离线",
+      "paired": "已配对"
+    },
+    "type": {
+      "smartphone": "智能手机",
+      "tablet": "平板电脑",
+      "laptop": "笔记本电脑",
+      "iot": "物联网设备",
+      "other": "其他"
+    },
+    "toast": {
+      "scan_success": "发现 {{count}} 台设备",
+      "scan_error": "设备扫描失败"
+    }
+  },
+  "pairing": {
+    "title": "配对详情",
+    "subtitle": "设备安全信息和配置文件选择",
+    "security_status": "安全状态",
+    "profile_selection": "配置文件选择",
+    "select_profile": "请选择配置文件",
+    "pair_button": "配对",
+    "unpair_button": "取消配对",
+    "pairing": "配对中...",
+    "toast": {
+      "pair_success": "设备配对成功",
+      "pair_error": "配对失败",
+      "unpair_success": "设备取消配对成功",
+      "unpair_error": "取消配对失败"
+    }
+  },
+  "stream_dashboard": {
+    "title": "流控制面板",
+    "subtitle": "活动会话的QoS优化",
+    "kpi": {
+      "active_sessions": "活动会话",
+      "avg_latency": "平均延迟",
+      "achievement_rate": "KPI达成率"
+    },
+    "status": {
+      "optimal": "最佳",
+      "degraded": "降级",
+      "critical": "危急"
+    },
+    "chart": {
+      "latency": "延迟 (ms)",
+      "jitter": "抖动 (ms)",
+      "packet_loss": "丢包率 (%)",
+      "bandwidth": "带宽 (Mbps)"
+    },
+    "priority": {
+      "title": "优先级",
+      "up": "提高优先级",
+      "down": "降低优先级"
+    },
+    "toast": {
+      "priority_success": "优先级已更改为 {{priority}}",
+      "priority_error": "更新优先级失败"
+    }
+  },
+  "policy_builder": {
+    "title": "策略构建器",
+    "subtitle": "创建和管理QoS配置文件模板",
+    "form": {
+      "basic_info": "基本信息",
+      "qos_settings": "QoS设置",
+      "schedule_settings": "调度设置",
+      "template_name": "模板名称",
+      "template_name_placeholder": "例如：低延迟游戏",
+      "usage": "用途类型",
+      "usage_help": "选择此模板的主要用例",
+      "latency_target": "延迟目标 (ms)",
+      "latency_help": "指定1-50ms之间",
+      "bandwidth_min": "最小带宽 (Mbps)",
+      "bandwidth_help": "指定10-5000Mbps之间",
+      "fec_mode": "FEC模式",
+      "fec_help": "选择前向纠错强度",
+      "schedule_start": "有效起始日期",
+      "schedule_end": "有效结束日期",
+      "priority": "优先级",
+      "priority_help": "多个配置文件冲突时的优先级"
+    },
+    "usage_types": {
+      "low_latency": "低延迟",
+      "realtime_audio": "实时音频",
+      "media_8k": "8K媒体",
+      "gaming": "游戏",
+      "iot_lowpower": "物联网低功耗"
+    },
+    "fec_modes": {
+      "none": "无 (NONE)",
+      "light": "轻度 (LIGHT - 1/4)",
+      "medium": "中度 (MEDIUM - 1/2)",
+      "heavy": "重度 (HEAVY - 3/4)"
+    },
+    "priority_levels": {
+      "1": "级别 1 (最高)",
+      "2": "级别 2 (高)",
+      "3": "级别 3 (中)",
+      "4": "级别 4 (低)",
+      "5": "级别 5 (最低)"
+    },
+    "buttons": {
+      "preview": "预览",
+      "save": "保存"
+    },
+    "toast": {
+      "save_success": "策略模板保存成功",
+      "save_error": "保存失败: {{error}}"
+    }
+  },
+  "metrics_hub": {
+    "title": "指标中心",
+    "subtitle": "系统范围监控和警报管理",
+    "filters": {
+      "time_range": "时间范围筛选",
+      "severity": "严重性筛选",
+      "device": "设备筛选",
+      "all": "全部"
+    },
+    "kpis": {
+      "title": "关键绩效指标",
+      "change": "较昨天"
+    },
+    "alerts": {
+      "title": "警报历史",
+      "acknowledge": "确认",
+      "timestamp": "时间戳",
+      "type": "类型",
+      "severity": "严重性",
+      "details": "详情",
+      "device": "设备",
+      "status": "状态"
+    },
+    "severity": {
+      "info": "信息",
+      "warning": "警告",
+      "error": "错误"
+    },
+    "alert_status": {
+      "active": "活动",
+      "acknowledged": "已确认",
+      "resolved": "已解决"
+    },
+    "toast": {
+      "acknowledge_success": "警报确认成功",
+      "acknowledge_error": "确认警报失败"
+    }
+  }
+}

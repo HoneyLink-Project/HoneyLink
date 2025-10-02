@@ -1,0 +1,176 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "success": "成功しました",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ",
+    "confirm": "確認",
+    "close": "閉じる"
+  },
+  "device_list": {
+    "title": "近接デバイス",
+    "subtitle": "Bluetoothで検出された端末の一覧です",
+    "scan_button": "デバイスをスキャン",
+    "scanning": "スキャン中...",
+    "no_devices": "デバイスが見つかりません",
+    "device_count": "{{count}}台のデバイス",
+    "signal_strength": "信号強度",
+    "last_seen": "最終確認",
+    "status": {
+      "online": "オンライン",
+      "offline": "オフライン",
+      "paired": "ペアリング済み"
+    },
+    "type": {
+      "smartphone": "スマートフォン",
+      "tablet": "タブレット",
+      "laptop": "ノートPC",
+      "iot": "IoTデバイス",
+      "other": "その他"
+    },
+    "toast": {
+      "scan_success": "{{count}}台のデバイスを検出しました",
+      "scan_error": "デバイススキャンに失敗しました"
+    }
+  },
+  "pairing": {
+    "title": "ペアリング詳細",
+    "subtitle": "デバイスのセキュリティ情報とプロファイル選択",
+    "security_status": "セキュリティステータス",
+    "profile_selection": "プロファイル選択",
+    "select_profile": "プロファイルを選択してください",
+    "pair_button": "ペアリング",
+    "unpair_button": "ペアリング解除",
+    "pairing": "ペアリング中...",
+    "toast": {
+      "pair_success": "デバイスをペアリングしました",
+      "pair_error": "ペアリングに失敗しました",
+      "unpair_success": "ペアリングを解除しました",
+      "unpair_error": "ペアリング解除に失敗しました"
+    }
+  },
+  "stream_dashboard": {
+    "title": "ストリーム制御",
+    "subtitle": "アクティブセッションのQoS最適化",
+    "kpi": {
+      "active_sessions": "アクティブセッション数",
+      "avg_latency": "平均遅延",
+      "achievement_rate": "KPI達成率"
+    },
+    "status": {
+      "optimal": "最適",
+      "degraded": "劣化",
+      "critical": "危険"
+    },
+    "chart": {
+      "latency": "遅延 (ms)",
+      "jitter": "ジッタ (ms)",
+      "packet_loss": "パケット損失率 (%)",
+      "bandwidth": "帯域 (Mbps)"
+    },
+    "priority": {
+      "title": "優先度",
+      "up": "優先度を上げる",
+      "down": "優先度を下げる"
+    },
+    "toast": {
+      "priority_success": "優先度を{{priority}}に変更しました",
+      "priority_error": "優先度の更新に失敗しました"
+    }
+  },
+  "policy_builder": {
+    "title": "Policy Builder",
+    "subtitle": "QoS profile templates を作成・管理",
+    "form": {
+      "basic_info": "基本情報",
+      "qos_settings": "QoS設定",
+      "schedule_settings": "スケジュール設定",
+      "template_name": "テンプレート名",
+      "template_name_placeholder": "例: 低遅延ゲーミング用",
+      "usage": "用途",
+      "usage_help": "テンプレートの主な用途を選択してください",
+      "latency_target": "遅延目標 (ms)",
+      "latency_help": "1-50msの範囲で指定",
+      "bandwidth_min": "帯域下限 (Mbps)",
+      "bandwidth_help": "10-5000Mbpsの範囲で指定",
+      "fec_mode": "FECモード",
+      "fec_help": "Forward Error Correctionの強度を選択",
+      "schedule_start": "有効期間 (開始)",
+      "schedule_end": "有効期間 (終了)",
+      "priority": "優先度",
+      "priority_help": "複数のプロファイルが競合する場合の優先順位"
+    },
+    "usage_types": {
+      "low_latency": "低遅延 (Low Latency)",
+      "realtime_audio": "リアルタイム音声 (Real-time Audio)",
+      "media_8k": "8Kメディア (8K Media)",
+      "gaming": "ゲーミング (Gaming)",
+      "iot_lowpower": "IoT省電力 (IoT Low Power)"
+    },
+    "fec_modes": {
+      "none": "なし (NONE)",
+      "light": "軽 (LIGHT - 1/4)",
+      "medium": "中 (MEDIUM - 1/2)",
+      "heavy": "重 (HEAVY - 3/4)"
+    },
+    "priority_levels": {
+      "1": "Level 1 (最高)",
+      "2": "Level 2 (高)",
+      "3": "Level 3 (中)",
+      "4": "Level 4 (低)",
+      "5": "Level 5 (最低)"
+    },
+    "buttons": {
+      "preview": "プレビュー",
+      "save": "保存"
+    },
+    "toast": {
+      "save_success": "ポリシーテンプレートを保存しました",
+      "save_error": "保存に失敗しました: {{error}}"
+    }
+  },
+  "metrics_hub": {
+    "title": "メトリクスハブ",
+    "subtitle": "システム全体の監視とアラート管理",
+    "filters": {
+      "time_range": "期間フィルタ",
+      "severity": "重要度フィルタ",
+      "device": "デバイスフィルタ",
+      "all": "全て"
+    },
+    "kpis": {
+      "title": "主要KPI",
+      "change": "前日比"
+    },
+    "alerts": {
+      "title": "アラート履歴",
+      "acknowledge": "承認",
+      "timestamp": "タイムスタンプ",
+      "type": "種類",
+      "severity": "重要度",
+      "details": "詳細",
+      "device": "デバイス",
+      "status": "ステータス"
+    },
+    "severity": {
+      "info": "情報",
+      "warning": "警告",
+      "error": "エラー"
+    },
+    "alert_status": {
+      "active": "アクティブ",
+      "acknowledged": "承認済み",
+      "resolved": "解決済み"
+    },
+    "toast": {
+      "acknowledge_success": "アラートを承認しました",
+      "acknowledge_error": "アラート承認に失敗しました"
+    }
+  }
+}

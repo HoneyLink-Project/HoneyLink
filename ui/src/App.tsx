@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import './i18n'; // Initialize i18next
 
 const queryClient = new QueryClient();
 
@@ -21,6 +23,24 @@ function App() {
         </div>
       </BrowserRouter>
       <ReactQueryDevtools initialIsOpen={false} />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#ffffff',
+            color: '#1f2937',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          },
+          success: {
+            iconTheme: { primary: '#10b981', secondary: '#ffffff' },
+          },
+          error: {
+            iconTheme: { primary: '#ef4444', secondary: '#ffffff' },
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

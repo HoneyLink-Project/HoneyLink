@@ -1,0 +1,176 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "device_list": {
+    "title": "Nearby Devices",
+    "subtitle": "List of devices detected via Bluetooth",
+    "scan_button": "Scan Devices",
+    "scanning": "Scanning...",
+    "no_devices": "No devices found",
+    "device_count": "{{count}} device(s)",
+    "signal_strength": "Signal Strength",
+    "last_seen": "Last Seen",
+    "status": {
+      "online": "Online",
+      "offline": "Offline",
+      "paired": "Paired"
+    },
+    "type": {
+      "smartphone": "Smartphone",
+      "tablet": "Tablet",
+      "laptop": "Laptop",
+      "iot": "IoT Device",
+      "other": "Other"
+    },
+    "toast": {
+      "scan_success": "Found {{count}} device(s)",
+      "scan_error": "Device scan failed"
+    }
+  },
+  "pairing": {
+    "title": "Pairing Details",
+    "subtitle": "Device security information and profile selection",
+    "security_status": "Security Status",
+    "profile_selection": "Profile Selection",
+    "select_profile": "Please select a profile",
+    "pair_button": "Pair",
+    "unpair_button": "Unpair",
+    "pairing": "Pairing...",
+    "toast": {
+      "pair_success": "Device paired successfully",
+      "pair_error": "Pairing failed",
+      "unpair_success": "Device unpaired successfully",
+      "unpair_error": "Unpair failed"
+    }
+  },
+  "stream_dashboard": {
+    "title": "Stream Dashboard",
+    "subtitle": "QoS optimization for active sessions",
+    "kpi": {
+      "active_sessions": "Active Sessions",
+      "avg_latency": "Avg Latency",
+      "achievement_rate": "KPI Achievement"
+    },
+    "status": {
+      "optimal": "Optimal",
+      "degraded": "Degraded",
+      "critical": "Critical"
+    },
+    "chart": {
+      "latency": "Latency (ms)",
+      "jitter": "Jitter (ms)",
+      "packet_loss": "Packet Loss (%)",
+      "bandwidth": "Bandwidth (Mbps)"
+    },
+    "priority": {
+      "title": "Priority",
+      "up": "Increase Priority",
+      "down": "Decrease Priority"
+    },
+    "toast": {
+      "priority_success": "Priority changed to {{priority}}",
+      "priority_error": "Failed to update priority"
+    }
+  },
+  "policy_builder": {
+    "title": "Policy Builder",
+    "subtitle": "Create and manage QoS profile templates",
+    "form": {
+      "basic_info": "Basic Information",
+      "qos_settings": "QoS Settings",
+      "schedule_settings": "Schedule Settings",
+      "template_name": "Template Name",
+      "template_name_placeholder": "e.g., Low Latency Gaming",
+      "usage": "Usage Type",
+      "usage_help": "Select the primary use case for this template",
+      "latency_target": "Latency Target (ms)",
+      "latency_help": "Specify between 1-50ms",
+      "bandwidth_min": "Minimum Bandwidth (Mbps)",
+      "bandwidth_help": "Specify between 10-5000Mbps",
+      "fec_mode": "FEC Mode",
+      "fec_help": "Select Forward Error Correction strength",
+      "schedule_start": "Valid From",
+      "schedule_end": "Valid Until",
+      "priority": "Priority",
+      "priority_help": "Priority when multiple profiles conflict"
+    },
+    "usage_types": {
+      "low_latency": "Low Latency",
+      "realtime_audio": "Real-time Audio",
+      "media_8k": "8K Media",
+      "gaming": "Gaming",
+      "iot_lowpower": "IoT Low Power"
+    },
+    "fec_modes": {
+      "none": "None (NONE)",
+      "light": "Light (LIGHT - 1/4)",
+      "medium": "Medium (MEDIUM - 1/2)",
+      "heavy": "Heavy (HEAVY - 3/4)"
+    },
+    "priority_levels": {
+      "1": "Level 1 (Highest)",
+      "2": "Level 2 (High)",
+      "3": "Level 3 (Medium)",
+      "4": "Level 4 (Low)",
+      "5": "Level 5 (Lowest)"
+    },
+    "buttons": {
+      "preview": "Preview",
+      "save": "Save"
+    },
+    "toast": {
+      "save_success": "Policy template saved successfully",
+      "save_error": "Save failed: {{error}}"
+    }
+  },
+  "metrics_hub": {
+    "title": "Metrics Hub",
+    "subtitle": "System-wide monitoring and alert management",
+    "filters": {
+      "time_range": "Time Range Filter",
+      "severity": "Severity Filter",
+      "device": "Device Filter",
+      "all": "All"
+    },
+    "kpis": {
+      "title": "Key Performance Indicators",
+      "change": "vs. Yesterday"
+    },
+    "alerts": {
+      "title": "Alert History",
+      "acknowledge": "Acknowledge",
+      "timestamp": "Timestamp",
+      "type": "Type",
+      "severity": "Severity",
+      "details": "Details",
+      "device": "Device",
+      "status": "Status"
+    },
+    "severity": {
+      "info": "Info",
+      "warning": "Warning",
+      "error": "Error"
+    },
+    "alert_status": {
+      "active": "Active",
+      "acknowledged": "Acknowledged",
+      "resolved": "Resolved"
+    },
+    "toast": {
+      "acknowledge_success": "Alert acknowledged successfully",
+      "acknowledge_error": "Failed to acknowledge alert"
+    }
+  }
+}

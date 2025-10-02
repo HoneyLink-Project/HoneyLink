@@ -9,14 +9,39 @@ repository.workspace = true
 
 [dependencies]
 honeylink-core = { path = "../core" }
+honeylink-transport = { path = "../transport" }
 
+# OpenTelemetry (Pure Rust)
 opentelemetry = { workspace = true }
 opentelemetry-otlp = { workspace = true }
+opentelemetry_sdk = { version = "0.27", features = ["rt-tokio", "metrics", "trace"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tracing-opentelemetry = { workspace = true }
+
+# Async runtime
 tokio = { workspace = true }
+
+# Serialization
 serde = { workspace = true }
+serde_json = "1.0"
+toml = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+
+# Networking (Pure Rust with rustls)
+reqwest = { workspace = true }
+
+# UUID generation
+uuid = { workspace = true }
+
+# Random sampling
+rand = { workspace = true }
+
+# Logging
+log = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }
+tokio-test = "0.4"

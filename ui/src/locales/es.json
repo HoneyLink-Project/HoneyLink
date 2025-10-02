@@ -1,0 +1,176 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Se produjo un error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "confirm": "Confirmar",
+    "close": "Cerrar"
+  },
+  "device_list": {
+    "title": "Dispositivos Cercanos",
+    "subtitle": "Lista de dispositivos detectados vía Bluetooth",
+    "scan_button": "Escanear Dispositivos",
+    "scanning": "Escaneando...",
+    "no_devices": "No se encontraron dispositivos",
+    "device_count": "{{count}} dispositivo(s)",
+    "signal_strength": "Intensidad de Señal",
+    "last_seen": "Última Vez Visto",
+    "status": {
+      "online": "En Línea",
+      "offline": "Fuera de Línea",
+      "paired": "Emparejado"
+    },
+    "type": {
+      "smartphone": "Teléfono Inteligente",
+      "tablet": "Tableta",
+      "laptop": "Portátil",
+      "iot": "Dispositivo IoT",
+      "other": "Otro"
+    },
+    "toast": {
+      "scan_success": "Se encontraron {{count}} dispositivo(s)",
+      "scan_error": "Error al escanear dispositivos"
+    }
+  },
+  "pairing": {
+    "title": "Detalles de Emparejamiento",
+    "subtitle": "Información de seguridad del dispositivo y selección de perfil",
+    "security_status": "Estado de Seguridad",
+    "profile_selection": "Selección de Perfil",
+    "select_profile": "Por favor seleccione un perfil",
+    "pair_button": "Emparejar",
+    "unpair_button": "Desemparejar",
+    "pairing": "Emparejando...",
+    "toast": {
+      "pair_success": "Dispositivo emparejado exitosamente",
+      "pair_error": "Error al emparejar",
+      "unpair_success": "Dispositivo desemparejado exitosamente",
+      "unpair_error": "Error al desemparejar"
+    }
+  },
+  "stream_dashboard": {
+    "title": "Panel de Transmisión",
+    "subtitle": "Optimización de QoS para sesiones activas",
+    "kpi": {
+      "active_sessions": "Sesiones Activas",
+      "avg_latency": "Latencia Promedio",
+      "achievement_rate": "Logro de KPI"
+    },
+    "status": {
+      "optimal": "Óptimo",
+      "degraded": "Degradado",
+      "critical": "Crítico"
+    },
+    "chart": {
+      "latency": "Latencia (ms)",
+      "jitter": "Jitter (ms)",
+      "packet_loss": "Pérdida de Paquetes (%)",
+      "bandwidth": "Ancho de Banda (Mbps)"
+    },
+    "priority": {
+      "title": "Prioridad",
+      "up": "Aumentar Prioridad",
+      "down": "Disminuir Prioridad"
+    },
+    "toast": {
+      "priority_success": "Prioridad cambiada a {{priority}}",
+      "priority_error": "Error al actualizar prioridad"
+    }
+  },
+  "policy_builder": {
+    "title": "Constructor de Políticas",
+    "subtitle": "Crear y gestionar plantillas de perfil QoS",
+    "form": {
+      "basic_info": "Información Básica",
+      "qos_settings": "Configuración QoS",
+      "schedule_settings": "Configuración de Programación",
+      "template_name": "Nombre de Plantilla",
+      "template_name_placeholder": "ej., Juegos de Baja Latencia",
+      "usage": "Tipo de Uso",
+      "usage_help": "Seleccione el caso de uso principal para esta plantilla",
+      "latency_target": "Objetivo de Latencia (ms)",
+      "latency_help": "Especificar entre 1-50ms",
+      "bandwidth_min": "Ancho de Banda Mínimo (Mbps)",
+      "bandwidth_help": "Especificar entre 10-5000Mbps",
+      "fec_mode": "Modo FEC",
+      "fec_help": "Seleccione la intensidad de Corrección de Errores",
+      "schedule_start": "Válido Desde",
+      "schedule_end": "Válido Hasta",
+      "priority": "Prioridad",
+      "priority_help": "Prioridad cuando múltiples perfiles entran en conflicto"
+    },
+    "usage_types": {
+      "low_latency": "Baja Latencia",
+      "realtime_audio": "Audio en Tiempo Real",
+      "media_8k": "Medios 8K",
+      "gaming": "Juegos",
+      "iot_lowpower": "IoT Bajo Consumo"
+    },
+    "fec_modes": {
+      "none": "Ninguno (NONE)",
+      "light": "Ligero (LIGHT - 1/4)",
+      "medium": "Medio (MEDIUM - 1/2)",
+      "heavy": "Pesado (HEAVY - 3/4)"
+    },
+    "priority_levels": {
+      "1": "Nivel 1 (Más Alto)",
+      "2": "Nivel 2 (Alto)",
+      "3": "Nivel 3 (Medio)",
+      "4": "Nivel 4 (Bajo)",
+      "5": "Nivel 5 (Más Bajo)"
+    },
+    "buttons": {
+      "preview": "Vista Previa",
+      "save": "Guardar"
+    },
+    "toast": {
+      "save_success": "Plantilla de política guardada exitosamente",
+      "save_error": "Error al guardar: {{error}}"
+    }
+  },
+  "metrics_hub": {
+    "title": "Centro de Métricas",
+    "subtitle": "Monitoreo del sistema y gestión de alertas",
+    "filters": {
+      "time_range": "Filtro de Rango de Tiempo",
+      "severity": "Filtro de Severidad",
+      "device": "Filtro de Dispositivo",
+      "all": "Todos"
+    },
+    "kpis": {
+      "title": "Indicadores Clave de Rendimiento",
+      "change": "vs. Ayer"
+    },
+    "alerts": {
+      "title": "Historial de Alertas",
+      "acknowledge": "Reconocer",
+      "timestamp": "Marca de Tiempo",
+      "type": "Tipo",
+      "severity": "Severidad",
+      "details": "Detalles",
+      "device": "Dispositivo",
+      "status": "Estado"
+    },
+    "severity": {
+      "info": "Información",
+      "warning": "Advertencia",
+      "error": "Error"
+    },
+    "alert_status": {
+      "active": "Activo",
+      "acknowledged": "Reconocido",
+      "resolved": "Resuelto"
+    },
+    "toast": {
+      "acknowledge_success": "Alerta reconocida exitosamente",
+      "acknowledge_error": "Error al reconocer alerta"
+    }
+  }
+}
