@@ -4,7 +4,7 @@ import { Layout } from './components/layout/Layout';
 import { DeviceListPage } from './pages/DeviceListPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PairingDetailsPage } from './pages/PairingDetailsPage';
-import { PolicyBuilderPage } from './pages/PolicyBuilderPage';
+import PolicyBuilderPage from './pages/PolicyBuilderPage';
 
 // Code splitting: Lazy load chart-heavy screens
 // These pages use recharts (~50 kB), so they are split into separate chunks

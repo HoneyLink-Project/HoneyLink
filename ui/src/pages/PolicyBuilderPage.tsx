@@ -1,32 +1,51 @@
 import { Eye, FileText, Save } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button, Card, CardContent, CardHeader, Input, Select } from '../components/ui';
 
 /**
- * Policy template form data interface
+ * Zod validation schema for policy template form
+ * Provides type-safe validation with i18n-friendly error messages
  */
-interface PolicyTemplate {
-  name: string;
-  usage: string;
-  latencyTarget: number; // ms (1-50)
-  bandwidthMin: number; // Mbps (10-5000)
-  fecMode: 'NONE' | 'LIGHT' | 'MEDIUM' | 'HEAVY';
-  scheduleStart: string; // ISO date
-  scheduleEnd: string; // ISO date
-  priority: number; // 1-5
-}
+const createPolicySchema = (t: (key: string) => string) =>
+  z.object({
+    name: z
+      .string()
+      .min(1, t('policy_builder.validation.name_required'))
+      .min(3, t('policy_builder.validation.name_min_length')),
+    usage: z.string(),
+    latencyTarget: z
+      .number()
+      .min(1, t('policy_builder.validation.latency_range'))
+      .max(50, t('policy_builder.validation.latency_range')),
+    bandwidthMin: z
+      .number()
+      .min(10, t('policy_builder.validation.bandwidth_range'))
+      .max(5000, t('policy_builder.validation.bandwidth_range')),
+    fecMode: z.enum(['NONE', 'LIGHT', 'MEDIUM', 'HEAVY']),
+    scheduleStart: z.string(),
+    scheduleEnd: z.string(),
+    priority: z.number().min(1).max(5),
+  })
+  .refine(
+    (data) => {
+      const start = new Date(data.scheduleStart);
+      const end = new Date(data.scheduleEnd);
+      return start < end;
+    },
+    {
+      message: '',
+      path: ['scheduleEnd'],
+    }
+  );
 
 /**
- * Form validation errors
+ * Policy template form data type (inferred from schema)
  */
-interface ValidationErrors {
-  name?: string;
-  latencyTarget?: string;
-  bandwidthMin?: string;
-  scheduleStart?: string;
-  scheduleEnd?: string;
-}
+type PolicyTemplate = z.infer<ReturnType<typeof createPolicySchema>>;
 
 /**
  * WF-04: Policy Builder Page
@@ -44,21 +63,36 @@ interface ValidationErrors {
  * - Date picker component (replace native input[type=date])
  * - Template preview modal
  */
-export const PolicyBuilderPage = () => {
+export default function PolicyBuilderPage() {
   const { t } = useTranslation();
 
-  const [formData, setFormData] = useState<PolicyTemplate>({
-    name: '',
-    usage: 'low_latency',
-    latencyTarget: 10,
-    bandwidthMin: 150,
-    fecMode: 'LIGHT',
-    scheduleStart: new Date().toISOString().split('T')[0],
-    scheduleEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +30 days
-    priority: 2,
+  // Create schema with current translation function
+  const policySchema = createPolicySchema(t);
+
+  // react-hook-form setup with zod validation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    watch,
+  } = useForm<PolicyTemplate>({
+    resolver: zodResolver(policySchema),
+    mode: 'onChange', // Real-time validation
+    defaultValues: {
+      name: '',
+      usage: 'low_latency',
+      latencyTarget: 10,
+      bandwidthMin: 150,
+      fecMode: 'LIGHT',
+      scheduleStart: new Date().toISOString().split('T')[0],
+      scheduleEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0],
+      priority: 2,
+    },
   });
 
-  const [errors, setErrors] = useState<ValidationErrors>({});
+  const formData = watch(); // For preview modal
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // Usage type options
@@ -79,71 +113,25 @@ export const PolicyBuilderPage = () => {
   ];
 
   // Priority options
-  const priorityOptions = [
-    { value: '1', label: t('policy_builder.priority_levels.1') },
-    { value: '2', label: t('policy_builder.priority_levels.2') },
-    { value: '3', label: t('policy_builder.priority_levels.3') },
-    { value: '4', label: t('policy_builder.priority_levels.4') },
-    { value: '5', label: t('policy_builder.priority_levels.5') },
-  ];
+  const priorityOptions = [...Array(5)].map((_, i) => ({
+    value: i + 1,
+    label: `${i + 1} - ${t(`policy_builder.priority_levels.level_${i + 1}`)}`,
+  }));
 
-  // Validate form
-  const validateForm = (): boolean => {
-    const newErrors: ValidationErrors = {};
-
-    // Name validation
-    if (!formData.name.trim()) {
-      newErrors.name = t('policy_builder.validation.name_required');
-    } else if (formData.name.length < 3) {
-      newErrors.name = t('policy_builder.validation.name_min_length');
-    }
-
-    // Latency validation (1-50ms from wireframes.md)
-    if (formData.latencyTarget < 1 || formData.latencyTarget > 50) {
-      newErrors.latencyTarget = t('policy_builder.validation.latency_range');
-    }
-
-    // Bandwidth validation (10-5000Mbps from wireframes.md)
-    if (formData.bandwidthMin < 10 || formData.bandwidthMin > 5000) {
-      newErrors.bandwidthMin = t('policy_builder.validation.bandwidth_range');
-    }
-
-    // Schedule validation
-    const start = new Date(formData.scheduleStart);
-    const end = new Date(formData.scheduleEnd);
-    if (start >= end) {
-      newErrors.scheduleEnd = t('policy_builder.validation.schedule_end_after_start');
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Handle input change
-  const handleChange = (field: keyof PolicyTemplate, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for this field
-    if (errors[field as keyof ValidationErrors]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  // Handle preview
+  /**
+   * Handle form preview (no validation needed - button is disabled when form invalid)
+   */
   const handlePreview = () => {
-    if (validateForm()) {
-      setIsPreviewOpen(true);
-      // TODO: Show preview modal with formatted template
-      console.log('Preview:', formData);
-    }
+    setIsPreviewOpen(true);
   };
 
-  // Handle save
-  const handleSave = () => {
-    if (validateForm()) {
-      // TODO: Call POST /policies API
-      console.log('Save policy template:', formData);
-      alert('テンプレートを保存しました (Mock)');
-    }
+  /**
+   * Handle form submission (validated by react-hook-form)
+   */
+  const onSubmit = (data: PolicyTemplate) => {
+    // TODO: API integration - POST /policies
+    console.log('Save policy template:', data);
+    alert('テンプレートを保存しました (Mock)');
   };
 
   return (
@@ -175,9 +163,8 @@ export const PolicyBuilderPage = () => {
               <Input
                 label={t('policy_builder.form.template_name')}
                 placeholder={t('policy_builder.form.template_name_placeholder')}
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-                error={errors.name}
+                {...register('name')}
+                error={errors.name?.message}
                 fullWidth
               />
 
@@ -185,8 +172,7 @@ export const PolicyBuilderPage = () => {
                 label={t('policy_builder.form.usage')}
                 helperText={t('policy_builder.form.usage_help')}
                 options={usageOptions}
-                value={formData.usage}
-                onChange={(e) => handleChange('usage', e.target.value)}
+                {...register('usage')}
               />
             </div>
 
@@ -203,9 +189,8 @@ export const PolicyBuilderPage = () => {
                   type="number"
                   min={1}
                   max={50}
-                  value={formData.latencyTarget}
-                  onChange={(e) => handleChange('latencyTarget', parseInt(e.target.value, 10))}
-                  error={errors.latencyTarget}
+                  {...register('latencyTarget', { valueAsNumber: true })}
+                  error={errors.latencyTarget?.message}
                   fullWidth
                 />
 
@@ -215,9 +200,8 @@ export const PolicyBuilderPage = () => {
                   type="number"
                   min={10}
                   max={5000}
-                  value={formData.bandwidthMin}
-                  onChange={(e) => handleChange('bandwidthMin', parseInt(e.target.value, 10))}
-                  error={errors.bandwidthMin}
+                  {...register('bandwidthMin', { valueAsNumber: true })}
+                  error={errors.bandwidthMin?.message}
                   fullWidth
                 />
               </div>
@@ -226,8 +210,7 @@ export const PolicyBuilderPage = () => {
                 label={t('policy_builder.form.fec_mode')}
                 helperText={t('policy_builder.form.fec_help')}
                 options={fecModeOptions}
-                value={formData.fecMode}
-                onChange={(e) => handleChange('fecMode', e.target.value as PolicyTemplate['fecMode'])}
+                {...register('fecMode')}
               />
             </div>
 
@@ -241,18 +224,16 @@ export const PolicyBuilderPage = () => {
                 <Input
                   label={t('policy_builder.form.schedule_start')}
                   type="date"
-                  value={formData.scheduleStart}
-                  onChange={(e) => handleChange('scheduleStart', e.target.value)}
-                  error={errors.scheduleStart}
+                  {...register('scheduleStart')}
+                  error={errors.scheduleStart?.message}
                   fullWidth
                 />
 
                 <Input
                   label={t('policy_builder.form.schedule_end')}
                   type="date"
-                  value={formData.scheduleEnd}
-                  onChange={(e) => handleChange('scheduleEnd', e.target.value)}
-                  error={errors.scheduleEnd}
+                  {...register('scheduleEnd')}
+                  error={errors.scheduleEnd?.message}
                   fullWidth
                 />
               </div>
@@ -260,9 +241,8 @@ export const PolicyBuilderPage = () => {
               <Select
                 label={t('policy_builder.form.priority')}
                 helperText={t('policy_builder.form.priority_help')}
-                options={priorityOptions}
-                value={formData.priority.toString()}
-                onChange={(e) => handleChange('priority', parseInt(e.target.value, 10))}
+                options={priorityOptions.map(opt => ({ value: opt.value.toString(), label: opt.label }))}
+                {...register('priority', { valueAsNumber: true })}
               />
             </div>
 
@@ -272,6 +252,7 @@ export const PolicyBuilderPage = () => {
                 variant="outline"
                 icon={<Eye size={18} />}
                 onClick={handlePreview}
+                disabled={!isValid}
                 className="flex-1"
               >
                 {t('policy_builder.buttons.preview')}
@@ -279,7 +260,8 @@ export const PolicyBuilderPage = () => {
               <Button
                 variant="primary"
                 icon={<Save size={18} />}
-                onClick={handleSave}
+                onClick={handleSubmit(onSubmit)}
+                disabled={!isValid}
                 className="flex-1"
               >
                 {t('policy_builder.buttons.save')}
@@ -301,7 +283,7 @@ export const PolicyBuilderPage = () => {
                 </div>
                 <ul className="text-sm text-text-secondary space-y-1 list-disc list-inside">
                   {Object.values(errors).map((error, index) => (
-                    <li key={index}>{error}</li>
+                    <li key={index}>{error?.message}</li>
                   ))}
                 </ul>
               </div>
