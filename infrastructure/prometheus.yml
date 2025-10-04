@@ -1,0 +1,61 @@
+# Prometheus Configuration for HoneyLink Telemetry
+# Scrapes metrics from OTEL Collector Prometheus exporter (port 9090)
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'honeylink-dev'
+    replica: '1'
+
+# Alertmanager configuration (optional - for production)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Rule files for recording rules and alerts
+rule_files:
+  # - /etc/prometheus/rules/*.yml
+
+scrape_configs:
+  # Scrape OTEL Collector's Prometheus exporter
+  - job_name: 'otel-collector-honeylink'
+    static_configs:
+      - targets: ['otel-collector:9090']
+        labels:
+          service: 'honeylink-telemetry'
+          environment: 'development'
+
+  # Scrape OTEL Collector's internal metrics
+  - job_name: 'otel-collector-internal'
+    static_configs:
+      - targets: ['otel-collector:8888']
+        labels:
+          service: 'otel-collector'
+
+  # Scrape Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Scrape Jaeger internal metrics
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger:14269']
+        labels:
+          service: 'jaeger'
+
+  # Scrape Loki internal metrics
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+        labels:
+          service: 'loki'
+
+  # Scrape Grafana internal metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          service: 'grafana'

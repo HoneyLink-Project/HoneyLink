@@ -1,0 +1,141 @@
+# HoneyLink Observability Stack
+# Deploys OpenTelemetry Collector + Prometheus + Jaeger + Loki + Grafana
+#
+# Usage:
+#   docker-compose -f infrastructure/docker-compose.observability.yml up -d
+#
+# Services:
+#   - OTEL Collector: localhost:4317 (gRPC), localhost:4318 (HTTP)
+#   - Prometheus: localhost:9090
+#   - Jaeger UI: localhost:16686
+#   - Grafana: localhost:3000 (admin/admin)
+#   - Loki: localhost:3100
+
+version: '3.9'
+
+services:
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: honeylink-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel/otel-collector-config.yaml:ro
+      - ./certs:/etc/otel/certs:ro
+      - otel-logs:/var/log/otel
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "9090:9090"   # Prometheus exporter
+      - "8888:8888"   # Internal metrics
+      - "13133:13133" # Health check
+      - "55679:55679" # zPages diagnostics
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - HONEYLINK_VERSION=${HONEYLINK_VERSION:-0.1.0}
+      - JAEGER_ENDPOINT=jaeger:14250
+      - LOKI_ENDPOINT=http://loki:3100/loki/api/v1/push
+    depends_on:
+      - prometheus
+      - jaeger
+      - loki
+    networks:
+      - honeylink-observability
+
+  # Prometheus (metrics storage)
+  prometheus:
+    image: prom/prometheus:v2.50.1
+    container_name: honeylink-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9091:9090"  # Prometheus UI (remapped to avoid conflict with OTEL exporter)
+    networks:
+      - honeylink-observability
+
+  # Jaeger (distributed tracing)
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    container_name: honeylink-jaeger
+    restart: unless-stopped
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=badger
+      - BADGER_EPHEMERAL=false
+      - BADGER_DIRECTORY_VALUE=/badger/data
+      - BADGER_DIRECTORY_KEY=/badger/key
+    volumes:
+      - jaeger-data:/badger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14250:14250"  # gRPC collector
+      - "14268:14268"  # HTTP collector
+      - "6831:6831/udp"  # Jaeger agent UDP
+    networks:
+      - honeylink-observability
+
+  # Loki (log aggregation)
+  loki:
+    image: grafana/loki:2.9.4
+    container_name: honeylink-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"  # Loki API
+    networks:
+      - honeylink-observability
+
+  # Grafana (visualization)
+  grafana:
+    image: grafana/grafana:10.3.3
+    container_name: honeylink-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"  # Grafana UI
+    depends_on:
+      - prometheus
+      - loki
+      - jaeger
+    networks:
+      - honeylink-observability
+
+volumes:
+  otel-logs:
+    driver: local
+  prometheus-data:
+    driver: local
+  jaeger-data:
+    driver: local
+  loki-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  honeylink-observability:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

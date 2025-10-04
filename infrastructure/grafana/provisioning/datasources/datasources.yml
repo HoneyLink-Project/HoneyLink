@@ -1,0 +1,63 @@
+# Grafana Datasource Provisioning for HoneyLink Observability Stack
+# Auto-configures Prometheus, Loki, and Jaeger datasources on Grafana startup
+
+apiVersion: 1
+
+datasources:
+  # Prometheus datasource (metrics)
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: 15s
+      queryTimeout: 60s
+      httpMethod: POST
+    version: 1
+
+  # Loki datasource (logs)
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: true
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        # Extract trace_id from logs and link to Jaeger
+        - datasourceUid: jaeger-uid
+          matcherRegex: "trace_id=(\\w+)"
+          name: TraceID
+          url: "$${__value.raw}"
+    version: 1
+
+  # Jaeger datasource (traces)
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    url: http://jaeger:16686
+    uid: jaeger-uid
+    editable: true
+    jsonData:
+      tracesToLogsV2:
+        # Link traces to logs in Loki
+        datasourceUid: loki-uid
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
+        filterByTraceID: true
+        filterBySpanID: false
+        customQuery: true
+        query: '{service_name="$${__span.tags["service.name"]}"} |~ "$${__span.traceId}"'
+      tracesToMetrics:
+        # Link traces to metrics in Prometheus
+        datasourceUid: prometheus-uid
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
+        queries:
+          - name: Request rate
+            query: 'rate(traces_spanmetrics_calls_total{service="$${__span.tags["service.name"]}"}[5m])'
+      nodeGraph:
+        enabled: true
+    version: 1
