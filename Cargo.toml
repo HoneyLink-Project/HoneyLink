@@ -46,11 +46,11 @@ thiserror = "2.0"
 anyhow = "1.0"
 
 # Observability (OpenTelemetry)
-opentelemetry = "0.27"
-opentelemetry-otlp = "0.27"
+opentelemetry = "0.26"
+opentelemetry-otlp = "0.26"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
-tracing-opentelemetry = "0.27"
+tracing-opentelemetry = "0.26"
 
 # UUID generation
 uuid = { version = "1.11", features = ["v7", "serde"] }

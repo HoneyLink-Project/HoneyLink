@@ -75,10 +75,13 @@ impl TelemetryCollector {
         otel_provider.initialize()?;
         self.otel_provider = Some(otel_provider);
 
+        // Leak service_name to get 'static lifetime required by OpenTelemetry 0.26 APIs
+        let service_name: &'static str = Box::leak(config.otel.service_name.clone().into_boxed_str());
+
         // Initialize providers
-        self.metrics_provider = Some(MetricsProvider::new(&config.otel.service_name));
+        self.metrics_provider = Some(MetricsProvider::new(service_name));
         self.tracing_provider = Some(TracingProvider::new());
-        self.log_exporter = Some(LogExporter::new(config.otel.service_name.clone()));
+        self.log_exporter = Some(LogExporter::new(service_name.to_string()));
 
         // Start storage batch writer
         self.storage_pipeline.start_batch_writer();

@@ -2,7 +2,7 @@
 //!
 //! Provides telemetry integration for cryptographic operations from Task 2.4.
 
-use crate::types::{Metric, MetricType};
+use crate::types::Metric;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 

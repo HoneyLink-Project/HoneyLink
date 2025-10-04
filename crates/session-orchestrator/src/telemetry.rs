@@ -53,18 +53,17 @@ impl SessionTelemetry {
 
         let labels = vec![("success".to_string(), success.to_string())];
 
-        let metric = Metric {
-            name: "session_establishment_latency_p95".to_string(),
-            metric_type: MetricType::Histogram,
-            value: duration_ms,
+        let metric = Metric::new(
+            "session_establishment_latency_p95".to_string(),
+            MetricType::Histogram,
+            duration_ms,
             labels,
-            timestamp: chrono::Utc::now(),
-        };
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::Error::EventBusError(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }
@@ -89,18 +88,17 @@ impl SessionTelemetry {
             ("session_id".to_string(), session_id.to_string()),
         ];
 
-        let metric = Metric {
-            name: "session_state_transitions_total".to_string(),
-            metric_type: MetricType::Counter,
-            value: 1.0,
+        let metric = Metric::new(
+            "session_state_transitions_total".to_string(),
+            MetricType::Counter,
+            1.0,
             labels,
-            timestamp: chrono::Utc::now(),
-        };
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::Error::EventBusError(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }
@@ -110,18 +108,17 @@ impl SessionTelemetry {
     /// # Arguments
     /// * `count` - Current number of active sessions
     pub async fn record_active_sessions(&self, count: u64) -> Result<()> {
-        let metric = Metric {
-            name: "session_active_count".to_string(),
-            metric_type: MetricType::Gauge,
-            value: count as f64,
-            labels: vec![],
-            timestamp: chrono::Utc::now(),
-        };
+        let metric = Metric::new(
+            "session_active_count".to_string(),
+            MetricType::Gauge,
+            count as f64,
+            vec![],
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::Error::EventBusError(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }
@@ -135,18 +132,17 @@ impl SessionTelemetry {
     pub async fn record_session_failure(&self, reason: &str) -> Result<()> {
         let labels = vec![("reason".to_string(), reason.to_string())];
 
-        let metric = Metric {
-            name: "session_failures_total".to_string(),
-            metric_type: MetricType::Counter,
-            value: 1.0,
+        let metric = Metric::new(
+            "session_failures_total".to_string(),
+            MetricType::Counter,
+            1.0,
             labels,
-            timestamp: chrono::Utc::now(),
-        };
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::Error::EventBusError(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }
@@ -160,18 +156,17 @@ impl SessionTelemetry {
     pub async fn record_session_activity(&self, session_id: &str) -> Result<()> {
         let labels = vec![("session_id".to_string(), session_id.to_string())];
 
-        let metric = Metric {
-            name: "session_activity_heartbeats_total".to_string(),
-            metric_type: MetricType::Counter,
-            value: 1.0,
+        let metric = Metric::new(
+            "session_activity_heartbeats_total".to_string(),
+            MetricType::Counter,
+            1.0,
             labels,
-            timestamp: chrono::Utc::now(),
-        };
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::Error::EventBusError(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }

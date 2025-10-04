@@ -2,7 +2,7 @@
 //!
 //! Provides buffering, batching, PII detection, and TimescaleDB integration.
 
-use crate::types::{Metric, TelemetryError, TelemetryResult};
+use crate::types::{Metric, TelemetryResult};
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 use std::sync::Arc;

@@ -55,18 +55,17 @@ impl PolicyTelemetry {
             ("operation".to_string(), operation.to_string()),
         ];
 
-        let metric = Metric {
-            name: "policy_update_latency_p95".to_string(),
-            metric_type: MetricType::Histogram,
-            value: duration_ms,
+        let metric = Metric::new(
+            "policy_update_latency_p95".to_string(),
+            MetricType::Histogram,
+            duration_ms,
             labels,
-            timestamp: chrono::Utc::now(),
-        };
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::PolicyError::EventBus(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }
@@ -88,18 +87,17 @@ impl PolicyTelemetry {
             ("valid".to_string(), valid.to_string()),
         ];
 
-        let metric = Metric {
-            name: "policy_validation_errors_total".to_string(),
-            metric_type: MetricType::Counter,
-            value: error_count as f64,
+        let metric = Metric::new(
+            "policy_validation_errors_total".to_string(),
+            MetricType::Counter,
+            error_count as f64,
             labels,
-            timestamp: chrono::Utc::now(),
-        };
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::PolicyError::EventBus(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }
@@ -109,18 +107,17 @@ impl PolicyTelemetry {
     /// # Arguments
     /// * `count` - Current number of active policies
     pub async fn record_active_policies(&self, count: u64) -> Result<()> {
-        let metric = Metric {
-            name: "policy_active_count".to_string(),
-            metric_type: MetricType::Gauge,
-            value: count as f64,
-            labels: vec![],
-            timestamp: chrono::Utc::now(),
-        };
+        let metric = Metric::new(
+            "policy_active_count".to_string(),
+            MetricType::Gauge,
+            count as f64,
+            vec![],
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::PolicyError::EventBus(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }
@@ -143,18 +140,17 @@ impl PolicyTelemetry {
             ("success".to_string(), success.to_string()),
         ];
 
-        let metric = Metric {
-            name: "policy_profile_operations_total".to_string(),
-            metric_type: MetricType::Counter,
-            value: 1.0,
+        let metric = Metric::new(
+            "policy_profile_operations_total".to_string(),
+            MetricType::Counter,
+            1.0,
             labels,
-            timestamp: chrono::Utc::now(),
-        };
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::PolicyError::EventBus(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }
@@ -179,18 +175,17 @@ impl PolicyTelemetry {
             ("success".to_string(), success.to_string()),
         ];
 
-        let metric = Metric {
-            name: "policy_eventbus_publishes_total".to_string(),
-            metric_type: MetricType::Counter,
-            value: 1.0,
+        let metric = Metric::new(
+            "policy_eventbus_publishes_total".to_string(),
+            MetricType::Counter,
+            1.0,
             labels,
-            timestamp: chrono::Utc::now(),
-        };
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::PolicyError::EventBus(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }
@@ -208,18 +203,17 @@ impl PolicyTelemetry {
             ("reason".to_string(), reason.to_string()),
         ];
 
-        let metric = Metric {
-            name: "policy_rollbacks_total".to_string(),
-            metric_type: MetricType::Counter,
-            value: 1.0,
+        let metric = Metric::new(
+            "policy_rollbacks_total".to_string(),
+            MetricType::Counter,
+            1.0,
             labels,
-            timestamp: chrono::Utc::now(),
-        };
+        );
 
         self.collector
             .record_metric(metric)
             .await
-            .map_err(|e| crate::error::Error::InternalError(format!("Telemetry error: {}", e)))?;
+            .map_err(|e| crate::error::PolicyError::EventBus(format!("Telemetry error: {}", e)))?;
 
         Ok(())
     }

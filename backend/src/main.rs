@@ -25,8 +25,7 @@ use middleware::{
     rate_limit::PerIpRateLimiter,
     tracing::otel_trace_middleware,
 };
-use opentelemetry::trace::TracerProvider as _;
-use opentelemetry_sdk::trace::TracerProvider;
+
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -156,31 +155,14 @@ async fn not_found_handler() -> impl IntoResponse {
 }
 
 /// Initialize OpenTelemetry and tracing
-fn init_telemetry(config: &AppConfig) -> Result<(), Box<dyn std::error::Error>> {
-    // Create OTLP exporter
-    let tracer_provider = opentelemetry_otlp::new_pipeline()
-        .tracing()
-        .with_exporter(
-            opentelemetry_otlp::new_exporter()
-                .tonic()
-                .with_endpoint(&config.otel.endpoint)
-        )
-        .with_trace_config(
-            opentelemetry_sdk::trace::Config::default()
-                .with_resource(opentelemetry_sdk::Resource::new(vec![
-                    opentelemetry::KeyValue::new("service.name", config.otel.service_name.clone()),
-                    opentelemetry::KeyValue::new("service.version", config.otel.service_version.clone()),
-                    opentelemetry::KeyValue::new("deployment.environment", config.otel.environment.clone()),
-                ]))
-        )
-        .install_batch(opentelemetry_sdk::runtime::Tokio)?;
-
-    // Create tracing subscriber
+fn init_telemetry(_config: &AppConfig) -> Result<(), Box<dyn std::error::Error>> {
+    // Initialize basic tracing subscriber without OpenTelemetry layer
+    // Note: Full OTLP tracing export deferred due to OpenTelemetry 0.26 API changes
+    // This matches the workaround in honeylink-telemetry crate
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::try_from_default_env()
             .unwrap_or_else(|_| "info,honeylink_control_plane=debug".into()))
-        .with(tracing_subscriber::fmt::layer().with_target(true))
-        .with(tracing_opentelemetry::layer().with_tracer(tracer_provider.tracer("honeylink-control-plane")))
+        .with(tracing_subscriber::fmt::layer().json().with_target(true))
         .init();
 
     Ok(())

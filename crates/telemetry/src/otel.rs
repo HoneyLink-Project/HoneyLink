@@ -4,14 +4,13 @@
 
 use crate::types::{LogEvent, LogLevel, Metric, MetricType, TelemetryError, TelemetryResult};
 use opentelemetry::KeyValue;
+use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::metrics::{PeriodicReader, SdkMeterProvider};
 use opentelemetry_sdk::Resource;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
 
 /// OpenTelemetry configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -82,10 +81,12 @@ impl OtelProvider {
     /// Initializes metrics provider
     fn init_metrics(&mut self, resource: Resource) -> TelemetryResult<()> {
         // Create OTLP exporter
-        let exporter = opentelemetry_otlp::MetricExporter::builder()
-            .with_tonic()
+        let exporter = opentelemetry_otlp::new_exporter()
+            .tonic()
             .with_endpoint(&self.config.otlp_endpoint)
-            .build()
+            .build_metrics_exporter(
+                Box::new(opentelemetry_sdk::metrics::reader::DefaultTemporalitySelector::default())
+            )
             .map_err(|e| {
                 TelemetryError::InitializationError(format!("Failed to create exporter: {}", e))
             })?;
@@ -107,34 +108,13 @@ impl OtelProvider {
     }
 
     /// Initializes tracing provider
-    fn init_tracing(&self, resource: Resource) -> TelemetryResult<()> {
-        // Create OTLP tracer
-        let tracer = opentelemetry_otlp::SpanExporter::builder()
-            .with_tonic()
-            .with_endpoint(&self.config.otlp_endpoint)
-            .build()
-            .map_err(|e| {
-                TelemetryError::InitializationError(format!("Failed to create tracer: {}", e))
-            })?;
-
-        // Create tracer provider
-        let tracer_provider = opentelemetry_sdk::trace::TracerProvider::builder()
-            .with_batch_exporter(tracer, opentelemetry_sdk::runtime::Tokio)
-            .with_resource(resource)
-            .build();
-
-        // Set global tracer provider
-        opentelemetry::global::set_tracer_provider(tracer_provider);
-
-        // Initialize tracing subscriber
-        let telemetry_layer = tracing_opentelemetry::layer()
-            .with_tracer(opentelemetry::global::tracer("honeylink"));
-
-        let subscriber = tracing_subscriber::registry().with(telemetry_layer);
-
-        subscriber.try_init().map_err(|e| {
-            TelemetryError::InitializationError(format!("Failed to init subscriber: {}", e))
-        })?;
+    fn init_tracing(&self, _resource: Resource) -> TelemetryResult<()> {
+        // Initialize basic tracing subscriber without OpenTelemetry layer
+        // Note: Full OTLP tracing export deferred due to OpenTelemetry 0.26 API changes
+        // Metrics export still functional via separate metrics pipeline
+        tracing_subscriber::fmt()
+            .json()
+            .init();
 
         Ok(())
     }
@@ -164,7 +144,8 @@ pub struct MetricsProvider {
 
 impl MetricsProvider {
     /// Creates a new metrics provider
-    pub fn new(service_name: &str) -> Self {
+    pub fn new(service_name: &'static str) -> Self {
+        // Use 'static str for OpenTelemetry 0.26 requirement
         let meter = opentelemetry::global::meter(service_name);
 
         Self {
@@ -190,7 +171,7 @@ impl MetricsProvider {
                     self.meter
                         .u64_counter(metric.name.clone())
                         .with_description(format!("Counter: {}", metric.name))
-                        .build()
+                        .init()
                 });
 
                 counter.add(metric.value as u64, &labels);
@@ -201,7 +182,7 @@ impl MetricsProvider {
                     self.meter
                         .f64_gauge(metric.name.clone())
                         .with_description(format!("Gauge: {}", metric.name))
-                        .build()
+                        .init()
                 });
 
                 gauge.record(metric.value, &labels);
@@ -212,7 +193,7 @@ impl MetricsProvider {
                     self.meter
                         .f64_histogram(metric.name.clone())
                         .with_description(format!("Histogram: {}", metric.name))
-                        .build()
+                        .init()
                 });
 
                 histogram.record(metric.value, &labels);
@@ -234,10 +215,13 @@ impl TracingProvider {
 
     /// Starts a new span
     pub fn start_span(&self, name: &str, attributes: Vec<(String, String)>) -> TracingSpan {
-        let span = tracing::info_span!(
-            name,
-            {}
-        );
+        // Create span with attributes
+        // Note: tracing! macros require compile-time span names
+        let span = if attributes.is_empty() {
+            tracing::info_span!("span", name = name)
+        } else {
+            tracing::info_span!("span", name = name, attributes = ?attributes)
+        };
 
         TracingSpan { inner: span }
     }
@@ -273,8 +257,10 @@ impl TracingSpan {
 
     /// Marks the span as completed with error
     pub fn end_error(self, error: &str) {
-        let _entered = self.inner.enter();
-        tracing::error!(error = error, "Span ended with error");
+        {
+            let _entered = self.inner.enter();
+            tracing::error!(error = error, "Span ended with error");
+        }
         drop(self);
     }
 }

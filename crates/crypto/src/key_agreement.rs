@@ -62,12 +62,12 @@ impl SecretKey {
 
         let mut array = [0u8; 32];
         array.copy_from_slice(bytes);
-        
+
         // Apply clamping for X25519
         array[0] &= 248;
         array[31] &= 127;
         array[31] |= 64;
-        
+
         let scalar = Scalar::from_bytes_mod_order(array);
 
         // Zeroize the temporary array
@@ -153,12 +153,12 @@ impl KeyAgreement {
     pub fn generate_keypair() -> (SecretKey, PublicKey) {
         let mut bytes = [0u8; 32];
         rand::thread_rng().fill_bytes(&mut bytes);
-        
+
         // Apply X25519 clamping
         bytes[0] &= 248;
         bytes[31] &= 127;
         bytes[31] |= 64;
-        
+
         let scalar = Scalar::from_bytes_mod_order(bytes);
         let secret = SecretKey { scalar };
         let public = secret.public_key();

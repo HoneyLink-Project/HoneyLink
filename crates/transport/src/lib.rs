@@ -78,7 +78,7 @@ impl PowerMode {
 }
 
 /// Link quality metrics for physical layers
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct LinkQualityMetrics {
     /// Received Signal Strength Indicator in dBm
     pub rssi_dbm: i16,

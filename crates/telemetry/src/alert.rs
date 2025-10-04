@@ -201,8 +201,9 @@ impl AlertManager {
             history.push(alert.clone());
 
             // Keep only last 1000 alerts
-            if history.len() > 1000 {
-                history.drain(0..history.len() - 1000);
+            let len = history.len();
+            if len > 1000 {
+                history.drain(0..len - 1000);
             }
         }
 

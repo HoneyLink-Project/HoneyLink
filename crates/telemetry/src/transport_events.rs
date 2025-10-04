@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 
 /// Transport layer event types
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum TransportEvent {
     /// Link state changed (Hot Swap occurred)
@@ -66,7 +66,7 @@ impl LinkStateChangeEvent {
 }
 
 /// FEC strategy change event
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct FecStrategyChangeEvent {
     pub timestamp_ms: u64,
     pub from_strategy: String,
