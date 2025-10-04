@@ -1,12 +1,12 @@
 /**
  * MSW API Handlers for E2E Tests
- * 
+ *
  * Mocks Control Plane REST API responses during E2E testing.
  * No actual network calls are made.
  */
 
 import { http, HttpResponse } from 'msw';
-import { mockDevices, mockStreams, mockProfiles, mockKPIs, mockAlerts } from './mock-data';
+import { mockAlerts, mockDevices, mockKPIs, mockProfiles, mockStreams } from './mock-data';
 
 const API_BASE = 'http://localhost:3000/api/v1';
 

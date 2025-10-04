@@ -1,10 +1,10 @@
 /**
  * Page Object Models for E2E Tests
- * 
+ *
  * Encapsulates page interactions and selectors for maintainability.
  */
 
-import { type Page, type Locator } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 
 /**
  * Base Page class with common functionality

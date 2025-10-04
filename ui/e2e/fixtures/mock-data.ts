@@ -1,6 +1,6 @@
 /**
  * E2E Test Fixtures - Mock Data
- * 
+ *
  * Provides consistent test data for all E2E workflows.
  * Aligned with spec/ui/mock-data.md
  */
