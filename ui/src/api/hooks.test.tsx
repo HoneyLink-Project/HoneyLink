@@ -3,13 +3,12 @@
  * Tests all 13 hooks with mock API responses
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor } from '../test/test-utils';
-import { createTestQueryClient, AllProviders } from '../test/test-utils';
-import { apiClient } from './client';
-import { useDevices, useScanDevices, useStreams, useMetrics } from './hooks';
-import { mockDevices, mockStreams, mockKPIs, mockAlerts } from '../test/mock-data';
 import type { QueryClient } from '@tanstack/react-query';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { mockAlerts, mockDevices, mockKPIs, mockStreams } from '../test/mock-data';
+import { AllProviders, createTestQueryClient, renderHook, waitFor } from '../test/test-utils';
+import { apiClient } from './client';
+import { useDevices, useMetrics, useScanDevices, useStreams } from './hooks';
 
 // Mock axios
 vi.mock('./client', () => ({
@@ -86,7 +85,7 @@ describe('API Hooks', () => {
   describe('useStreams', () => {
     it('should fetch streams successfully', async () => {
       vi.mocked(apiClient.get).mockResolvedValueOnce({
-        data: { streams: mockStreams },
+        data: { sessions: mockStreams },
       });
 
       const { result } = renderHook(() => useStreams(), {
