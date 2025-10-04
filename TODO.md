@@ -107,7 +107,7 @@
 - [x] OpenTelemetry 0.26互換性問題解決 - commit 2c03246 (crypto), d5e8f4a (telemetry)
 - [x] Transportにテレメトリー統合(packet_loss_rate, qos_packet_drop_rate) - commit 8a7c1f2
 - [x] Cryptoモジュールに計装追加(crypto_metrics.rsのメソッド呼び出し) - commit f9b4e3d
-- [ ] OTLP Collectorセットアップ(TLS証明書, Prometheus/Jaeger/Loki exporters)
+- [x] OTLP Collectorセットアップ(TLS証明書, Prometheus/Jaeger/Loki exporters) - commit a385acd
 - ⚠️ Backend: sqlx macro errors blocked by DATABASE_URL requirement (Task 111: TimescaleDB setup) - partial fix commit 13a7fdb
 - [ ] TimescaleDBスキーマ作成とsqlx統合完了
 - [ ] 本番環境アラートルーティング設定(PagerDuty/Slack webhook)成
