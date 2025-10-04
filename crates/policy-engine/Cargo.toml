@@ -10,6 +10,7 @@ repository.workspace = true
 [dependencies]
 honeylink-core = { path = "../core" }
 honeylink-crypto = { path = "../crypto" }
+honeylink-telemetry = { path = "../telemetry" }
 
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -21,6 +21,7 @@ pub mod event_bus;
 pub mod policy;
 pub mod presets;
 pub mod profile;
+pub mod telemetry;
 pub mod types;
 
 // Re-export commonly used types
@@ -29,4 +30,5 @@ pub use event_bus::{PolicyEvent, PolicyEventBus};
 pub use policy::PolicyEngine;
 pub use presets::create_presets;
 pub use profile::{InMemoryProfileStorage, PolicyProfile, ProfileStorage};
+pub use telemetry::PolicyTelemetry;
 pub use types::{FecMode, PowerProfile, Priority, QoSPolicyUpdate, UseCase};
