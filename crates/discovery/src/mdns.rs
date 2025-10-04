@@ -36,7 +36,7 @@ pub struct MdnsDiscovery {
 
     /// Running state
     running: Arc<Mutex<bool>>,
-    
+
     /// Network monitor task handle
     network_monitor_handle: Option<tokio::task::JoinHandle<()>>,
 }
@@ -210,7 +210,7 @@ impl MdnsDiscovery {
         tokio::spawn(async move {
             while let Some(net_event) = net_rx.recv().await {
                 info!("Network change detected: {:?}", net_event);
-                
+
                 // Re-announce service
                 if let Err(e) = Self::re_announce_internal(
                     &device_id,

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
 
 /// Device type categories (Bluetooth-compatible)
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum DeviceType {
     /// Desktop/Laptop computer
@@ -39,6 +39,28 @@ impl DeviceType {
             Self::Iot => "iot",
             Self::Server => "server",
             Self::Unknown => "unknown",
+        }
+    }
+
+    /// Convert to u8 for binary serialization (GATT protocol)
+    pub fn to_u8(&self) -> u8 {
+        match self {
+            Self::Desktop => 1,
+            Self::Mobile => 2,
+            Self::Iot => 3,
+            Self::Server => 4,
+            Self::Unknown => 0,
+        }
+    }
+
+    /// Convert from u8 (with fallback to Unknown)
+    pub fn from_u8(value: u8) -> Self {
+        match value {
+            1 => Self::Desktop,
+            2 => Self::Mobile,
+            3 => Self::Iot,
+            4 => Self::Server,
+            _ => Self::Unknown,
         }
     }
 }

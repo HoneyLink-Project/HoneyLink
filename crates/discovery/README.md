@@ -175,12 +175,16 @@ cargo run --example device_b
 - [x] Error handling
 - [x] Unit tests (10 tests)
 
-### Phase 1.2: BLE Discovery ✅ (Skeleton)
+### Phase 1.2: BLE Discovery ✅
 - [x] BLE module skeleton (ble.rs)
 - [x] BleDiscovery struct with advertising/scanning placeholders
 - [x] UUID definitions (HoneyLink service, device info characteristic)
+- [x] GATT protocol definitions (gatt.rs, 345 lines)
+- [x] Device Info characteristic (8-byte device ID + device type)
+- [x] Pairing State characteristic (state + 16-byte nonce)
+- [x] Binary serialization with BLE MTU constraints (20 bytes)
 - [x] Integration with DiscoveryService
-- [x] Unit tests (3 tests)
+- [x] Unit tests (11 GATT tests + 3 BLE tests)
 - [ ] Full btleplug implementation (deferred to Phase 2)
 - [ ] Integration tests
 

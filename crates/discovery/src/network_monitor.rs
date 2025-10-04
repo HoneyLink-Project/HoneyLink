@@ -24,10 +24,10 @@ pub enum NetworkEvent {
 pub struct NetworkMonitor {
     /// Current known IP addresses
     current_addresses: HashSet<IpAddr>,
-    
+
     /// Event sender for network changes
     event_tx: mpsc::Sender<NetworkEvent>,
-    
+
     /// Running state
     running: bool,
 }
@@ -162,10 +162,10 @@ mod tests {
     async fn test_monitor_start_stop() {
         let (tx, _rx) = mpsc::channel(10);
         let mut monitor = NetworkMonitor::new(tx);
-        
+
         monitor.start().await.unwrap();
         assert!(monitor.running);
-        
+
         monitor.stop();
         assert!(!monitor.running);
     }

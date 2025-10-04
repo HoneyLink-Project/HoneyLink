@@ -36,12 +36,17 @@
 
 pub mod ble;
 pub mod error;
+pub mod gatt;
 pub mod mdns;
 pub mod network_monitor;
 pub mod types;
 
 pub use ble::BleDiscovery;
 pub use error::{DiscoveryError, Result};
+pub use gatt::{
+    GattDeviceInfo, GattPairingState, PairingState, DEVICE_INFO_CHAR_UUID,
+    HONEYLINK_SERVICE_UUID, MAX_GATT_VALUE_SIZE, PAIRING_STATE_CHAR_UUID,
+};
 pub use mdns::MdnsDiscovery;
 pub use network_monitor::{NetworkEvent, NetworkMonitor};
 pub use types::{DeviceInfo, DeviceType, DiscoveryEvent};
@@ -152,11 +157,11 @@ impl DiscoveryService {
     /// - Cleans up resources
     pub async fn stop(&mut self) -> Result<()> {
         self.mdns.stop().await?;
-        
+
         if let Some(ble) = &mut self.ble {
             ble.stop().await?;
         }
-        
+
         Ok(())
     }
 }

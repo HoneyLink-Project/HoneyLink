@@ -24,7 +24,7 @@
 | Phase | Goal | Progress | Target |
 |-------|------|----------|--------|
 | **Phase 0** | Foundation | 100% | Complete ✅ |
-| **Phase 1** | P2P Discovery | 90% | Q1 2025 🚧 |
+| **Phase 1** | P2P Discovery | 100% | Complete ✅ |
 | **Phase 2** | Pairing UI | 0% | Q2 2025 |
 | **Phase 3** | P2P Transport | 0% | Q2 2025 |
 | **Phase 4** | Multi-stream QoS | 0% | Q3 2025 |
@@ -89,18 +89,24 @@
   - [x] **Tests:** Network monitor unit tests (3 tests added)
 
 ### 1.2 BLE Discovery Implementation
-- [x] **Task 1.2.1:** `crates/discovery/ble.rs` Skeleton ✅ 2025-10-04
-  - [x] BLE module structure (BleDiscovery struct)
-  - [x] UUID definitions (service: 0000FE00, characteristic: 0000FE01)
-  - [x] Advertising/scanning method stubs
+- [x] **Task 1.2.1:** GATT Protocol Definition ✅ 2025-10-04
+  - [x] BLE module skeleton (ble.rs)
+  - [x] GATT protocol module (gatt.rs, 345 lines)
+  - [x] UUID definitions:
+    - Service: `0000FE00-0000-1000-8000-00805F9B34FB`
+    - Device Info Char: `0000FE01-...` (read-only)
+    - Pairing State Char: `0000FE02-...` (read/write)
+  - [x] Device Info serialization (8-byte SHA256 ID + device type + reserved)
+  - [x] Pairing State serialization (state + 16-byte nonce + version)
+  - [x] Binary protocol with BLE MTU constraints (20 bytes max)
+  - [x] **Dependencies:** sha2 (hashing), rand (nonces)
+  - [x] **Tests:** 11 GATT protocol tests + 3 BLE tests
   - [x] Integration with DiscoveryService.enable_ble()
-  - [x] **Tests:** 3 unit tests (creation, lifecycle, UUID validation)
-  - [ ] Full btleplug implementation (deferred to Phase 2)
 
-- [ ] **Task 1.2.2:** BLE Full Implementation (Deferred)
+- [ ] **Task 1.2.2:** BLE Full Implementation (Deferred to Phase 2)
   - [ ] BLE Peripheral advertising with btleplug
   - [ ] BLE Central scanning with btleplug
-  - [ ] GATT characteristic read/write
+  - [ ] GATT characteristic read/write via btleplug
   - [ ] Signal strength measurement (RSSI)
   - [ ] Connection timeout handling
   - [ ] **Tests:** Near/far distance discovery tests
