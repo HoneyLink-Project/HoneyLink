@@ -108,6 +108,7 @@
 - [x] Transportにテレメトリー統合(packet_loss_rate, qos_packet_drop_rate) - commit 8a7c1f2
 - [x] Cryptoモジュールに計装追加(crypto_metrics.rsのメソッド呼び出し) - commit f9b4e3d
 - [ ] OTLP Collectorセットアップ(TLS証明書, Prometheus/Jaeger/Loki exporters)
+- ⚠️ Backend: sqlx macro errors blocked by DATABASE_URL requirement (Task 111: TimescaleDB setup) - partial fix commit 13a7fdb
 - [ ] TimescaleDBスキーマ作成とsqlx統合完了
 - [ ] 本番環境アラートルーティング設定(PagerDuty/Slack webhook)成
   - ✅ `.vscode/settings.json` (rust-analyzer + clippy + TypeScript設定)、`.vscode/extensions.json` (推奨拡張機能28個)、`.editorconfig` (言語別フォーマット)、`ui/eslint.config.js` (Flat Config + TypeScript/React)、`ui/.prettierrc.json` 作成完了
