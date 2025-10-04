@@ -210,54 +210,59 @@
 
 ## Phase 4: P2P Transport (Next)
 
-**Goal:** QUIC/WebRTC transport layer implementation
+**Goal:** QUIC/WebRTC transport layer for device-to-device communication
 
-### 2.1 QR Code Pairing Implementation (Deferred)
-- [ ] **Task 2.1.1:** QR Code Generation (`ui/src/components/QRCodeDisplay.tsx`)
-  - [ ] device_id + public_key JSON encoding
-  - [ ] QR code display (react-qr-code)
-  - [ ] Expiration timer (5 minutes)
-  - [ ] **Bluetooth Comparison:** Same steps as Bluetooth QR pairing
+**Architecture:** Trait-based design (similar to Phase 1 DiscoveryProtocol)
 
-- [ ] **Task 2.1.2:** QR Code Scanning (`ui/src/components/QRCodeScanner.tsx`)
-  - [ ] Camera access (react-qr-reader)
-  - [ ] QR code parsing (JSON parse + validation)
-  - [ ] Pairing initiation trigger
-  - [ ] **Tests:** E2E test with mock QR codes
+### 4.1 Transport Protocol Abstraction
+- [ ] **Task 4.1.1:** Transport Trait Definition (`crates/transport/src/protocol.rs`)
+  - [ ] TransportProtocol trait with async methods
+  - [ ] Connection establishment (connect/listen)
+  - [ ] Data send/receive API (stream-based)
+  - [ ] Connection lifecycle management (close/timeout)
+  - [ ] Error handling (connection failures, network errors)
+  - [ ] Pluggable backend support (QUIC, WebRTC)
+  - [ ] **Dependencies:** async-trait 0.1 (Pure Rust)
+  - [ ] **Tests:** Trait-based mock tests
 
-### 2.2 PIN Code Pairing Implementation
-- [ ] **Task 2.2.1:** PIN Generation & Display
-  - [ ] 6-digit PIN generation (cryptographically secure random)
-  - [ ] Large text display (accessibility)
-  - [ ] Expiration timer (5 minutes)
-  - [ ] **Bluetooth Comparison:** Same UX as Bluetooth PIN
+### 4.2 QUIC Implementation (Primary Transport)
+- [ ] **Task 4.2.1:** QUIC Backend (`crates/transport/src/quic.rs`)
+  - [ ] quinn crate integration (Pure Rust QUIC)
+  - [ ] TransportProtocol trait implementation
+  - [ ] TLS 1.3 configuration (using rustls)
+  - [ ] Connection multiplexing (multiple streams)
+  - [ ] Congestion control (BBR/Cubic)
+  - [ ] NAT traversal (STUN/TURN integration)
+  - [ ] **Performance Target:** P99 latency <= 12ms
+  - [ ] **Dependencies:** quinn 0.11, rustls 0.23 (Pure Rust, no C/C++)
+  - [ ] **Tests:** Connection establishment, data transfer, error handling
 
-- [ ] **Task 2.2.2:** PIN Input Screen
-  - [ ] 6-digit input form (keyboard + touchpad)
-  - [ ] Input validation (digits only)
-  - [ ] Pairing initiation trigger
-  - [ ] **Tests:** Positive/negative test cases
+### 4.3 WebRTC Implementation (Fallback Transport)
+- [ ] **Task 4.3.1:** WebRTC Backend (`crates/transport/src/webrtc.rs`)
+  - [ ] webrtc-rs crate integration (Pure Rust WebRTC)
+  - [ ] TransportProtocol trait implementation
+  - [ ] ICE candidate gathering
+  - [ ] DTLS-SRTP encryption
+  - [ ] Data channel for arbitrary data
+  - [ ] Firewall/NAT traversal
+  - [ ] **Dependencies:** webrtc 0.11 (Pure Rust)
+  - [ ] **Tests:** Browser compatibility, NAT traversal tests
 
-### 2.3 ECDH Key Exchange Implementation
-- [ ] **Task 2.3.1:** `crates/crypto/pairing.rs` Implementation
-  - [ ] X25519 public key generation
-  - [ ] Embed public key in QR/PIN data
-  - [ ] Derive shared secret from peer public key
-  - [ ] **Existing:** Leverage `crates/crypto/` ECDH implementation
-  - [ ] **Tests:** Key exchange accuracy tests
+### 4.4 Transport Manager
+- [ ] **Task 4.4.1:** Unified Transport Manager (`crates/transport/src/manager.rs`)
+  - [ ] Multi-protocol coordination (QUIC + WebRTC)
+  - [ ] Automatic protocol selection (QUIC preferred)
+  - [ ] Connection pooling and reuse
+  - [ ] Failover logic (QUIC → WebRTC)
+  - [ ] Integration with DiscoveryManager (Phase 1)
+  - [ ] **Tests:** Multi-transport scenarios
 
-- [ ] **Task 2.3.2:** Trusted Peer Management
-  - [ ] `~/.honeylink/trusted_peers.json` implementation
-  - [ ] TOFU (Trust On First Use) implementation
-  - [ ] Key change detection & warning
-  - [ ] "Forget" functionality
-  - [ ] **Tests:** File I/O, concurrent write tests
-
-**Phase 2 Completion Criteria:**
-- [ ] QR/PIN pairing completes within 30 seconds
-- [ ] ECDH key exchange working correctly
-- [ ] Trusted peer management operational
-- [ ] Integration test: 2-device pairing 99%+ success rate
+**Phase 4 Completion Criteria:**
+- [ ] QUIC connection establishment within 500ms
+- [ ] P99 latency <= 12ms (QUIC)
+- [ ] WebRTC fallback working behind NAT
+- [ ] Zero C/C++ dependencies (Pure Rust)
+- [ ] Unit tests: 20+ tests, 100% pass rate
 
 ---
 

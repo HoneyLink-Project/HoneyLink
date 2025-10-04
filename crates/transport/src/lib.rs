@@ -3,20 +3,32 @@
 //! Transport abstraction with FEC and WFQ support.
 //!
 //! This module provides:
-//! - Physical layer abstraction via `PhysicalLayer` trait
-//! - Forward Error Correction (FEC) strategies
-//! - Weighted Fair Queuing (WFQ) scheduling
-//! - Link quality monitoring and power management
+//! - **Protocol layer**: QUIC/WebRTC transport protocols (Phase 4)
+//! - **Physical layer**: Low-level adapter abstraction (BLE/WiFi)
+//! - **FEC**: Forward Error Correction strategies
+//! - **WFQ**: Weighted Fair Queuing scheduling
+//! - **Telemetry**: Link quality monitoring and power management
 
 use async_trait::async_trait;
 use std::time::Duration;
 use thiserror::Error;
 
+// Phase 4: Transport protocol abstraction (QUIC/WebRTC)
+pub mod protocol;
+
+// Existing modules (Physical layer, FEC, WFQ, Telemetry)
 pub mod fec;
 pub mod retry;
 pub mod wfq;
 pub mod telemetry;
 
+// Phase 4 exports
+pub use protocol::{
+    Connection, ConnectionStats, ProtocolStrategy, ProtocolType, Stream, TransportProtocol,
+    TransportStats,
+};
+
+// Existing exports
 pub use fec::{FecEncoder, FecStrategy};
 pub use retry::{CircuitBreaker, CircuitState, RetryExecutor, RetryPolicy};
 pub use wfq::WeightedFairQueuing;
