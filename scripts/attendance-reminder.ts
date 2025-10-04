@@ -2,10 +2,10 @@
 
 /**
  * HoneyLink Stakeholder Attendance Reminder System
- * 
+ *
  * Purpose: Automated reminder and escalation system to maintain 90%+ attendance
  * Integration: Slack Workflow + GitHub Issues
- * 
+ *
  * Non-negotiables:
  * - No C/C++ dependencies (pure Node.js/TypeScript)
  * - Follows spec/notes/attendance-system.md
@@ -294,4 +294,4 @@ if (require.main === module) {
   });
 }
 
-export { main, trackAttendance, createEscalationIssue };
+export { createEscalationIssue, main, trackAttendance };

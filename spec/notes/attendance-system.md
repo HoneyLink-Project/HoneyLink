@@ -268,4 +268,3 @@ A4: 含まれない。コアメンバーのみが対象。ただしゲストの�
 - [spec/notes/meeting-notes.md](meeting-notes.md) - 会議議事録テンプレート
 - [spec/notes/decision-log.md](decision-log.md) - 決定事項記録先
 - [spec/roadmap.md](../roadmap.md) - 測定指標(SLI/SLO)との整合性
-

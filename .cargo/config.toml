@@ -1,0 +1,11 @@
+# Cargo configuration for HoneyLink project
+# Ensures GNU toolchain builds work on Windows without MSVC/MinGW dependencies
+
+[build]
+# Use GNU toolchain by default on Windows (avoids MSVC linker requirement)
+target = "x86_64-pc-windows-gnu"
+
+[target.x86_64-pc-windows-gnu]
+# Use Rust's bundled LLD linker (no external MinGW/GCC required)
+# This avoids "dlltool.exe" errors and works out-of-the-box
+rustflags = ["-C", "linker=rust-lld"]
