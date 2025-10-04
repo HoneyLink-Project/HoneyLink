@@ -102,8 +102,9 @@
 - スループット目標: 100K events/sec/instance
 
 **次のステップ(セクション3で統合予定):**
-- [ ] Session Orchestratorにテレメトリー統合(session_establishment_latency_p95)
-- [ ] Policy Engineにテレメトリー統合(policy_update_latency_p95)
+- [x] Session Orchestratorにテレメトリー統合(session_establishment_latency_p95) - Task 2.5完了
+- [x] Policy Engineにテレメトリー統合(policy_update_latency_p95) - Task 2.5完了
+- [x] OpenTelemetry 0.26互換性問題解決 - commit 2c03246 (crypto), d5e8f4a (telemetry)
 - [ ] Transportにテレメトリー統合(packet_loss_rate, qos_packet_drop_rate)
 - [ ] Cryptoモジュールに計装追加(crypto_metrics.rsのメソッド呼び出し)
 - [ ] OTLP Collectorセットアップ(TLS証明書, Prometheus/Jaeger/Loki exporters)
