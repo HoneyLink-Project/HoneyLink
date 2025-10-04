@@ -380,6 +380,43 @@ impl MdnsDiscovery {
     }
 }
 
+// DiscoveryProtocol trait implementation for MdnsDiscovery
+use crate::protocol::DiscoveryProtocol;
+use async_trait::async_trait;
+
+#[async_trait]
+impl DiscoveryProtocol for MdnsDiscovery {
+    fn protocol_name(&self) -> &'static str {
+        "mDNS"
+    }
+
+    async fn start_announcing(&mut self) -> Result<()> {
+        self.announce().await?;
+        self.start_network_monitoring().await
+    }
+
+    async fn stop_announcing(&mut self) -> Result<()> {
+        self.stop().await
+    }
+
+    async fn start_browsing(&mut self) -> Result<()> {
+        self.start_browsing().await
+    }
+
+    async fn stop_browsing(&mut self) -> Result<()> {
+        // Browsing is stopped via running flag in stop()
+        Ok(())
+    }
+
+    async fn get_devices(&self) -> HashMap<String, DeviceInfo> {
+        self.devices.lock().await.clone()
+    }
+
+    async fn is_running(&self) -> bool {
+        *self.running.lock().await
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

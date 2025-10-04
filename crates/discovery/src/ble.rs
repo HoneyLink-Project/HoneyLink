@@ -127,6 +127,43 @@ impl BleDiscovery {
     }
 }
 
+// DiscoveryProtocol trait implementation for BleDiscovery
+use crate::protocol::DiscoveryProtocol;
+use async_trait::async_trait;
+use std::collections::HashMap;
+
+#[async_trait]
+impl DiscoveryProtocol for BleDiscovery {
+    fn protocol_name(&self) -> &'static str {
+        "BLE"
+    }
+
+    async fn start_announcing(&mut self) -> Result<()> {
+        self.start_advertising().await
+    }
+
+    async fn stop_announcing(&mut self) -> Result<()> {
+        self.stop().await
+    }
+
+    async fn start_browsing(&mut self) -> Result<()> {
+        self.start_scanning().await
+    }
+
+    async fn stop_browsing(&mut self) -> Result<()> {
+        // Scanning is stopped via running flag in stop()
+        Ok(())
+    }
+
+    async fn get_devices(&self) -> HashMap<String, DeviceInfo> {
+        self.discovered_devices.lock().await.clone()
+    }
+
+    async fn is_running(&self) -> bool {
+        *self.running.lock().await
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

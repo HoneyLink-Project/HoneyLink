@@ -37,8 +37,10 @@
 pub mod ble;
 pub mod error;
 pub mod gatt;
+pub mod manager;
 pub mod mdns;
 pub mod network_monitor;
+pub mod protocol;
 pub mod types;
 
 pub use ble::BleDiscovery;
@@ -47,6 +49,7 @@ pub use gatt::{
     GattDeviceInfo, GattPairingState, PairingState, DEVICE_INFO_CHAR_UUID,
     HONEYLINK_SERVICE_UUID, MAX_GATT_VALUE_SIZE, PAIRING_STATE_CHAR_UUID,
 };
+pub use manager::DiscoveryManager;
 pub use mdns::MdnsDiscovery;
 pub use network_monitor::{NetworkEvent, NetworkMonitor};
 pub use types::{DeviceInfo, DeviceType, DiscoveryEvent};

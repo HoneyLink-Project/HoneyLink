@@ -19,6 +19,9 @@ if-addrs = "0.13"
 # Async runtime
 tokio = { version = "1.40", features = ["rt-multi-thread", "macros", "time", "sync"] }
 
+# Async trait support for DiscoveryProtocol
+async-trait = "0.1"
+
 # Error handling
 thiserror = "1.0"
 anyhow = "1.0"

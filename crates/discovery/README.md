@@ -188,13 +188,46 @@ cargo run --example device_b
 - [ ] Full btleplug implementation (deferred to Phase 2)
 - [ ] Integration tests
 
+### Phase 1.3: Unified Discovery Manager ✅
+- [x] DiscoveryProtocol trait (protocol.rs, 170 lines)
+- [x] Trait implementation for MdnsDiscovery
+- [x] Trait implementation for BleDiscovery
+- [x] DiscoveryManager (manager.rs, 370 lines)
+- [x] Multi-protocol coordination
+- [x] Device deduplication by device_id
+- [x] Protocol selection strategies (All/Prefer/Only)
+- [x] Unified event stream
+- [x] mDNS prioritization over BLE
+- [x] RSSI preservation from BLE
+- [x] Unit tests (4 manager tests + 3 protocol tests)
+
+## Architecture
+
+### Discovery Manager
+The `DiscoveryManager` provides a unified interface for multi-protocol device discovery:
+
+- **Protocol Abstraction**: `DiscoveryProtocol` trait enables pluggable backends
+- **Device Deduplication**: Same device discovered via multiple protocols is merged
+- **Priority Handling**: mDNS preferred over BLE for consistency
+- **Event Aggregation**: Unified event stream for all discovery events
+- **Strategy Support**: Configure protocol usage (All/Prefer/Only)
+
+### Design Rationale
+- **Trait-Based**: Allows Phase 2 to plug in full BLE implementation without API changes
+- **Thread-Safe**: All state protected by Arc<RwLock>/Arc<Mutex>
+- **Non-Blocking**: Async/await throughout
+- **CI-Compatible**: No hardware dependencies for testing (mock/stub support)
+
 ## Dependencies
 
 - `mdns-sd` - Pure Rust mDNS-SD implementation
 - `local-ip-address` - Local IP address detection
+- `async-trait` - Async trait support
 - `tokio` - Async runtime
 - `tracing` - Logging
 - `serde` - TXT record serialization
+- `sha2` - GATT device ID hashing
+- `rand` - GATT nonce generation
 
 ## References
 

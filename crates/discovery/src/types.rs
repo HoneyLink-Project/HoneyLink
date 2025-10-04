@@ -135,7 +135,7 @@ impl DeviceInfo {
 }
 
 /// Discovery events
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DiscoveryEvent {
     /// New device discovered
     DeviceFound(DeviceInfo),
