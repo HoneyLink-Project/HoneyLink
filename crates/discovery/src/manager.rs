@@ -318,7 +318,7 @@ mod tests {
     #[tokio::test]
     async fn test_manager_lifecycle() {
         let mut manager = DiscoveryManager::new(ProtocolStrategy::All, 100);
-        
+
         // Start should succeed even without protocols
         assert!(manager.start().await.is_ok());
         assert!(manager.is_running().await);

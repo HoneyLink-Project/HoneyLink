@@ -196,7 +196,7 @@ export const StreamDashboardPage = () => {
           console.log(`Priority updated for ${streamId}: ${direction}`);
           // TODO Part 4: toast.success(`優先度を${direction === 'up' ? '上げました' : '下げました'}`)
         },
-        onError: (error) => {
+        onError: (error: Error) => {
           console.error(`Failed to update priority for ${streamId}:`, error);
           // TODO Part 4: toast.error('優先度の更新に失敗しました')
         },
@@ -239,7 +239,7 @@ export const StreamDashboardPage = () => {
 
       {/* Stream Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {streams.map((stream) => (
+        {streams.map((stream: StreamStatus) => (
           <Card key={stream.id}>
             <CardHeader
               title={stream.profileLabel}

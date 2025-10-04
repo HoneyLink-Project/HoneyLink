@@ -2,33 +2,9 @@ import { AlertTriangle, CheckCircle, Clock, Shield, TrendingUp, XCircle } from '
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CartesianGrid, Cell, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from 'recharts';
+import type { AlertEntry, KPIMetric } from '../api/hooks';
 import { useLatencyHeatmap, useMetrics } from '../api/hooks';
 import { Card, CardContent, CardHeader, Select } from '../components/ui';
-
-/**
- * KPI metric interface
- */
-interface KPIMetric {
-  id: string;
-  label: string;
-  value: string;
-  unit?: string;
-  target: string;
-  status: 'good' | 'warning' | 'critical';
-  change: number; // percentage change (positive/negative)
-}
-
-/**
- * Alert entry interface
- */
-interface AlertEntry {
-  timestamp: Date;
-  type: 'latency_spike' | 'packet_loss' | 'fec_degradation' | 'bandwidth_limit' | 'auth_failure';
-  severity: 'info' | 'warning' | 'error';
-  details: string;
-  device?: string;
-  status: 'active' | 'acknowledged' | 'resolved';
-}
 
 /**
  * WF-05: Metrics Hub Page
@@ -228,7 +204,7 @@ export const MetricsHubPage = () => {
 
       {/* KPI Tiles */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {kpis.map((kpi) => (
+        {kpis.map((kpi: KPIMetric) => (
           <Card key={kpi.id}>
             <CardContent className="py-6">
               <div className="flex items-start justify-between mb-4">
@@ -293,7 +269,7 @@ export const MetricsHubPage = () => {
                   formatter={(value: number) => [`${value.toFixed(1)} ms`, 'Latency']}
                 />
                 <Scatter data={heatmapDataApi}>
-                  {heatmapDataApi.map((entry, index) => {
+                  {heatmapDataApi.map((entry: { x: string; y: string; value: number }, index: number) => {
                     // Color scale: Green (0-8ms) -> Yellow (8-15ms) -> Red (15+ms)
                     const latency = entry.value;
                     let fillColor = '#10b981'; // green (good)
@@ -347,7 +323,7 @@ export const MetricsHubPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-text-secondary/10">
-                {alerts.map((alert, index) => (
+                {alerts.map((alert: AlertEntry, index: number) => (
                   <tr key={index} className="hover:bg-surface-alt/50 dark:hover:bg-surface-dark/30 transition-colors">
                     <td className="px-4 py-3 text-sm text-text-primary dark:text-text-dark font-mono whitespace-nowrap">
                       {formatTimestamp(alert.timestamp)}
@@ -382,7 +358,7 @@ export const MetricsHubPage = () => {
                 <span className="text-sm font-medium text-text-secondary">{t('metrics_hub.summary.active_alerts')}</span>
               </div>
               <div className="text-2xl font-bold text-error">
-                {alerts.filter((a) => a.status === 'active').length}
+                {alerts.filter((a: AlertEntry) => a.status === 'active').length}
               </div>
             </div>
             <div>

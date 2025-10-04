@@ -5,7 +5,8 @@
 
 [toolchain]
 # Lock to specific stable version for reproducibility
-channel = "1.89.0-x86_64-pc-windows-gnu"
+# Using MSVC toolchain for Windows compatibility (avoids dlltool issues)
+channel = "1.89.0-x86_64-pc-windows-msvc"
 
 # Essential components for development and CI
 components = [
