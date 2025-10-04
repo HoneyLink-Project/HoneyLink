@@ -3,10 +3,10 @@
  * Tests validation, error states, accessibility, and user interaction
  */
 
-import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Search } from 'lucide-react';
+import { describe, expect, it, vi } from 'vitest';
 import { Input } from './Input';
 
 describe('Input', () => {
