@@ -32,20 +32,15 @@ use crate::{
 };
 
 /// QoS configuration in policy update request
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct QoSConfig {
-    /// Stream name or identifier
-    pub stream: String,
-
-    /// Priority level (1-7, higher = more urgent)
+    /// Stream priority (0-255)
+    #[serde(default)]
     pub priority: u8,
 
-    /// Target latency budget in milliseconds
-    pub latency_budget_ms: u16,
-
-    /// Minimum bandwidth floor in Mbps
+    /// Minimum bandwidth in Mbps
     #[serde(default)]
-    pub bandwidth_floor_mbps: Option<f64>,
+    pub bandwidth_min_mbps: Option<f64>,
 
     /// Maximum bandwidth ceiling in Mbps
     #[serde(default)]
@@ -53,7 +48,7 @@ pub struct QoSConfig {
 }
 
 /// Encryption configuration in policy update request
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct EncryptionConfig {
     /// Allowed cipher suites (e.g., ["chacha20-poly1305"])
     pub ciphers: Vec<String>,
@@ -64,7 +59,7 @@ pub struct EncryptionConfig {
 }
 
 /// Feature flags in policy update request
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct FeatureFlags {
     /// Enable OTA updates
     #[serde(default)]

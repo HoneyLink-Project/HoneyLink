@@ -52,6 +52,7 @@ config = "0.14"
 toml = "0.8"
 
 # Database (Pure Rust PostgreSQL/CockroachDB client)
+# NOTE: Temporarily using unchecked queries until DB environment is available for `cargo sqlx prepare`
 sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "uuid", "chrono", "json"] }
 
 # Validation

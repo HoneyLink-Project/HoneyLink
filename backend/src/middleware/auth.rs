@@ -115,6 +115,7 @@ pub async fn jwt_auth_middleware(
 }
 
 /// Extractor for JWT claims from request extensions
+#[derive(Debug)]
 pub struct RequireAuth(pub JwtClaims);
 
 #[axum::async_trait]
