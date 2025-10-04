@@ -1,76 +1,213 @@
-# docs/deployment/infrastructure.md
+# HoneyLink Client Distribution Infrastructure
 
-**バッジ:** `🚫 実装コード非出力` `🚫 C/C++依存禁止`
+**Badges:** ` P2P Design` ` Serverless` ` No C/C++ Dependencies`
 
-> HoneyLink™ の本番・ステージング環境のインフラ設計方針を定義します。クラウドリソース、ネットワーク、セキュリティ制御を整理し、実装コードや C/C++ 依存は含めません。
+> HoneyLink P2P client distribution strategy for all platforms. No central servers, no cloud infrastructure.
 
-## 目次
-- [環境構成](#環境構成)
-- [ネットワークトポロジ](#ネットワークトポロジ)
-- [コンピュートレイヤー](#コンピュートレイヤー)
-- [データおよびストレージ](#データおよびストレージ)
-- [秘密情報と鍵管理](#秘密情報と鍵管理)
-- [監視・ロギング・トレーシング](#監視ロギングトレーシング)
-- [コンプライアンスとガバナンス](#コンプライアンスとガバナンス)
-- [IaC とリリース管理](#iac-とリリース管理)
-- [受け入れ基準 (DoD)](#受け入れ基準-dod)
+## Table of Contents
+- [Overview](#overview)
+- [Platform-Specific Installers](#platform-specific-installers)
+- [Local Storage Configuration](#local-storage-configuration)
+- [Network Configuration](#network-configuration)
+- [NAT Traversal Setup](#nat-traversal-setup)
+- [Firewall Configuration](#firewall-configuration)
 
-## 環境構成
-| 環境 | 用途 | スケール | 備考 |
-|------|------|----------|------|
-| 開発 (dev) | 個別検証 | 1 AZ, 25% リソース | Feature Branch 検証 |
-| ステージング (stg) | 統合/E2E | 3 AZ, 50% リソース | 本番同等 | 
-| 本番 (prd) | 顧客向け | 3 AZ + DR リージョン | 24/7 SRE 体制 |
+## Overview
 
-- すべて Infrastructure as Code (Terraform or Bicep)。C/C++ 製 CLI/ツールは禁止。
-- リージョン分散: Primary (例: East US), Secondary (例: West Europe) をホットスタンバイ。
+**HoneyLink P2P Architecture = No Servers Required**
 
-## ネットワークトポロジ
-- VNet/VPC を 3 層 (Edge, Service, Data)。サブネット間は NSG/セキュリティグループで制御。
-- Southbound 通信: デバイス ↔ Edge Gateway (QUIC + TLS1.3)。Northbound: Gateway ↔ Control Plane (mTLS)。
-- Zero Trust: IP allow list ではなくデバイス証明書 + ポリシー。
-- プライベートエンドポイント経由でデータストアへアクセス。公開エンドポイントは API Gateway のみ。
+Unlike traditional applications, HoneyLink uses pure peer-to-peer architecture:
+- No backend infrastructure: No Kubernetes, no databases
+- No cloud hosting costs: Users run locally
+- Deployment target: Client apps (Windows/macOS/Linux/iOS/Android)
+- Network requirement: Only STUN servers for NAT traversal (public, free)
 
-## コンピュートレイヤー
-- Edge Gateway: コンテナプラットフォーム (AKS/EKS/GKE)。Rust/WASM ランタイム、C/C++ バイナリは禁止。
-- Control Plane Microservices: サーバレス Container Apps or Kubernetes。HPA/KEDA でオートスケール。
-- バッチ/分析: マネージドサーバレス (Azure Functions, AWS Lambda) で夜間ジョブを実行。
-- Observability エージェントは Rust/WASM ベースで提供。
+### Architecture Comparison
 
-## データおよびストレージ
-- 時系列データ: マネージドカラムナー DB (InfluxDB Cloud, Azure Data Explorer)。保持期間: 30 日。
-- メタデータ・設定: マネージド RDB (PostgreSQL マネージド)。
-- キュー/ストリーム: マネージド Kafka 互換サービス or Azure Event Hubs。
-- バックアップ: スナップショット + オブジェクトストレージ (冗長化: GRS/LRS)。RPO 15 分、RTO 30 分。
+| Component | Traditional | HoneyLink P2P |
+|-----------|-------------|---------------|
+| Backend API | Required | Not needed  |
+| Database | Required | Not needed  |
+| Cloud Hosting | Required | Not needed  |
+| Client App | Required | Required  |
+| STUN/TURN | Optional | Required  |
 
-## 秘密情報と鍵管理
-- KMS (Azure Key Vault / AWS KMS) で鍵・証明書を集中管理。
-- mTLS 証明書は自動ローテ (90 日)。
-- アプリケーションシークレットは HashiCorp Vault 互換 API で取得。
-- C/C++ ベースの暗号ライブラリは使用せず、Rust ネイティブ or マネージドサービスを利用。
+## Platform-Specific Installers
 
-## 監視・ロギング・トレーシング
-- OpenTelemetry Collector (Rust ビルド) を DaemonSet としてデプロイ。
-- メトリクス → マネージドモニタリング (Datadog/NewRelic/Azure Monitor)。
-- ログ → クラウドネイティブログサービス (Log Analytics/CloudWatch Logs)。
-- トレース → Honeycomb or Jaeger SaaS。
-- KPI/SLO は [docs/testing/metrics.md](../testing/metrics.md) と同期。SLO 違反時は PagerDuty 通知。
+### Windows
+- Format: MSI (Windows Installer)
+- Architecture: x64, ARM64
+- Min OS: Windows 10 21H2+
+- Install Path: %PROGRAMFILES%\HoneyLink\
+- Data Path: %USERPROFILE%\.honeylink\
+- Distribution: Direct download, winget, Chocolatey
 
-## コンプライアンスとガバナンス
-- 標準: ISO27001, SOC2, GDPR, HIPAA (必要に応じて)。
-- データレジデンシ: EU テナントは EU 内リージョンへ固定。
-- 監査ログは WORM ストレージに 7 年保管。アクセスは RBAC + ABAC。
-- サプライチェーン監査は [docs/security/vulnerability.md](../security/vulnerability.md) に従って四半期ごとに実施。
+### macOS
+- Format: DMG with signed APP
+- Architecture: Apple Silicon (ARM64), Intel (x64)
+- Min OS: macOS 12 (Monterey)+
+- Install Path: /Applications/HoneyLink.app
+- Data Path: ~/.honeylink/
+- Distribution: Direct download, Homebrew, App Store (future)
 
-## IaC とリリース管理
-- IaC リポジトリはアプリとは別。Pull Request → Plan → Apply の 3 ステップ。
-- GitOps (ArgoCD/Flux) を使用し、本番環境への手動操作は禁止。
-- コンテナイメージは Rust ベースでビルド。C/C++ ビルドチェーンは排除。
-- インフラ変更の影響評価は [docs/notes/decision-log.md](../notes/decision-log.md) に記録。
+### Linux
+- Formats: DEB, RPM, AppImage, Snap, Flatpak
+- Architecture: x64, ARM64
+- Min Kernel: 5.15+ (BLE support)
+- Install Paths: /usr/bin/honeylink, ~/.honeylink/
+- Distribution: Direct download, APT, DNF, Snap, Flatpak
 
-## 受け入れ基準 (DoD)
-- 環境構成・ネットワーク・コンピュート・ストレージが網羅的に記述されている。
-- 秘密情報/鍵管理と観測性のアプローチが定義されている。
-- コンプライアンスとガバナンス要件が整理されている。
-- C/C++ 依存排除と IaC 方針が明文化されている。
-- 他ドキュメントへのリンクが整合している。
+### iOS
+- Distribution: Apple App Store
+- Min iOS: 15.0+
+- Permissions: Bluetooth, Local Network, Camera
+- Storage: App sandbox + Keychain
+
+### Android
+- Distribution: Google Play, F-Droid, APK
+- Min Android: 10 (API 29)+
+- Permissions: Bluetooth, Internet, Camera
+- Storage: Private storage + Android Keystore
+## Local Storage Configuration
+
+Directory: `~/.honeylink/` (all platforms)
+
+```
+~/.honeylink/
+ keys/
+    device_key.pem       # X25519 private key (0600)
+    device_key.pub        # X25519 public key (0644)
+ trusted_peers.json        # TOFU list (0600)
+ config.toml               # Configuration (0644)
+ metrics/metrics.db        # Local SQLite (0644)
+ logs/honeylink.log        # Logs (0644, max 50MB)
+```
+
+### Permissions (Unix)
+```bash
+chmod 700 ~/.honeylink/
+chmod 600 ~/.honeylink/keys/device_key.pem
+chmod 600 ~/.honeylink/trusted_peers.json
+```
+
+## Network Configuration
+
+### Required Access
+- mDNS: UDP 5353 (local multicast)
+- BLE: Bluetooth hardware
+- QUIC: UDP 7843 (default, configurable)
+- WebRTC: UDP dynamic ports (ICE)
+
+### NAT Traversal
+- STUN: UDP 3478, 19302 (stun.l.google.com)
+- TURN: UDP/TCP 3478 (optional, user-provided)
+
+### Default config.toml
+```toml
+[device]
+device_id = "auto-uuid"
+device_name = "My HoneyLink Device"
+
+[discovery]
+protocols = ["mdns", "ble"]
+
+[pairing]
+methods = ["qr_code", "pin"]
+pin_length = 6
+
+[transport]
+protocols = ["quic", "webrtc"]
+quic_port = 7843
+webrtc_stun_servers = ["stun:stun.l.google.com:19302"]
+
+[storage]
+key_storage_path = "~/.honeylink/keys"
+trusted_peers_path = "~/.honeylink/trusted_peers.json"
+
+[telemetry]
+local_storage_path = "~/.honeylink/metrics"
+export_enabled = false  # No server upload
+```
+
+## Firewall Configuration
+
+### Windows
+```powershell
+New-NetFirewallRule -DisplayName "HoneyLink QUIC" -Direction Inbound -Protocol UDP -LocalPort 7843 -Action Allow
+New-NetFirewallRule -DisplayName "HoneyLink mDNS" -Direction Inbound -Protocol UDP -LocalPort 5353 -Action Allow
+```
+
+### Linux (ufw)
+```bash
+sudo ufw allow 7843/udp comment "HoneyLink QUIC"
+sudo ufw allow 5353/udp comment "HoneyLink mDNS"
+```
+
+### macOS
+Automatic: System prompts "Allow HoneyLink to accept incoming connections?"
+
+## CI/CD Pipeline
+
+### Build Matrix (GitHub Actions)
+- Windows: x86_64-pc-windows-msvc  .msi
+- macOS: aarch64-apple-darwin  .dmg
+- Linux: x86_64-unknown-linux-gnu  .deb/.rpm
+
+### Quality Gates
+- All tests pass: `cargo test`
+- Linter passes: `cargo clippy -- -D warnings`
+- No vulnerabilities: `cargo audit`
+- Coverage  85%
+
+### Release Steps
+1. Build all platform installers
+2. Sign (Authenticode/Apple/GPG)
+3. Upload to GitHub Releases
+4. Publish to package managers
+5. Update app stores (iOS/Android)
+
+## Security
+
+### Code Signing
+- Windows: Authenticode (DigiCert)
+- macOS: Apple Developer ID + Notarization
+- Linux: GPG signatures
+
+### Supply Chain
+- All dependencies: Pure Rust only (no C/C++)
+- Audit: `cargo audit` in CI
+- Reproducible builds
+
+## Compliance
+
+### Privacy (GDPR/CCPA)
+- No server data collection
+- All data local only
+- No tracking, no analytics without opt-in
+
+### License
+- MIT License (open source)
+- Repository: github.com/HoneyLink-Project/HoneyLink
+
+### Accessibility
+- WCAG 2.1 Level AA
+- Keyboard navigation
+- Screen reader support
+
+### i18n
+- English, Japanese, Spanish, Chinese (Phase 1)
+
+## Definition of Done
+- [x] Platform installers documented (5 platforms)
+- [x] Local storage structure defined
+- [x] Network/firewall configuration specified
+- [x] NAT traversal (STUN/TURN) explained
+- [x] CI/CD pipeline defined
+- [x] Security (signing, supply chain) covered
+- [x] Compliance (GDPR, licensing) documented
+- [x] No server infrastructure (pure P2P)
+
+---
+
+**Last Updated:** 2025-01-04  
+**Related:** [architecture/overview.md](../architecture/overview.md), [security/auth.md](../security/auth.md)
