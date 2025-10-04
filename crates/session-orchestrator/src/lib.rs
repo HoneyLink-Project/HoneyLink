@@ -19,6 +19,7 @@ pub mod metrics;
 pub mod persistence;
 pub mod session;
 pub mod state_machine;
+pub mod telemetry;
 pub mod versioning;
 
 pub use error::{Error, Result};
@@ -28,4 +29,5 @@ pub use metrics::Metrics;
 pub use persistence::{InMemorySessionStore, SessionStore};
 pub use session::Session;
 pub use state_machine::{SessionState, SessionStateMachine, TransitionEvent};
+pub use telemetry::SessionTelemetry;
 pub use versioning::{NegotiatedVersion, VersionNegotiator};

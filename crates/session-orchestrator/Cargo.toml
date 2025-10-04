@@ -11,6 +11,7 @@ repository.workspace = true
 honeylink-core = { path = "../core" }
 honeylink-crypto = { path = "../crypto" }
 honeylink-policy-engine = { path = "../policy-engine" }
+honeylink-telemetry = { path = "../telemetry" }
 
 tokio = { workspace = true }
 serde = { workspace = true }
