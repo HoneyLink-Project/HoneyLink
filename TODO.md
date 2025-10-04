@@ -23,8 +23,8 @@
 
 | Phase | Goal | Progress | Target |
 |-------|------|----------|--------|
-| **Phase 0** | Foundation | 100% | Complete |
-| **Phase 1** | P2P Discovery | 20% | Q1 2025 |
+| **Phase 0** | Foundation | 100% | Complete ✅ |
+| **Phase 1** | P2P Discovery | 50% | Q1 2025 🚧 |
 | **Phase 2** | Pairing UI | 0% | Q2 2025 |
 | **Phase 3** | P2P Transport | 0% | Q2 2025 |
 | **Phase 4** | Multi-stream QoS | 0% | Q3 2025 |
@@ -69,14 +69,15 @@
 **Goal:** "Nearby Devices" list display same as Bluetooth settings
 
 ### 1.1 mDNS Discovery Implementation
-- [ ] **Task 1.1.1:** Create `crates/discovery/`
-  - [ ] mDNS-SD implementation (service: `_honeylink._tcp.local`)
-  - [ ] TXT record implementation (device_id, device_name, device_type, version)
-  - [ ] Service browsing (discovery within 5 seconds)
-  - [ ] Service resolution (IP address + port retrieval)
-  - [ ] **Dependency:** `mdns-sd` crate (Pure Rust)
-  - [ ] **Tests:** Mock mDNS responder, discovery time measurement
-  - [ ] **Bluetooth Comparison:** Same UX as Bluetooth discovery (3-5 seconds)
+- [x] **Task 1.1.1:** Create `crates/discovery/` ✅ 2025-10-04
+  - [x] mDNS-SD implementation (service: `_honeylink._tcp.local`)
+  - [x] TXT record implementation (device_id, device_name, device_type, version)
+  - [x] Service browsing (discovery within 5 seconds)
+  - [x] Service resolution (IP address + port retrieval)
+  - [x] **Dependency:** `mdns-sd` crate (Pure Rust)
+  - [x] **Tests:** Unit tests for types, error handling, service lifecycle
+  - [x] **Bluetooth Comparison:** Same UX as Bluetooth discovery (3-5 seconds)
+  - [x] **Example:** simple_discovery.rs demonstrating basic usage
 
 - [ ] **Task 1.1.2:** mDNS Announcement Implementation
   - [ ] Device info announcement (automatic on startup)

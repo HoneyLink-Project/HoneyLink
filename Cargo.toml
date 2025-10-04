@@ -4,6 +4,7 @@ members = [
     # P2P Core Crates (no centralized backend)
     "crates/core",
     "crates/crypto",
+    "crates/discovery",
     "crates/transport",
     "crates/qos-scheduler",
     "crates/policy-engine",
