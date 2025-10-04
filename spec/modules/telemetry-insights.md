@@ -217,8 +217,8 @@ Root Span: session.establish (Session Orchestrator)
 ## 8. セキュリティ & プライバシー
 
 ### 認証/認可
-- **OTLP送信**: mTLS (client certificate)
-- **Local SQLite**: ファイルパーミッション 0644 (読み取り専用)
+- **OTLP送信** (オプション): QUIC (ChaCha20-Poly1305) - ユーザー同意必須
+- **Local SQLite**: ファイルパーミッション 0644 (読み取り専用), ネットワークアップロードなし
 
 ### 機密データ取り扱い
 - **ペイロード**: メトリクス/ログにペイロード含めない

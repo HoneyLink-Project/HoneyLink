@@ -219,9 +219,10 @@ Physical Layer Hardware (Wi-Fi/5G/THz)
 |------|----------------|-------------------|----------|
 | **上位** | Transport | PhysicalSend | P95 < 30ms |
 | **上位** | Session Orchestrator | SwitchPhysicalLayer | Best-effort |
-| **下位** | WiFi Controller Service | gRPC | P95 < 20ms |
-| **下位** | 5G Modem HTTP Server | REST | P95 < 50ms |
-| **下位** | THz Experimental Service | gRPC | P95 < 30ms |
+| **下位** | mdns-sd crate | Rust API | P95 < 10ms |
+| **下位** | btleplug crate | Rust API | P95 < 20ms |
+| **下位** | quinn (QUIC) crate | Rust API | P95 < 20ms |
+| **下位** | webrtc crate | Rust API | P95 < 50ms (NAT traversal) |
 
 **依存ルール**: [spec/architecture/dependencies.md](../architecture/dependencies.md)
 
@@ -315,9 +316,10 @@ MOD-007-PHYSICAL-ADAPTER → FR-03 (power consumption optimization)
 - カバレッジ目標: 85%
 
 ### 統合テスト
-- Mock WiFi Controller Service 連携
-- Mock 5G Modem HTTP Server 連携
-- Hot Swap E2E (Wi-Fi → 5G → Ethernet)
+- mDNS service discovery E2E (_honeylink._tcp.local.)
+- BLE advertising/scanning E2E (HoneyLink UUID)
+- QUIC connection E2E (UDP 7843, ChaCha20-Poly1305)
+- WebRTC NAT traversal E2E (STUN/TURN)
 
 ### E2E テスト
 - Transport → Physical Adapter → 実機 Wi-Fi モジュール
