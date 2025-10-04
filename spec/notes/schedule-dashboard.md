@@ -157,12 +157,14 @@
 - インフラ構築コスト (月額$50〜)
 - 学習コスト
 
-**設定手順**:
-1. TimescaleDB インスタンスを作成 (AWS RDS/Azure Database)
-2. タスクデータを日次で DB へエクスポート (GitHub Actions)
-3. Grafana をセットアップし、TimescaleDB をデータソースに追加
+**設定手順 (P2Pローカル設計)**:
+1. ローカルSQLiteデータベース作成 (`~/.honeylink/metrics/metrics.db`, 500MB max)
+2. タスクデータを日次でSQLiteへ保存 (ローカルスクリプト)
+3. Grafanaをローカルインストールし、SQLiteデータソースを追加 (開発環境のみ)
 4. ダッシュボード JSON テンプレートをインポート (後述 Section 4.5)
-5. アラートルールを設定 (Section 6)
+5. ローカルOS通知を設定 (Windows Toast/macOS Notification Center/Linux libnotify)
+
+**注意**: P2P設計ではクラウドインフラ不要 (月額$0, プライバシー保護)
 
 ### 4.3 オプションC: GitHub Projects (カンバンボード連携)
 

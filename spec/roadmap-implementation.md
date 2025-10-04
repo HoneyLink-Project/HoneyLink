@@ -24,7 +24,7 @@
 | Sequence | Milestone | Description | Owner (Role ID) | Duration | Dependencies | Deliverables |
 |----------|-----------|-------------|-----------------|----------|--------------|--------------|
 | P1-M1 | Traceability Skeleton | Build requirement → spec → test mapping shell in project tool | ENG-ARCH-03 | 2 weeks | Governance charter, requirements catalog | Traceability board, linked requirement references |
-| P1-M2 | Protocol Spec Finalization | Finalize session orchestration state diagrams and API contracts | ENG-PROTO-01 | 4 weeks | P1-M1 | Updated control-plane spec, ADR drafts |
+| P1-M2 | Protocol Spec Finalization | Finalize P2P discovery (mDNS/BLE) and session orchestration state diagrams | ENG-PROTO-01 | 4 weeks | P1-M1 | Updated P2P protocol spec (discovery, pairing, TOFU), ADR drafts |
 | P1-M3 | UX System Definition | Publish design tokens, accessibility checklist, motion guidelines | UX-LEAD-01 | 3 weeks | P1-M1 | Figma library, UI spec set |
 | P1-M4 | Security Posture Alignment | Confirm crypto/key lifecycle docs and threat model | SEC-ARCH-01 | 3 weeks | P1-M2 | Updated encryption/key-management docs, risk log |
 | P1-M5 | Phase Exit Review | Cross-WG review to validate 30-document DoD and backlogs | ENG-ARCH-01 | 1 week | P1-M2, P1-M3, P1-M4 | Review minutes, decision-log entries |

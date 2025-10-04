@@ -271,11 +271,9 @@ receivers:
   otlp:
     protocols:
       grpc:
-        endpoint: 0.0.0.0:4317
-        tls:
-          cert_file: /etc/certs/server.crt
-          key_file: /etc/certs/server.key
-          client_ca_file: /etc/certs/ca.crt
+        endpoint: 127.0.0.1:4317
+        # P2P: No TLS server certificates (local-only export)
+        # Use QUIC with ChaCha20-Poly1305 for remote export if needed
 
 exporters:
   prometheusremotewrite:
@@ -366,4 +364,3 @@ MOD-006-TELEMETRY → NFR-03 (observability and monitoring)
 | バージョン | 日付 | 変更内容 | 承認者 |
 |-----------|------|---------|--------|
 | 1.0 | 2025-10-01 | 初版作成 | Observability WG (ENG-OBS-01) |
-

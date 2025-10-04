@@ -320,4 +320,3 @@ MOD-003-TRANSPORT → FR-03 (power optimization via FEC mode)
 | バージョン | 日付 | 変更内容 | 承認者 |
 |-----------|------|---------|--------|
 | 1.0 | 2025-10-01 | 初版作成 | Protocol WG (ENG-PROTO-02) |
-

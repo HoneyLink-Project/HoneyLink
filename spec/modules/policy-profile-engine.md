@@ -170,8 +170,8 @@ QoSPolicy:
 ## 7. セキュリティ & プライバシー
 
 ### 認証/認可
-- **認証**: OAuth2 + mTLS
-- **認可**: RBAC (Roles: `policy:create`, `policy:update`, `policy:read`, `policy:delete`)
+- **認証**: TOFU (Trust On First Use) - QR/PIN pairing, no OAuth2/mTLS
+- **認可**: Local policy enforcement (no RBAC server, each device manages own policies)
 - 詳細: [spec/security/auth.md](../security/auth.md)
 
 ### 脅威対策 (STRIDE)
@@ -228,12 +228,13 @@ QoSPolicy:
 }
 ```
 
-### 互換性マトリクス
-| Client Version | Server Version | 互換性 |
+### 互換性マトリクス (P2Pピアバージョンネゴシエーション)
+| Peer A Version | Peer B Version | 互換性 |
 |----------------|----------------|--------|
 | 1.x | 1.x | ✅ Full |
-| 1.x | 2.x | ✅ Read-only (deprecated警告) |
-| 2.x | 1.x | ❌ Not supported |
+| 1.x | 2.x | ✅ Negotiate to 1.x (backward compat) |
+| 2.x | 1.x | ✅ Negotiate to 1.x (backward compat) |
+| 2.x | 2.x | ✅ Full (latest features) |
 
 ---
 
@@ -328,4 +329,3 @@ MOD-002-POLICY-ENGINE → FR-06 (profile sharing)
 | バージョン | 日付 | 変更内容 | 承認者 |
 |-----------|------|---------|--------|
 | 1.0 | 2025-10-01 | 初版作成 | Protocol WG (ENG-PROTO-01) |
-

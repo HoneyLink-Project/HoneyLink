@@ -264,13 +264,13 @@ React Component (状態変更イベント経由で更新)
 ## 10. セキュリティ & プライバシー
 
 ### 認証/認可
-- **SDK**: OAuth2 + mTLS
-- **UI Shell**: OAuth2 + PKCE (Authorization Code Flow)
+- **SDK**: TOFU (Trust On First Use) - QR/PIN pairing, no OAuth2
+- **UI Shell**: Local TOFU trust, `~/.honeylink/trusted_peers.json` based
 
 ### 脅威対策 (STRIDE)
 | 脅威 | 対策 |
 |------|------|
-| **Spoofing** | OAuth2 + mTLS |
+| **Spoofing** | TOFU + Physical Proximity Verification (QR/PIN/NFC) |
 | **Cross-Site Scripting (XSS)** | React自動エスケープ + Content Security Policy |
 | **Cross-Site Request Forgery (CSRF)** | SameSite Cookie + CSRF Token |
 
@@ -312,9 +312,10 @@ React Component (状態変更イベント経由で更新)
 ```typescript
 import { HoneyLinkClient } from '@honeylink/sdk';
 
+// P2P client - no API endpoint, discovers peers via mDNS/BLE
 const client = new HoneyLinkClient({
-  apiEndpoint: 'https://api.honeylink.example.com',
-  authToken: 'your-oauth2-token'
+  deviceId: 'DEVICE-LOCAL-123',
+  discoveryProtocols: ['mdns', 'ble']
 });
 
 // ペアリング & セッション確立
@@ -349,9 +350,10 @@ await client.disconnect(session.sessionId);
 ```python
 from honeylink_sdk import HoneyLinkClient
 
+# P2P client - no API endpoint, discovers peers via mDNS/BLE
 client = HoneyLinkClient(
-    api_endpoint='https://api.honeylink.example.com',
-    auth_token='your-oauth2-token'
+    device_id='DEVICE-LOCAL-123',
+    discovery_protocols=['mdns', 'ble']
 )
 
 # ペアリング & セッション確立

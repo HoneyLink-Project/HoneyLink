@@ -81,8 +81,8 @@
 | **Policy Engine** | 2.2 | QoS Scheduler | 2.5 | S | ポリシー配信にQoS連携が必要だが、スタブで開発可 |
 | **Session Orchestrator** | 2.1 | Policy Engine, Crypto & Trust | 2.2, 2.4 | B | 鍵合意とポリシー交渉が必須 |
 | **Telemetry & Insights** | 2.5 (別タスク) | Session, QoS, Transport | 2.1, 2.5, 2.3 | E | イベント購読のみ、スタブ可 |
-| **Control-Plane API** | 3.1〜3.6 | Session Orchestrator | 2.1 | B | セッション管理APIがコア |
-| **Experience Layer** | 4.1 | Control-Plane API | 3.1〜3.6 | S | API仕様確定後に並行開発可 |
+| **P2P Internal API** | 3.1〜3.6 | Session Orchestrator | 2.1 | B | P2Pセッション管理がコア (no HTTP/gRPC server) |
+| **Experience Layer** | 4.1 | P2P Internal API | 3.1〜3.6 | S | Rust API仕様確定後に並行開発可 |
 
 ### 3.2 タスク依存グラフ (簡略版)
 
@@ -97,7 +97,7 @@
                                           [2.1 Session Orchestrator] <──┘
                                                    │
                                                    v
-                                          [3.1-3.6 Control-Plane API]
+                                          [3.1-3.6 P2P Internal API]
                                                    │
                                                    ├──> [4.1 UI基盤]
                                                    │

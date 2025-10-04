@@ -17,7 +17,7 @@
 
 - **モジュール名:** Physical Adapter Layer
 - **担当チーム:** Physical WG (ENG-PHY-01, ENG-PHY-02)
-- **概要:** Wi-Fi/5G/THz などの物理層との統合、gRPC/REST API経由でのドライバ制御
+- **概要:** mDNS/BLE/QUIC/WebRTCプロトコル統合、Pure Rustクレート経由でのネットワーク制御 (no gRPC/REST servers)
 - **ステータス:** 実装中 (P1フェーズ)
 - **リポジトリパス:** `crates/physical-adapter/`
 
@@ -32,7 +32,7 @@
 ## 2. 責務と境界
 
 ### 主な責務
-- **物理層統合**: Wi-Fi/5G/THz/Ethernet との gRPC/REST API連携
+- **P2Pプロトコル統合**: mDNS/BLE/QUIC/WebRTC Pure Rust crates (mdns-sd, btleplug, quinn, webrtc)
 - **電力モード制御**: Ultra Low / Low / Normal / High の4段階制御
 - **リンク品質監視**: RSSI/SNR/パケロス率の定期測定
 - **Hot Swap**: 物理層切替時のセッション維持
@@ -96,13 +96,14 @@ for event in receiver.recv() {
 #### PhysicalLayerConfig (物理層設定)
 ```yaml
 PhysicalLayerConfig:
-  physical_type: Enum[WiFi, FiveG, THz, Ethernet]
-  endpoint: String(256)  # gRPC: "http://localhost:50051", REST: "http://10.0.0.1:8080"
-  protocol: Enum[gRPC, REST]
+  protocol_type: Enum[MDNS, BLE, QUIC, WebRTC]  # P2P protocols only
+  mdns_service_name: String(64)  # Default: "_honeylink._tcp.local."
+  ble_uuid: String(36)  # HoneyLink BLE service UUID
+  quic_port: UInt16  # Default: 7843 (UDP)
+  stun_server: String(256)  # Default: "stun.l.google.com:19302"
   power_mode: Enum[UltraLow, Low, Normal, High]
-  max_retries: UInt8  # デフォルト 3
-  timeout_ms: UInt16  # デフォルト 5000
-  tls_enabled: Boolean
+  max_retries: UInt8  # Default 3
+  timeout_ms: UInt16  # Default 5000
 ```
 
 #### PhysicalLayerMetrics (物理層メトリクス)
@@ -194,20 +195,19 @@ Physical Layer Hardware (Wi-Fi/5G/THz)
   - SetPowerMode(mode) → ACK
 ```
 
-#### 5G Modem HTTP Server (Vendor提供)
-```
-- ポート: 8080 (HTTP)
-- プロトコル: REST/JSON
-- API:
-  - POST /send → {"status": "ok"}
-  - GET /metrics → {"rssi": -70, "snr": 25.5, "loss_rate": 0.01}
-  - POST /power_mode → {"mode": "low"}
-```
+#### P2P Native Rust Integration (Recommended)
 
-**利点**:
-- Rust コードに C/C++ 依存なし
-- Vendor Driver Service のクラッシュが Physical Adapter Layer に影響しない
-- 物理層の実装言語を自由に選択可能 (Go/Python/Node.js/etc.)
+**Direct Crate Usage** (No HTTP/gRPC servers):
+- **mDNS Discovery**: `mdns-sd` crate (`_honeylink._tcp.local.` service)
+- **BLE Advertising**: `btleplug` crate (HoneyLink UUID)
+- **QUIC Transport**: `quinn` crate (UDP 7843, P95 < 20ms latency)
+- **WebRTC Data Channels**: `webrtc` crate (STUN/TURN NAT traversal)
+
+**Benefits**:
+- Zero C/C++ dependencies (Pure Rust cryptography: `x25519-dalek`, `chacha20poly1305`)
+- No vendor HTTP servers (eliminates external service dependency)
+- Direct OS network stack access (better performance, lower latency)
+- P2P design alignment (no backend services)
 
 参照: [spec/architecture/tech-stack.md](../architecture/tech-stack.md)
 
@@ -245,13 +245,14 @@ Physical Layer Hardware (Wi-Fi/5G/THz)
 ## 9. セキュリティ & プライバシー
 
 ### 認証/認可
-- **gRPC通信**: mTLS (client certificate)
-- **REST通信**: Bearer Token (OAuth2)
+- **P2P Communication**: TOFU (Trust On First Use) - QR/PIN pairing, no OAuth2/mTLS
+- **Transport Security**: QUIC (ChaCha20-Poly1305), WebRTC (DTLS-SRTP)
+- **Device Trust**: `~/.honeylink/trusted_peers.json` based
 
 ### 脅威対策 (STRIDE)
 | 脅威 | 対策 |
 |------|------|
-| **Spoofing** | mTLS/OAuth2 |
+| **Spoofing** | TOFU + Physical Proximity Verification (QR/PIN/NFC) |
 | **Tampering** | TLS 1.3 encryption |
 | **Denial of Service** | Rate limiting (per physical layer) |
 
@@ -363,4 +364,3 @@ MOD-007-PHYSICAL-ADAPTER → FR-03 (power consumption optimization)
 | バージョン | 日付 | 変更内容 | 承認者 |
 |-----------|------|---------|--------|
 | 1.0 | 2025-10-01 | 初版作成 | Physical WG (ENG-PHY-01) |
-

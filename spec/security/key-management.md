@@ -1,79 +1,324 @@
-# HoneyLink™ 鍵管理仕様書
+# HoneyLink P2P Key Management Specification
 
-## 目的
-HoneyLink™ における鍵管理の全体像を明文化し、オンプレミスやエアギャップ環境を含むあらゆる導入形態で一貫したセキュリティ水準を確保する。本仕様は実装言語に依存せず、暗号モジュールとして C/C++ ベースのライブラリを利用しないことを前提とする。
+**Badges:** ` P2P Design` ` Serverless` ` No HSM/Vault` ` No C/C++ Dependencies`
 
-## 鍵階層
-| 層 | 用途 | 生成元 | 保存先 |
-|----|------|--------|---------|
-| ルート信頼アンカー (RTA) | 全体の信頼チェーンを署名 | FIPS 140-3 対応 HSM または専用セキュアエレメント | オフライン制御ゾーン内セキュア保管庫 + HSM トークン |
-| 中間 CA / サービス鍵 | コントロールプレーン、サービス間認証 | オフライン署名ステーション (Rust + HSM ワークフロー) | 分離ネットワーク上の HSM / Vault クラスタ |
-| エッジ / デバイス鍵 | デバイス識別、セッション派生 | デバイス内 TRNG + X25519 | デバイス内セキュアエレメント |
-| セッション鍵 | ストリーム暗号化 (ChaCha20-Poly1305) | X25519 → HKDF-SHA512 | 揮発メモリのみ |
+---
 
-## ライフサイクル
-| フェーズ | RTA | 中間 CA | デバイス鍵 | セッション鍵 |
-|----------|-----|---------|-------------|-------------|
-| 生成 | 手動 (2人承認) | 自動バッチ (mTLS) | デバイス初期化時 | ハンドシェイク毎 |
-| 配布 | 物理メディア (オフライン) | オンプレ Vault + mTLS | ペアリング API (mTLS + 登録コード) | HLST チャネル内 |
-| ローテーション | 5 年 / インシデント時 | 12 ヵ月 / 検証失敗時 | 90 日 / 失効イベント | 接続ごと + 24 時間以内再生成 |
-| 失効 | Secure Erase + 監査ログ閉鎖 | CRL / OCSP | CRL + 自己破棄 | ハンドシェイク終了時 |
-| 監査 | 手動台帳 + SBOM | GitOps トレース | デバイス台帳 | セッションログ (匿名化) |
+## 1. Overview
 
-## 生成フロー詳細
-1. **ルート鍵生成**
-   - オフライン HSM 内で `ECDSA P-384` を生成。
-   - 生成ログは印刷物 + デジタル (Write-Once Media) で保全。
-   - オフラインでのみ利用し、使用時は短時間で再隔離。
-2. **中間 CA 登録**
-   - 署名リクエスト (CSR) は署名専用ネットワーク経由で RTA に搬送。
-   - 成功後に GitOps リポジトリへコミットし、監査証跡を自動付与。
-3. **デバイス鍵発行**
-   - デバイスは製造ラインで TRNG → X25519 ペアを生成。
-   - パブリック鍵を含む登録パッケージを QR/USB で搬送し、コントロールプレーンに登録。
-4. **セッション鍵派生**
-   - ハンドシェイク時に X25519 → HKDF-SHA512 でセッション鍵を導出。
-   - 揮発メモリにのみ配置し、シャットダウン時に即座にゼロ化。
+HoneyLink uses **TOFU (Trust On First Use)** based P2P key management. No centralized PKI, HSM, Vault, or Control Plane servers are required. All cryptographic operations use **Pure Rust** implementations (RustCrypto suite).
 
-## 配布/登録チャンネル
-- **物理オフライン配送:** ルート/中間素材は耐タンパメディアで配送。受領時に 4 眼原則で確認。
-- **P2Pペアリング:** QRコード/PIN + ECDH鍵交換。詳細は `spec/security/auth.md` (TOFU信頼モデル) を参照。
-- **ディレクトリ同期:** オンプレ Vault クラスタ間は Gossip + mTLS で同期。クラウド環境も利用可能だが必須ではない。
+**Design Principles:**
+- **Local-First:** All keys stored locally (`~/.honeylink/keys/`, OS Keychain)
+- **Zero Server Dependency:** No HSM, no Vault clusters, no mTLS certificate authorities
+- **Physical Proximity Security:** QR code / PIN / NFC pairing ensures MITM protection
+- **Pure Rust Cryptography:** `x25519-dalek`, `chacha20poly1305`, `hkdf`, `ed25519-dalek` crates (no C/C++ dependencies)
 
-## ローテーションポリシー
-- **スケジュール:**
-   - RTA: 5 年ごとに新規生成。旧鍵は HSM 内で暗号消去 (Secure Erase/NIST SP 800-88 準拠) を実施し、監査ログで廃止を確定。
-   - 中間 CA: 12 ヵ月ごとに再発行。旧証明書は CRL に登録し失効通知を配信。
-   - デバイス鍵: 90 日 + 異常検知時に即時ローテーション。
-- **イベントトリガ:**
-   - 不正アクセス兆候、監査ログ改ざん、構成ドリフトが検出された場合、30 分以内に緊急ローテーションワークフローを起動。
-   - エアギャップ環境では、署名オペレーションを手動承認 (ワンタイムハードウェアトークン) で実施。
+---
 
-## 失効 & 破棄
-- CRL と OCSP を併用し、ペアリング API による失効通知をリアルタイム伝播。
-- デバイス失効時は、セキュアエレメントの鍵消去 API を呼び出し、再登録には製造ラインの再検証を要求。
-- ルート鍵破棄は HSM 内の Secure Erase 手順を実施し、監査証跡 (ログ + 承認署名) を保全する。
+## 2. Key Hierarchy (P2P Model)
 
-## 保護要件
-- 鍵素材は常に FIPS または ISO/IEC 19790 準拠のモジュールで保管。
-- デバイス側は Rust/WASM 実装の暗号層のみを利用。C/C++ ベースのライブラリは禁止。
-- 揮発メモリにはガベージコレクション前にゼロ化ルーチンを実行し、メモリダンプ防止のためページングを禁止。
+| Layer | Purpose | Generation | Storage | Rotation |
+|-------|---------|------------|---------|----------|
+| **Device Identity Key** | X25519 long-term device keypair | First launch (CSPRNG) | `~/.honeylink/keys/device_key.pem` (0600) + OS Keychain | Manual (device reset) |
+| **Peer Trust Public Keys** | Trusted remote device public keys | Received during pairing | `~/.honeylink/trusted_peers.json` (0600) | Removed on unpair |
+| **Session Key** | ChaCha20-Poly1305 AEAD | ECDH + HKDF-SHA512 per session | Volatile memory only | Per session (ephemeral) |
+| **Signing Key** | Ed25519 for audit log | First launch (CSPRNG) | OS Keychain only | Manual (device reset) |
 
-## 監査・可観測性
-- すべての操作は OpenTelemetry Span で追跡し、暗号素材はマスキングした状態で SIEM へ送信。
-- 監査イベント: 生成、署名、配布、失効、復旧試行。
-- メトリクス: 成功/失敗率、ローテーション所要時間、承認経路、手動介入回数。
+**No Root CA / Intermediate CA:** P2P design eliminates traditional PKI hierarchy.
 
-## インシデント対応マトリクス
-| シナリオ | 対応手順 | SLA |
-|----------|-----------|-----|
-| 鍵漏洩疑い | 緊急ローテーション + 監査ログ完全取得 + 影響範囲報告 | 30 分検知、4 時間以内封じ込め |
-| HSM 障害 | フェイルオーバー HSM へ切替、SBOM で整合性検証 | 15 分以内切替 |
-| CRL 配信失敗 | 再配信 → フォールバック手動配布 → 事後レビュー | 60 分以内復旧 |
-| エアギャップ拠点ローテーション | 物理メディア交換 + 署名承認ダブルチェック | 24 時間以内完了 |
+---
 
-## 関連資料
-- `docs/security/encryption.md`: 通信・保存時暗号化の詳細
-- `docs/requirements.md`: FR-02, NFR-03, NFR-08 に準拠
-- `docs/testing/security.md`: 鍵管理テストケース
-- `docs/deployment/runbook.md`: ロールバック/ローテーション運用
+## 3. Key Generation
+
+### 3.1. Device Identity Key (X25519)
+
+Generated on first application launch. Storage:
+- **Primary:** OS Keychain (encrypted by OS)
+- **Backup:** `~/.honeylink/keys/device_key.pem` (permissions 0600, PKCS#8 format)
+
+### 3.2. Session Key Derivation (Per Connection)
+
+Ephemeral session key derived using ECDH + HKDF. Properties:
+- Ephemeral: Generated per session, discarded on session termination
+- Forward Secrecy: Past session keys cannot be recovered even if device key is compromised
+- Zero Persistence: Never written to disk
+
+---
+
+## 4. Key Distribution (Pairing Protocols)
+
+### 4.1. QR Code Pairing (Recommended)
+
+**Workflow:**
+1. Device A generates QR code containing device_id, public_key, expires_at
+2. Device B scans QR code
+3. Device B displays Device A's device_id and prompts user confirmation
+4. User confirms physical proximity verification  Device B saves Device A's public key to `~/.honeylink/trusted_peers.json`
+5. Device B sends its public key to Device A via BLE/QUIC
+6. Device A saves Device B's public key  Pairing complete
+
+**Security:**
+- QR code visibility = physical proximity (MITM protection)
+- 5-minute expiration (prevents replay attacks)
+- User confirmation required
+
+### 4.2. PIN Code Pairing (Fallback)
+
+**Workflow:**
+1. Device A displays 6-digit PIN (valid 30 seconds)
+2. User enters PIN on Device B
+3. Device B sends PIN + public key to Device A via BLE
+4. Device A verifies PIN  Saves Device B's public key
+5. Device A responds with its public key  Pairing complete
+
+**Security:**
+- 30-second validity (1,000,000 combinations, 30s window = low brute-force risk)
+- BLE short range (~100m) = physical proximity
+
+### 4.3. NFC Tap-to-Pair (Phase 2 - Future)
+
+**Workflow:**
+1. User taps Device A to Device B (NFC range ~10cm)
+2. Public keys exchanged via NFC NDEF
+3. Pairing complete (1-second operation)
+
+**Security:** 10cm range = strongest MITM protection
+
+---
+
+## 5. Key Storage
+
+### 5.1. Local File System
+
+**Structure:**
+```
+~/.honeylink/
+ keys/
+    device_key.pem          # X25519 private key (0600)
+    signing_key.pem         # Ed25519 private key (0600)
+ trusted_peers.json          # Trusted peer public keys (0600)
+ config.toml                 # Application config (0644)
+ logs/
+    audit.log               # Signed audit log (0600)
+ metrics/
+     metrics.db              # Local SQLite (0644)
+```
+
+### 5.2. OS Keychain Integration (Recommended)
+
+**Platform-Specific Storage:**
+- **Windows:** DPAPI (`CryptProtectData` API)
+- **macOS:** Keychain Services (`SecItemAdd` with `kSecAttrAccessibleWhenUnlocked`)
+- **Linux:** Secret Service API (GNOME Keyring / KWallet)
+
+**Implementation:** Use `keyring` crate for cross-platform abstraction.
+
+**Priority:**
+1. OS Keychain (encrypted by OS, survives file deletion)
+2. Local file (`.pem` files, 0600 permissions)
+
+---
+
+## 6. Key Lifecycle
+
+### 6.1. Device Identity Key
+
+**Generation:** First application launch  saved to OS Keychain + `~/.honeylink/keys/device_key.pem`
+
+**Rotation:** Manual only (device reset / security incident)
+
+**Rotation Procedure:**
+1. User initiates "Reset Device Identity" in settings
+2. Application generates new X25519 keypair
+3. Old key overwritten with secure erase (Zeroize crate)
+4. All peers unpaired (trusted_peers.json cleared)
+5. User must re-pair with all devices
+
+**Emergency Rotation:** If device key compromised:
+- User initiates emergency reset on all trusted devices
+- Compromised device removed from `trusted_peers.json`
+- Key change detected on next connection attempt (see section 7)
+
+### 6.2. Session Key
+
+**Generation:** Per session (ECDH + HKDF)
+
+**Rotation:** Automatic every session (ephemeral)
+
+**Zeroization:** Session key memory zeroized on session termination using `zeroize` crate
+
+### 6.3. Trusted Peer Keys
+
+**Addition:** During pairing (QR/PIN/NFC)
+
+**Removal:**
+- User-initiated unpair: Delete entry from `trusted_peers.json`
+- Key change detected: Display warning, allow user to re-verify or block
+
+**Retention:** Indefinite (until user unpairs)
+
+---
+
+## 7. Key Change Detection (MITM Protection)
+
+**Scenario:** Remote device's public key changes (device reset / key rotation / MITM attack)
+
+**Detection Mechanism:**
+1. Device A attempts connection to Device B
+2. Device B's public key in handshake  saved public key in `trusted_peers.json`
+3. Application displays ** Key Change Warning**
+
+**User Actions:**
+- **Block Connection:** Refuse connection, keep old key
+- **Re-Verify with QR/PIN:** Perform new pairing ceremony to confirm legitimacy
+- **Trust New Key:** Replace old key with new key (dangerous if MITM)
+
+**Security:** Physical proximity verification (QR/PIN/NFC) prevents silent key substitution.
+
+---
+
+## 8. Revocation & Destruction
+
+### 8.1. Peer Key Revocation
+
+**User-Initiated Unpair:**
+1. User selects device in trusted devices list
+2. Clicks "Unpair"
+3. Application removes entry from `trusted_peers.json`
+4. Next connection attempt from that device rejected with "Untrusted Device" error
+
+**No CRL/OCSP:** P2P design eliminates centralized revocation lists.
+
+### 8.2. Device Key Destruction
+
+**Scenarios:** Device decommissioning, Factory reset, Security incident
+
+**Procedure:**
+1. Overwrite `device_key.pem` with random data (3 passes)
+2. Delete OS Keychain entry (`keyring` crate)
+3. Clear `trusted_peers.json`
+4. Secure erase audit logs
+5. Zeroize all memory containing key material (`zeroize` crate)
+
+**Compliance:** NIST SP 800-88 sanitization guidelines (Clear / Purge).
+
+---
+
+## 9. Cryptographic Primitives (Pure Rust)
+
+| Primitive | Algorithm | Crate | Purpose |
+|-----------|-----------|-------|---------|
+| Key Exchange | X25519 ECDH | `x25519-dalek` | Session key derivation |
+| Key Derivation | HKDF-SHA512 | `hkdf` | Derive session keys from shared secret |
+| AEAD Encryption | ChaCha20-Poly1305 | `chacha20poly1305` | Stream encryption/authentication |
+| Digital Signatures | Ed25519 | `ed25519-dalek` | Audit log signing |
+| CSPRNG | OS Random | `rand_core::OsRng` | Key generation |
+| Zeroization | Memory Clearing | `zeroize` | Secure key erasure |
+
+**Zero C/C++ Dependencies:** All cryptography implemented in Pure Rust (RustCrypto project).
+
+---
+
+## 10. Security Properties
+
+| Property | Mechanism | Threat Mitigation |
+|----------|-----------|-------------------|
+| **Forward Secrecy** | Ephemeral ECDH per session | Past sessions safe if device key compromised |
+| **MITM Protection** | Physical proximity pairing (QR/PIN/NFC) | Attacker cannot impersonate without physical access |
+| **Key Change Detection** | Compare saved vs. received public keys | Alerts user to potential compromise |
+| **Local-Only Storage** | No network key transmission | Zero server breach risk |
+| **OS-Level Encryption** | Keychain/DPAPI/Secret Service | File system access  key access |
+
+---
+
+## 11. Audit & Observability
+
+### 11.1. Audit Log
+
+**Events Logged:** Device key generation, Peer pairing (QR/PIN/NFC), Peer unpair, Key change detection warnings, Emergency key rotation
+
+**Log Format:** JSON Lines (`~/.honeylink/logs/audit.log`, 0600 permissions)
+
+**Signing:** Ed25519 signature using device signing key (prevents log tampering).
+
+### 11.2. Metrics
+
+| Metric | Type | Labels |
+|--------|------|--------|
+| `key_pairing_total` | Counter | method (qr, pin, nfc), result (success, failure) |
+| `key_rotation_total` | Counter | reason (manual, emergency) |
+| `key_change_detected_total` | Counter | action (block, re-verify, trust) |
+
+**Storage:** Local SQLite (`~/.honeylink/metrics/metrics.db`, 500MB max, 13-month retention)
+
+**No Server Upload:** Metrics never leave device without explicit user consent (optional OTLP export).
+
+---
+
+## 12. Threat Model & Mitigations
+
+| Threat | P2P Mitigation | Traditional PKI Risk |
+|--------|----------------|----------------------|
+| **HSM Compromise** | N/A (no HSM) | Single point of failure |
+| **CA Breach** | N/A (no CA) | All certificates revoked |
+| **Vault Data Leak** | N/A (no Vault) | All secrets exposed |
+| **MITM Attack** | Physical proximity pairing | Relies on trusted CA chain |
+| **Key Theft** | OS Keychain + 0600 permissions | HSM still vulnerable to insider |
+| **Replay Attack** | Ephemeral session keys | Depends on nonce management |
+
+**Conclusion:** P2P TOFU model eliminates entire classes of server-side attacks.
+
+---
+
+## 13. Compliance & Best Practices
+
+**Standards:** NIST SP 800-56A (ECDH), NIST SP 800-108 (Key Derivation), NIST SP 800-88 (Secure Erasure), RFC 7748 (X25519 / Ed25519), RFC 8439 (ChaCha20-Poly1305)
+
+**Best Practices:**
+-  Use CSPRNG (`OsRng`) for all key generation
+-  Zeroize keys after use (`zeroize` crate)
+-  Set file permissions to 0600 for key files
+-  Use OS Keychain when available
+-  Implement key change detection with user confirmation
+-  Sign audit logs to prevent tampering
+-  Never transmit private keys over network
+-  Never store keys in plaintext logs/metrics
+-  Never use C/C++ cryptographic libraries
+
+---
+
+## 14. Migration from Old Server-Centric Design
+
+**Removed Components:**
+-  Root Trust Anchor (RTA) + HSM
+-  Intermediate CA + Vault clusters
+-  Control Plane registration API
+-  mTLS certificate chains
+-  CRL/OCSP revocation services
+
+**Replaced With:**
+-  Local device identity keys (X25519)
+-  TOFU trust model (`trusted_peers.json`)
+-  QR/PIN/NFC pairing
+-  OS Keychain integration
+-  Pure Rust cryptography
+
+**Backup:** See `key-management-old-server.md` for historical server-centric design.
+
+---
+
+## 15. Related Specifications
+
+- **Authentication:** `spec/security/auth.md` (TOFU pairing protocols)
+- **Encryption:** `spec/security/encryption.md` (ChaCha20-Poly1305 AEAD)
+- **Architecture:** `spec/architecture/overview.md` (P2P design principles)
+- **Crypto Module:** `crates/crypto/README.md` (Implementation details)
+
+---
+
+**Version:** 2.0 (P2P)  
+**Last Updated:** 2025-01-15  
+**Changelog:**
+- 2025-01-15: Complete P2P rewrite (removed HSM/Vault/CA, added TOFU/QR/PIN/NFC)
+- 2024-XX-XX: Original server-centric design (archived as `key-management-old-server.md`)

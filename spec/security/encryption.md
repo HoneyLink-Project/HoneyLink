@@ -57,9 +57,9 @@
 
 - 各キーは最小権限アクセス。ABAC 条件 (region, time, role) を併用。
 
-## 秘密情報管理
-- シークレットは オンプレ Vault クラスタ、またはクラウド非依存のマネージドストアに保管。
-- 取得は短命トークン (5 分) + mTLS。ネットワーク孤立環境ではハードウェアトークンを利用。
+## 秘密情報管理 (P2Pローカル設計)
+- シークレットは OS Keychain (Windows DPAPI/macOS Keychain/Linux Secret Service) + ローカルファイル (`~/.honeylink/keys/*.pem`, 0600 permissions) に保管。
+- 取得はOS API経由 (no network access)。ネットワーク分離環境でも動作。
 - YAML/JSON で「暗号化済み」フラグを付与し、未暗号化を禁止。
 
 ## SBOMとコンプライアンス

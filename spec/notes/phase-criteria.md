@@ -278,4 +278,3 @@
 - [spec/notes/decision-log.md](decision-log.md) - 承認結果の記録先
 - [spec/requirements.md](../requirements.md) - トレーサビリティの起点
 - [spec/testing/metrics.md](../testing/metrics.md) - KPI/SLI測定方法
-

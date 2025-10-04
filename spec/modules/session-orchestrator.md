@@ -387,8 +387,8 @@ MOD-001-SESSION-ORCH → FR-04 (policy coordination)
 | UUIDv7 衝突 | Low | Very Low | 衝突検出 + 再生成ロジック |
 
 ### 13.2 技術的負債
-- **Idempotency-key のメモリキャッシュ**: 現在はDBのみ。Redis統合で性能向上可能 (優先度: P2)
 - **プロトコルバージョン自動移行**: 手動設定のみ。自動推奨機能の追加 (優先度: P3)
+- **P2P設計への移行完了** (Phase 0完了): Redis/DB references removed, local SQLite only
 
 ---
 
@@ -420,4 +420,3 @@ MOD-001-SESSION-ORCH → FR-04 (policy coordination)
 - [spec/requirements.md](../requirements.md) - 機能要件
 - [spec/architecture/interfaces.md](../architecture/interfaces.md) - I/F詳細
 - [spec/security/encryption.md](../security/encryption.md) - 暗号仕様
-
