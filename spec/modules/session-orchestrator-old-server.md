@@ -12,7 +12,7 @@
 
 - **モジュール名:** Session Orchestrator
 - **担当チーム:** Protocol WG (ENG-PROTO-01, ENG-PROTO-02)
-- **概要:** デバイス間のセッション確立、ハンドシェイク、状態遷移、バージョンネゴシエーション、セッション永続化を担当する中核モジュー- **Idempotency-key**: P2P通信では不要 (サーバー前提の機能)
+- **概要:** デバイス間のセッション確立、ハンドシェイク、状態遷移、バージョンネゴシエーション、セッション永続化を担当する中核モジュール
 - **ステータス:** 実装中 (P1フェーズ)
 - **リポジトリパス:** `crates/session-orchestrator/`
 
@@ -53,9 +53,9 @@
 
 | 名称 | プロトコル/フォーマット | 検証ルール | ソース |
 |------|-------------------------|------------|--------|
-| **HandshakeRequest** | Internal API (Rust) | session_id: UUIDv7, peer_public_key: 32bytes, protocol_version: SemVer | Physical Adapter (mDNS/BLE Discovery) |
-| **StateTransitionRequest** | Internal API (Rust) | session_id: UUIDv7, target_state: Enum | Policy Engine, QoS Scheduler |
-| **SessionQuery** | Internal API (Rust) | session_id: UUIDv7 OR device_id: String | Telemetry & Insights, Experience Layer |
+| **HandshakeRequest** | Async Request Queue (CBOR) | session_id: UUIDv7, client_public_key: 32bytes, protocol_version: SemVer | Control-Plane API |
+| **StateTransitionRequest** | Internal Event Bus (JSON) | session_id: UUIDv7, target_state: Enum, idempotency_key: String(36) | Policy Engine, QoS Scheduler |
+| **SessionQuery** | gRPC (Protobuf) | session_id: UUIDv7 OR device_id: String | Telemetry & Insights, Experience Layer |
 
 **検証ルール詳細**:
 - `session_id`: UUIDv7形式、モノトニック増加性検証
@@ -66,10 +66,10 @@
 
 | 名称 | プロトコル/フォーマット | SLA | 宛先 |
 |------|-------------------------|-----|------|
-| **SessionEstablished** | Internal API (Rust callback) | P95 < 500ms | Crypto & Trust, Policy Engine, Telemetry |
-| **SessionStateChanged** | Internal API (Rust callback) | P95 < 200ms | All subscribers (local observers) |
-| **SessionMetrics** | Local SQLite insert | Async | Telemetry & Insights (local metrics.db) |
-| **AuditLog** | JSON Lines (append-only local file) | 同期書き込み | ~/.honeylink/logs/audit.log |
+| **SessionEstablished** | Event Bus (JSON) | P95 < 500ms | Crypto & Trust, Policy Engine, Telemetry |
+| **SessionStateChanged** | Event Bus (JSON) | P95 < 200ms | All subscribers |
+| **SessionMetrics** | OTLP (Protobuf) | リアルタイム (1秒バッチ) | Telemetry & Insights |
+| **AuditLog** | JSON Lines (append-only) | 同期書き込み | Audit Storage (WORM) |
 
 **出力スキーマ** (`SessionEstablished`):
 ```json
@@ -122,14 +122,15 @@ IdempotencyRecord:
 ```
 
 ### 4.2 永続化
-- **データストア**: Local SQLite (~/.honeylink/sessions.db)
+- **データストア**: CockroachDB (分散SQL、Multi-region対応)
 - **保持期間**: 
   - Active/Suspended セッション: TTL満了まで
-  - Closed セッション: 90日間 (ローカル監査)
-  - IdempotencyRecord: 不要 (P2P通信では重複リクエストなし)
+  - Closed セッション: 90日間 (監査要件)
+  - IdempotencyRecord: 24時間
 - **インデックス**: 
   - Primary: `session_id`
   - Secondary: `(device_a_id, device_b_id)`, `state`, `expires_at`
+  - Unique: `idempotency_key` (24h window)
 
 ### 4.3 暗号/秘匿
 - `shared_key_id` はKMSへの参照IDのみを保存、実鍵は保存しない
@@ -142,12 +143,12 @@ IdempotencyRecord:
 
 | 種別 | コンポーネント | インターフェース | SLA/契約 | 備考 |
 |------|----------------|-------------------|----------|------|
-| **上位** | Physical Adapter | Internal API (Rust) | P95 < 500ms | mDNS/BLE Discovery経由でペアリング開始 |
-| **上位** | Experience Layer | Internal API (Rust) | P95 < 300ms | セッション状態クエリ |
-| **下位** | Crypto & Trust Anchor | Internal API (Rust) | P95 < 200ms | 鍵合意・検証 |
-| **下位** | Policy & Profile Engine | Internal API (Rust) | Best-effort | ポリシー適用通知 |
-| **下位** | Telemetry & Insights | Internal API (Rust) | Fire-and-forget | ローカルメトリクス保存 |
-| **Peer** | Local SQLite | rusqlite | P99 < 10ms (read), P99 < 50ms (write) | セッションローカル保存 |
+| **上位** | Control-Plane API | REST/gRPC | P95 < 500ms | セッション作成リクエスト元 |
+| **上位** | Experience Layer | gRPC | P95 < 300ms | セッション状態クエリ |
+| **下位** | Crypto & Trust Anchor | Async Request Queue | P95 < 200ms | 鍵合意・検証 |
+| **下位** | Policy & Profile Engine | Event Bus | Best-effort | ポリシー適用通知 |
+| **下位** | Telemetry & Insights | OTLP Stream | Fire-and-forget | メトリクス送信 |
+| **Peer** | CockroachDB | SQL/gRPC | P99 < 100ms (read), P99 < 250ms (write) | セッション永続化 |
 
 **依存ルール遵守**:
 - Session Orchestrator は Physical Adapter Layer への直接依存を禁止 (Transport Abstraction 経由)
@@ -186,7 +187,7 @@ IdempotencyRecord:
 ## 7. セキュリティ & プライバシー
 
 ### 7.1 認証/認可
-- **認証**: P2PペアリングはTOFU (Trust On First Use) + X25519 ECDH
+- **認証**: Control-Plane API 経由のリクエストは OAuth2 Client Credentials + mTLS
 - **認可**: RBAC (Role: `session:create`, `session:read`, `session:update`, `session:delete`)
 - 詳細: [spec/security/auth.md](../security/auth.md)
 
@@ -331,7 +332,7 @@ MOD-001-SESSION-ORCH → FR-04 (policy coordination)
 | シナリオ | 統合対象 | 成功基準 | 参照 |
 |---------|----------|---------|------|
 | エンドツーエンドペアリング | Crypto, Policy, QoS | セッション確立 P95 < 500ms | [spec/testing/integration-tests.md](../testing/integration-tests.md) |
-| 障害復旧 | Local SQLite backup | 状態復元成功率 > 99% | 同上 |
+| 障害復旧 | CockroachDB failover | 状態復元成功率 > 99% | 同上 |
 | 大量セッション同時確立 | 全モジュール | 10,000セッション/30秒 | 同上 |
 
 ### 11.3 E2E テスト
@@ -371,7 +372,7 @@ MOD-001-SESSION-ORCH → FR-04 (policy coordination)
 
 ### 12.4 運用手順
 - **ヘルスチェック**: `GET /health` (200 OK if DB reachable)
-- **Readiness**: 内部ヘルスチェック (all modules initialized)
+- **Readiness**: `GET /ready` (200 OK if event bus connected)
 - **Graceful Shutdown**: SIGTERM受信後、新規リクエスト拒否 → 既存セッション完了待機 (最大30秒) → 終了
 
 ---

@@ -80,14 +80,14 @@ interface ConnectOptions {
 
 詳細: [spec/ui/wireframes.md](../ui/wireframes.md)
 
-### 3.3 P2P Internal API 呼び出し
+### 3.3 Control-Plane API 呼び出し
 
-| SDK メソッド | 内部API | 説明 |
-|-------------|---------|------|
-| `connect()` | `SessionOrchestrator::establish_session()` | P2Pセッション確立 (mDNS/BLE経由) |
-| `disconnect()` | `SessionOrchestrator::close_session()` | セッション切断 |
-| `updateQoS()` | `PolicyEngine::update_policy()` | QoSポリシー更新 (ローカル適用) |
-| `exportProfile()` | `PolicyEngine::export_profile()` | プロファイル エクスポート (JSON) |
+| SDK メソッド | HTTP メソッド | エンドポイント | 説明 |
+|-------------|--------------|----------------|------|
+| `connect()` | POST | `/api/v1/sessions` | セッション確立 |
+| `disconnect()` | DELETE | `/api/v1/sessions/:id` | セッション切断 |
+| `updateQoS()` | PATCH | `/api/v1/sessions/:id/qos` | QoSポリシー更新 |
+| `exportProfile()` | GET | `/api/v1/profiles/:id/export` | プロファイル エクスポート |
 
 詳細: [spec/modules/session-orchestrator.md](./session-orchestrator.md) (P2Pセッション管理)
 
@@ -138,13 +138,15 @@ React Component (PairingView.tsx)
   ↓
 SDK API (client.connect())
   ↓
-Rust Backend (SessionOrchestrator::establish_session)
+HTTP POST /api/v1/sessions
   ↓
-mDNS/BLE Discovery → ECDH Key Exchange → QUIC/WebRTC Transport
+Control-Plane API
   ↓
-Session State Update (ローカルSQLite)
+Session Orchestrator
   ↓
-React Component (状態変更イベント経由で更新)
+WebSocket/SSE で状態更新
+  ↓
+React Component (リアルタイム更新)
 ```
 
 詳細: [spec/architecture/dataflow.md](../architecture/dataflow.md)
@@ -238,8 +240,8 @@ React Component (状態変更イベント経由で更新)
 
 | 種別 | コンポーネント | インターフェース | SLA/契約 |
 |------|----------------|-------------------|----------|
-| **下位** | Session Orchestrator | Internal API (Rust) | P95 < 500ms |
-| **下位** | Policy Engine | Internal API (Rust) | P95 < 300ms |
+| **下位** | Control-Plane API | REST/WebSocket | P95 < 500ms |
+| **下位** | Session Orchestrator | Event Bus (SSE) | リアルタイム |
 | **Peer** | Policy Engine | REST (プロファイル取得) | P95 < 300ms |
 
 **依存ルール**: [spec/architecture/dependencies.md](../architecture/dependencies.md)

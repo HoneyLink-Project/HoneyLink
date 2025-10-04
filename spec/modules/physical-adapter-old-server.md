@@ -2,12 +2,7 @@
 
 **バッジ:** `🚫 実装コード非出力` `🚫 C/C++依存禁止`
 
-> Physical Adapter Layer モジュ| モード | 消費電力 (目安) | スループット | レイテンシ | ユースケース | P2Pプロトコル |
-|--------|-----------------|--------------|------------|------------|----------|
-| **UltraLow** | ~10mA | < 1Mbps | P95 < 200ms | IoTセンサー (定期送信) | BLEのみ |
-| **Low** | ~50mA | 10-50Mbps | P95 < 50ms | 音声通話 | mDNS + QUIC |
-| **Normal** | ~200mA | 100-500Mbps | P95 < 20ms | HD映像 | mDNS + QUIC |
-| **High** | ~500mA | 500Mbps-1Gbps | P95 < 10ms | 8K映像, AR/VR | mDNS + QUIC + WebRTC |様書。Wi-Fi/5G/THz などの物理層との統合を担当します。
+> Physical Adapter Layer モジュールの実装仕様書。Wi-Fi/5G/THz などの物理層との統合を担当します。
 
 **トレーサビリティ ID**: `MOD-007-PHYSICAL-ADAPTER`
 
@@ -22,10 +17,10 @@
 - **リポジトリパス:** `crates/physical-adapter/`
 
 ### 価値提案
-- Pure Rust実装でC/C++ドライバ依存なし (mdns-sd, btleplug, quinn, webrtc crates)
-- 物理層の Hot Swap 対応 (mDNS/BLE → QUIC/WebRTC 切替を無停止で実行)
-- 電力モード制御 (BLE Low Power モードで ~10mA 消費)
-- NAT越え対応 (STUN/TURN, 95%成功率目標)
+- C/C++ ドライバ依存の完全排除 (gRPC/REST経由での間接制御)
+- 物理層の Hot Swap 対応 (Wi-Fi → 5G 切替を無停止で実行)
+- 電力モード制御 (Ultra Low Power モードで 5mA 消費)
+- THz帯域の実験的サポート
 
 ---
 
@@ -64,24 +59,27 @@
 
 | 名称 | プロトコル/フォーマット | SLA | 宛先 |
 |------|-------------------------|-----|------|
-| **mDNS Discovery** | UDP multicast (mdns-sd crate) | P95 < 100ms | Local network devices |
-| **BLE Advertisement** | Bluetooth LE (btleplug crate) | P95 < 200ms | Nearby devices |
-| **QUIC Connection** | UDP (quinn crate) | P95 < 50ms | Peer device (direct or STUN/TURN) |
-| **WebRTC Data Channel** | UDP (webrtc crate) | P95 < 100ms | Peer device (ICE candidates) |
+| **WiFi gRPC API** | gRPC/Protobuf | P95 < 20ms | Wi-Fi Controller Service |
+| **5G REST API** | HTTP/JSON | P95 < 50ms | 5G Modem HTTP Server |
+| **THz gRPC API** | gRPC/Protobuf | P95 < 30ms | THz Experimental Service |
 
-**mDNS Discovery 例**:
-```rust
-// 概念説明用 (実装コードではない)
-let mdns = ServiceDaemon::new()?;
-let service_type = "_honeylink._tcp.local.";
-let receiver = mdns.browse(service_type)?;
+**WiFi gRPC API スキーマ例**:
+```protobuf
+service WiFiController {
+  rpc Send(SendRequest) returns (SendResponse);
+  rpc GetLinkQuality(Empty) returns (LinkQualityResponse);
+  rpc SetPowerMode(PowerModeRequest) returns (Empty);
+}
 
-for event in receiver.recv() {
-    match event {
-        ServiceEvent::ServiceResolved(info) => {
-            println!("Found peer: {}", info.get_hostname());
-        }
-    }
+message SendRequest {
+  bytes payload = 1;
+  uint32 priority = 2;
+}
+
+message LinkQualityResponse {
+  int32 rssi_dbm = 1;
+  float snr_db = 2;
+  float packet_loss_rate = 3;
 }
 ```
 

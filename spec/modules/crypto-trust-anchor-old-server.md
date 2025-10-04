@@ -53,9 +53,9 @@
 
 | 名称 | プロトコル/フォーマット | 検証ルール | ソース |
 |------|-------------------------|------------|--------|
-| **KeyExchangeRequest** | Internal API (Rust) | public_key: 32 bytes | Session Orchestrator |
-| **EncryptRequest** | Internal API (Rust) | plaintext.len() <= 1MB | Transport |
-| **SignRequest** | Internal API (Rust) | data: Bytes | Policy Engine |
+| **KeyExchangeRequest** | gRPC (Protobuf) | public_key: 32 bytes | Session Orchestrator |
+| **EncryptRequest** | Sync API (Rust) | plaintext.len() <= 1MB | Transport |
+| **SignRequest** | Sync API (Rust) | data: Bytes | Policy Engine |
 
 ### 3.2 出力
 
@@ -64,7 +64,7 @@
 | **SharedSecret** | Sync Response (32 bytes) | P95 < 10ms | Session Orchestrator |
 | **EncryptedPayload** | CBOR (ChaCha20-Poly1305) | P95 < 20ms | Transport |
 | **Signature** | Bytes (64) | P99 < 50ms | Policy Engine |
-| **KeyRotation** | Internal API (Rust callback) | Async | Telemetry |
+| **KeyRotation** | Event Bus (JSON) | Async | Telemetry |
 
 **EncryptedPayload スキーマ**:
 ```json
@@ -120,9 +120,9 @@ KeyRotationLog:
 ```
 
 ### 4.2 永続化
-- **データストア**: ローカルファイル (~/.honeylink/keys/device_key.pem 0600権限) + メモリ (Session/Stream Keys - TTL付きHashMap)
-- **保持期間**: Device Master (無期限, 90日推奨ローテーション), Session (24h), Stream (24h)
-- **暗号/秘匿**: OS Keychain統合 (Windows DPAPI/macOS Keychain/Linux Secret Service) でDevice Master Key保護
+- **データストア**: HashiCorp Vault (Root/Device Master Keys), Redis (Session/Stream Keys - TTL付き)
+- **保持期間**: Root (無期限), Device Master (90日), Session (24h), Stream (24h)
+- **暗号/秘匿**: Vault Transit Secret Engine 使用
 
 詳細: [spec/security/key-management.md](../security/key-management.md)
 
@@ -179,7 +179,8 @@ ciphertext, tag ← ChaCha20-Poly1305-Encrypt(key, nonce, plaintext, aad="sessio
 | **上位** | Session Orchestrator | KeyExchangeRequest | P95 < 50ms |
 | **上位** | Transport | EncryptRequest | P95 < 30ms |
 | **上位** | Policy Engine | SignRequest | P99 < 50ms |
-| **Peer** | OS Keychain (DPAPI/Keychain/Secret Service) | System API | P99 < 50ms |
+| **Peer** | HashiCorp Vault | HTTP REST API | P99 < 100ms |
+| **Peer** | Redis | Redis Protocol | P99 < 10ms |
 
 **依存ルール**: [spec/architecture/dependencies.md](../architecture/dependencies.md)
 
@@ -262,7 +263,7 @@ ciphertext, tag ← ChaCha20-Poly1305-Encrypt(key, nonce, plaintext, aad="sessio
 ### ローテーション手順
 ```
 1. 新鍵生成 (HKDF-SHA512)
-2. 新鍵をローカルファイルとOS Keychainに保存
+2. 新鍵を Vault/Redis に保存
 3. KeyRotationLog 記録
 4. 旧鍵を `rotated=true` にマーク (即座に削除しない)
 5. Grace Period (1時間) 後に旧鍵削除
@@ -301,8 +302,8 @@ MOD-004-CRYPTO → NFR-02 (end-to-end encryption)
 - カバレッジ目標: 95%
 
 ### 統合テスト
-- OS Keychain連携 (Device Master Key保護)
-- メモリTTL管理 (Session/Stream Keys)
+- Vault連携 (Root Key取得, Device Master Key保存)
+- Redis連携 (Session Key TTL検証)
 - 鍵ローテーション E2E (旧鍵で復号可能、Grace Period検証)
 
 ### セキュリティテスト
@@ -330,7 +331,7 @@ MOD-004-CRYPTO → NFR-02 (end-to-end encryption)
 |--------|--------|
 | Nonce衝突 | Counter mode + セッションID prefix |
 | 量子コンピュータ攻撃 | Kyber768統合 (2025 Q4) |
-| Device Key破損 | OS Keychainから復元 or 再ペアリング |
+| HSM障害 | Multi-region Vault cluster |
 
 ---
 

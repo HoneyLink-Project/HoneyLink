@@ -18,20 +18,20 @@
 
 ### 価値提案
 - 全モジュール横断の分散トレーシング (Trace ID伝播)
-- リアルタイムSLI可視化とローカルアラート (Yellow/Orange/Red閾値)
-- Local SQLite によるメトリクス長期保存 (13ヶ月, 自動圧縮)
-- オプションでOTLP Collectorへのエクスポート (ユーザー同意必須)
+- リアルタイムSLI可視化とアラート (Yellow/Orange/Red閾値)
+- TimescaleDB によるメトリクス長期保存 (13ヶ月)
+- OTLP/gRPC over TLS 1.3 によるセキュアな送信
 
 ---
 
 ## 2. 責務と境界
 
 ### 主な責務
-- **メトリクス収集**: Counter/Gauge/Histogram の集約とローカル保存
+- **メトリクス収集**: Counter/Gauge/Histogram の集約と送信
 - **トレーシング**: Span生成、Trace ID伝播、親子関係管理
-- **ログ集約**: 構造化ログ (JSON Lines) のローカルファイル保存
-- **SLI/SLO監視**: Yellow/Orange/Red閾値でのローカルアラート生成
-- **長期保存**: Local SQLite へのメトリクス保存 (13ヶ月)
+- **ログ集約**: 構造化ログ (JSON Lines) の収集と転送
+- **SLI/SLO監視**: Yellow/Orange/Red閾値でのアラート生成
+- **長期保存**: TimescaleDB へのメトリクス保存 (13ヶ月)
 
 ### 非責務
 - **ビジネスロジック**: 各モジュールに委譲
@@ -60,11 +60,10 @@
 
 | 名称 | プロトコル/フォーマット | SLA | 宛先 |
 |------|-------------------------|-----|------|
-| **LocalMetrics** | SQLite insert | 10秒バッチ | ~/.honeylink/metrics/metrics.db |
-| **LocalTraces** | SQLite insert | リアルタイム | ~/.honeylink/metrics/traces.db |
-| **LocalLogs** | JSON Lines append | 5秒バッチ | ~/.honeylink/logs/honeylink.log |
-| **AlertEvent** | Local notification (OS toast) | P95 < 500ms | OS Notification System |
-| **OTLP Export** (optional) | gRPC/Protobuf (OTLP) | Best-effort | User-configured OTLP Collector (opt-in) |
+| **OTLP Metrics** | gRPC/Protobuf (OTLP) | 10秒バッチ | OpenTelemetry Collector |
+| **OTLP Traces** | gRPC/Protobuf (OTLP) | リアルタイム | OpenTelemetry Collector |
+| **OTLP Logs** | gRPC/Protobuf (OTLP) | 5秒バッチ | OpenTelemetry Collector |
+| **AlertEvent** | HTTP POST (JSON) | P95 < 500ms | Alertmanager |
 
 **AlertEvent スキーマ**:
 ```json
@@ -146,9 +145,9 @@ SLIThreshold:
 詳細: [spec/testing/metrics.md](../testing/metrics.md)
 
 ### 4.3 永続化
-- **データストア**: Local SQLite (~/.honeylink/metrics/metrics.db, 自動VACUUM)
+- **データストア**: TimescaleDB (hypertable, 自動圧縮)
 - **保持期間**: 13ヶ月 (高解像度 7日、1分集約 90日、1時間集約 13ヶ月)
-- **ファイルサイズ管理**: 最大500MB、超過時に古いデータから自動削除
+- **パーティショニング**: 7日毎
 
 ---
 
@@ -188,7 +187,7 @@ Root Span: session.establish (Session Orchestrator)
 |------|----------------|-------------------|----------|
 | **上位** | 全モジュール | RecordMetric/StartSpan/LogEvent | Best-effort (非同期) |
 | **下位** | OpenTelemetry Collector | OTLP/gRPC | P99 < 200ms |
-| **下位** | Local SQLite | rusqlite | P99 < 10ms |
+| **下位** | TimescaleDB | PostgreSQL Protocol | P99 < 100ms |
 | **Peer** | Alertmanager | HTTP POST | P95 < 500ms |
 
 **依存ルール**: [spec/architecture/dependencies.md](../architecture/dependencies.md)
@@ -218,7 +217,7 @@ Root Span: session.establish (Session Orchestrator)
 
 ### 認証/認可
 - **OTLP送信**: mTLS (client certificate)
-- **Local SQLite**: ファイルパーミッション 0644 (読み取り専用)
+- **TimescaleDB**: PostgreSQL SSL + ユーザー/パスワード認証
 
 ### 機密データ取り扱い
 - **ペイロード**: メトリクス/ログにペイロード含めない
@@ -299,7 +298,7 @@ processors:
 
 ### NFR-03: 可観測性
 - **関連**: 全トランザクションの追跡可能性とSLI/SLO監視
-- **実装**: OpenTelemetry統合 + Local SQLite長期保存
+- **実装**: OpenTelemetry統合 + TimescaleDB長期保存
 
 **トレーサビリティID対応表**:
 ```
@@ -318,7 +317,7 @@ MOD-006-TELEMETRY → NFR-03 (observability and monitoring)
 
 ### 統合テスト
 - OpenTelemetry Collector (Mock) 連携
-- Local SQLite書き込み/読み取り
+- TimescaleDB書き込み/読み取り
 - Alertmanager POST検証
 
 ### E2E テスト
@@ -344,7 +343,7 @@ MOD-006-TELEMETRY → NFR-03 (observability and monitoring)
 | リスク | 緩和策 |
 |--------|--------|
 | Collector障害によるメトリクス損失 | 10秒バッファ + リトライ (Exponential backoff) |
-| SQLite容量不足 | 自動VACUUM + 13ヶ月自動削除 (最大500MB) |
+| TimescaleDB容量不足 | 自動圧縮 + 13ヶ月自動削除 |
 | Trace ID衝突 | 128bit HEX (衝突確率 < 10^-30) |
 
 ---
@@ -357,7 +356,7 @@ MOD-006-TELEMETRY → NFR-03 (observability and monitoring)
 - [x] NFR-03 との紐付け明示
 - [x] トレーサビリティID (`MOD-006-TELEMETRY`) 付与
 - [x] C/C++ 依存排除確認 (Rust OpenTelemetry SDK使用)
-- [x] Local SQLite長期保存仕様完成
+- [x] TimescaleDB長期保存仕様完成
 
 ---
 

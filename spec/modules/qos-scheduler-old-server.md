@@ -52,16 +52,16 @@
 | 名称 | プロトコル/フォーマット | 検証ルール | ソース |
 |------|-------------------------|------------|--------|
 | **EnqueueRequest** | Internal API (Rust) | stream_id: UInt8, priority ∈ [0,7] | Session Orchestrator |
-| **QoSPolicyUpdate** | Internal API (Rust) | latency_budget_ms > 0 | Policy Engine |
-| **BackpressureSignal** | Internal API (Rust) | queue_depth: UInt32 | Transport |
+| **QoSPolicyUpdate** | Event Bus (JSON) | latency_budget_ms > 0 | Policy Engine |
+| **BackpressureSignal** | Event Bus (JSON) | queue_depth: UInt32 | Transport |
 
 ### 3.2 出力
 
 | 名称 | プロトコル/フォーマット | SLA | 宛先 |
 |------|-------------------------|-----|------|
 | **ScheduledPacket** | Internal API (Rust) | P95 < 5ms | Transport |
-| **BackpressureAck** | Internal API (Rust callback) | P95 < 100ms | Session Orchestrator |
-| **QoSMetrics** | Local SQLite insert | 10秒バッチ | Telemetry (local metrics.db) |
+| **BackpressureAck** | Event Bus (JSON) | P95 < 100ms | Session Orchestrator |
+| **QoSMetrics** | OTLP/gRPC | 10秒バッチ | Telemetry |
 
 **QoSMetrics スキーマ**:
 ```json
@@ -176,7 +176,7 @@ if (queue_depth == max_queue_depth) {
 | 種別 | コンポーネント | インターフェース | SLA/契約 |
 |------|----------------|-------------------|----------|
 | **上位** | Session Orchestrator | EnqueueRequest | P95 < 10ms |
-| **上位** | Policy Engine | QoSPolicyUpdate (Internal API) | Best-effort |
+| **上位** | Policy Engine | QoSPolicyUpdate (Event Bus) | Best-effort |
 | **下位** | Transport | ScheduledPacket | P95 < 5ms |
 | **Peer** | Telemetry | OTLP/gRPC | Best-effort |
 

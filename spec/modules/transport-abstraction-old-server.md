@@ -64,16 +64,16 @@ trait PhysicalLayer {
 | 名称 | プロトコル/フォーマット | 検証ルール | ソース |
 |------|-------------------------|------------|--------|
 | **SendRequest** | Internal API (Rust) | data.len() <= 64KB | Session Orchestrator |
-| **FECConfig** | Internal API (Rust) | mode ∈ {NONE, LIGHT, HEAVY} | Policy Engine |
-| **PhysicalMetrics** | Internal API (Rust) | valid_enum(physical_type) | Physical Adapter |
+| **FECConfig** | Event Bus (JSON) | mode ∈ {NONE, LIGHT, HEAVY} | Policy Engine |
+| **PhysicalMetrics** | Internal API | valid_enum(physical_type) | Physical Adapter |
 
 ### 3.3 出力
 
 | 名称 | プロトコル/フォーマット | SLA | 宛先 |
 |------|-------------------------|-----|------|
 | **EncodedPacket** | Binary (Reed-Solomon) | P95 < 5ms encoding | Physical Adapter |
-| **TransportMetrics** | Local SQLite insert | 10秒バッチ | Telemetry (local metrics.db) |
-| **LinkDegradation** | Internal API (Rust callback) | P95 < 100ms | Session Orchestrator |
+| **TransportMetrics** | OTLP/gRPC | 10秒バッチ | Telemetry |
+| **LinkDegradation** | Event Bus (JSON) | P95 < 100ms | Session Orchestrator |
 
 詳細: [spec/architecture/interfaces.md](../architecture/interfaces.md)
 
@@ -160,7 +160,7 @@ Packet C: priority=7, size=4KB, arrival=2ms  → vtime=2 + 4/128=2.03125
 | 種別 | コンポーネント | インターフェース | SLA/契約 |
 |------|----------------|-------------------|----------|
 | **上位** | Session Orchestrator | SendRequest API | P95 < 50ms |
-| **上位** | Policy Engine | FECConfig (Internal API) | Best-effort |
+| **上位** | Policy Engine | FECConfig (Event Bus) | Best-effort |
 | **下位** | Physical Adapter | PhysicalLayer trait | P95 < 10ms |
 | **Peer** | Telemetry | OTLP/gRPC | Best-effort |
 

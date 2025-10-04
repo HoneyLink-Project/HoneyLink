@@ -52,17 +52,17 @@
 
 | 名称 | プロトコル/フォーマット | 検証ルール | ソース |
 |------|-------------------------|------------|--------|
-| **CreateProfile** | Internal API (Rust) | JSON Schema, Ed25519 signature | Experience Layer (UI) |
-| **UpdatePolicy** | Internal API (Rust) | SemVer, latency_budget > 0 | Session Orchestrator |
-| **QueryProfile** | Internal API (Rust) | profile_id: String(64) | Experience Layer |
+| **CreateProfile** | REST API (JSON) | JSON Schema, Ed25519 signature | Control-Plane API |
+| **UpdatePolicy** | gRPC (Protobuf) | SemVer, latency_budget > 0 | Session Orchestrator |
+| **QueryProfile** | gRPC (Protobuf) | profile_id: String(64) | Experience Layer |
 
 ### 3.2 出力
 
 | 名称 | プロトコル/フォーマット | SLA | 宛先 |
 |------|-------------------------|-----|------|
-| **QoSPolicyUpdate** | Internal API (Rust callback) | P95 < 300ms | QoS Scheduler |
-| **PolicyValidation** | Sync Response (Rust Result) | P99 < 150ms | Experience Layer |
-| **ProfileExport** | Internal API (Rust, JSON serialized) | P95 < 500ms | Experience Layer |
+| **QoSPolicyUpdate** | Event Bus (JSON) | P95 < 300ms | QoS Scheduler |
+| **PolicyValidation** | Sync Response (JSON) | P99 < 150ms | Control-Plane API |
+| **ProfileExport** | REST API (JSON) | P95 < 500ms | Experience Layer |
 
 **QoSPolicyUpdate スキーマ**:
 ```json
@@ -132,7 +132,7 @@ QoSPolicy:
 詳細: [spec/requirements.md](../requirements.md) - ユースケース
 
 ### 4.3 永続化
-- **データストア**: Local SQLite (~/.honeylink/profiles.db, JSON カラムで拡張属性対応)
+- **データストア**: CockroachDB (JSON カラムで拡張属性対応)
 - **保持期間**: Active プロファイル: 無期限、Deprecated: 12ヶ月
 - **暗号/秘匿**: signature フィールドで改ざん防止、Ed25519検証必須
 
@@ -142,11 +142,11 @@ QoSPolicy:
 
 | 種別 | コンポーネント | インターフェース | SLA/契約 |
 |------|----------------|-------------------|----------|
-| **上位** | Experience Layer | Internal API (Rust) | P95 < 400ms |
-| **上位** | Session Orchestrator | Internal API (Rust) | Best-effort |
-| **下位** | QoS Scheduler | Internal API (Rust callback) | At-least-once delivery |
-| **下位** | Crypto & Trust (署名検証) | Internal API (Rust) | P99 < 50ms |
-| **Peer** | Local SQLite | rusqlite | P99 < 10ms |
+| **上位** | Control-Plane API | REST/gRPC | P95 < 400ms |
+| **上位** | Session Orchestrator | Event Bus | Best-effort |
+| **下位** | QoS Scheduler | Event Bus (QoSPolicyUpdate) | At-least-once delivery |
+| **下位** | Crypto & Trust (署名検証) | Sync API | P99 < 50ms |
+| **Peer** | CockroachDB | SQL | P99 < 100ms |
 
 **依存ルール**: [spec/architecture/dependencies.md](../architecture/dependencies.md)
 
@@ -253,7 +253,7 @@ QoSPolicy:
 ### スナップショット管理
 - **保存タイミング**: ポリシー適用成功時
 - **保持期間**: 直近3世代
-- **ストレージ**: メモリ (HashMap with TTL 24h)
+- **ストレージ**: Redis (TTL 24h)
 
 ---
 
