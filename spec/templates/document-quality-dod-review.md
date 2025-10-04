@@ -135,7 +135,7 @@
 ---
 
 ### 3.3 API Documentation
-**Applicable to:** `spec/api/control-plane.md`
+**Applicable to:** ~~`spec/api/control-plane.md`~~ (Deleted - server-centric design), `spec/modules/*.md` (P2P modules)
 
 #### Completeness Checklist (40 points)
 - [ ] (8 pts) **Endpoint Inventory:** All endpoints listed with HTTP method, path, summary

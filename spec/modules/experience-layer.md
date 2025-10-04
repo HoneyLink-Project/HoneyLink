@@ -89,7 +89,7 @@ interface ConnectOptions {
 | `updateQoS()` | PATCH | `/api/v1/sessions/:id/qos` | QoSポリシー更新 |
 | `exportProfile()` | GET | `/api/v1/profiles/:id/export` | プロファイル エクスポート |
 
-詳細: [spec/api/control-plane.md](../api/control-plane.md)
+詳細: [spec/modules/session-orchestrator.md](./session-orchestrator.md) (P2Pセッション管理)
 
 ---
 

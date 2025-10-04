@@ -140,7 +140,7 @@
 | # | 項目 | 検証方法 | 責任者 | ステータス |
 |---|------|---------|--------|-----------|
 | X1-01 | 30文書が策定完了し、すべてDoD満足度100% | 各文書末尾の「受け入れ基準(DoD)」チェックリストが全✅ | Operations WG | ⬜ |
-| X1-02 | プロトコル仕様 (制御プレーンAPI) が詳細化済み | `spec/api/control-plane.md` に8エンドポイント仕様記載 | Protocol WG | ⬜ |
+| X1-02 | P2P通信プロトコル仕様が詳細化済み | `spec/modules/transport-abstraction.md`, `spec/modules/session-orchestrator.md` にP2Pプロトコル記載 | Protocol WG | ⬜ |
 | X1-03 | UI仕様 (ワイヤーフレーム/デザイントークン) が完成 | `spec/ui/wireframes.md` + `spec/ui/visual-design.md` が承認済み | UX WG | ⬜ |
 | X1-04 | セキュリティ仕様 (暗号/鍵管理/脅威モデル) が承認済み | `spec/security/` 配下の4文書がレビュー完了 | Security WG | ⬜ |
 | X1-05 | トレーサビリティマトリクスが確立済み | FR-XX → 設計文書 → テスト仕様のリンクが全件存在 | Architecture WG | ⬜ |

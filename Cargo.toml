@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "backend",
+    # P2P Core Crates (no centralized backend)
     "crates/core",
     "crates/crypto",
     "crates/transport",
