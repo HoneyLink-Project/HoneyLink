@@ -107,6 +107,9 @@ impl DiscoveryService {
                 Ok(Some(DiscoveryEvent::DeviceLost(device_id))) => {
                     devices.retain(|d| d.device_id != device_id);
                 }
+                Ok(Some(DiscoveryEvent::NetworkChanged)) => {
+                    tracing::debug!("Network changed, continuing discovery");
+                }
                 Ok(None) => break, // Channel closed
                 Err(_) => break,   // Timeout
             }

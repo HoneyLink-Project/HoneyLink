@@ -149,13 +149,16 @@ impl MdnsDiscovery {
                             error!("Error handling service event: {}", e);
                         }
                     }
-                    Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
-                        // Normal timeout, continue
-                        continue;
-                    }
-                    Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
-                        warn!("mDNS receiver disconnected");
-                        break;
+                    Err(e) => {
+                        // Check error type string to distinguish timeout from disconnect
+                        let err_str = format!("{:?}", e);
+                        if err_str.contains("Timeout") {
+                            // Normal timeout, continue
+                            continue;
+                        } else {
+                            warn!("mDNS receiver disconnected");
+                            break;
+                        }
                     }
                 }
             }
@@ -217,10 +220,10 @@ impl MdnsDiscovery {
     fn parse_service_info(info: &ServiceInfo) -> Option<DeviceInfo> {
         let properties = info.get_properties();
 
-        let device_id = properties.get("device_id")?.as_str()?;
-        let device_name = properties.get("device_name")?.as_str()?;
-        let device_type_str = properties.get("device_type")?.as_str()?;
-        let version = properties.get("version")?.as_str()?;
+        let device_id = properties.get("device_id")?.val_str().to_string();
+        let device_name = properties.get("device_name")?.val_str().to_string();
+        let device_type_str = properties.get("device_type")?.val_str();
+        let _version = properties.get("version")?.val_str().to_string();
 
         let device_type = DeviceType::from_str(device_type_str);
 
