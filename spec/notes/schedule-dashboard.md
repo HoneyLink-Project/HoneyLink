@@ -443,4 +443,3 @@ function sendSlackAlert(message) {
 - [spec/testing/metrics.md](../testing/metrics.md) - KPI測定方法
 - [spec/notes/critical-path-analysis.md](critical-path-analysis.md) - タスク依存関係とバッファ
 - [spec/notes/governance.md](governance.md) - Operations WG の責務
-

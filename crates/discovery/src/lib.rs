@@ -35,10 +35,12 @@
 
 pub mod error;
 pub mod mdns;
+pub mod network_monitor;
 pub mod types;
 
 pub use error::{DiscoveryError, Result};
 pub use mdns::MdnsDiscovery;
+pub use network_monitor::{NetworkEvent, NetworkMonitor};
 pub use types::{DeviceInfo, DeviceType, DiscoveryEvent};
 
 use tokio::sync::mpsc;
@@ -82,6 +84,7 @@ impl DiscoveryService {
     pub async fn start(&mut self) -> Result<()> {
         self.mdns.announce().await?;
         self.mdns.start_browsing().await?;
+        self.mdns.start_network_monitoring().await?;
         Ok(())
     }
 

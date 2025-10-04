@@ -8,6 +8,7 @@ Pure Rust implementation of device discovery using mDNS-SD and BLE. Provides Blu
 
 - ✅ **mDNS-SD Discovery** - `_honeylink._tcp.local` service
 - ✅ **Automatic Announcement** - Device announces on startup
+- ✅ **Network Resilience** - Auto re-announce on IP changes
 - ✅ **Graceful Shutdown** - Proper service unregistration
 - ✅ **Async API** - Tokio-based async/await
 - ✅ **Pure Rust** - Zero C/C++ dependencies
@@ -167,10 +168,12 @@ cargo run --example device_b
 - [x] TXT records (device_id, device_name, device_type, version)
 - [x] Service browsing
 - [x] Service resolution (IP + port)
+- [x] Network monitoring (5-second interval)
+- [x] Auto re-announcement on IP changes
 - [x] Graceful shutdown
-- [x] Event system (DeviceFound/DeviceLost)
+- [x] Event system (DeviceFound/DeviceLost/NetworkChanged)
 - [x] Error handling
-- [x] Unit tests
+- [x] Unit tests (10 tests)
 
 ### Phase 1.2: BLE Discovery 🚧
 - [ ] BLE Peripheral (advertising)

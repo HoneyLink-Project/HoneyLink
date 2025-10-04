@@ -24,7 +24,7 @@
 | Phase | Goal | Progress | Target |
 |-------|------|----------|--------|
 | **Phase 0** | Foundation | 100% | Complete ✅ |
-| **Phase 1** | P2P Discovery | 50% | Q1 2025 🚧 |
+| **Phase 1** | P2P Discovery | 70% | Q1 2025 🚧 |
 | **Phase 2** | Pairing UI | 0% | Q2 2025 |
 | **Phase 3** | P2P Transport | 0% | Q2 2025 |
 | **Phase 4** | Multi-stream QoS | 0% | Q3 2025 |
@@ -79,12 +79,14 @@
   - [x] **Bluetooth Comparison:** Same UX as Bluetooth discovery (3-5 seconds)
   - [x] **Example:** simple_discovery.rs demonstrating basic usage
 
-- [ ] **Task 1.1.2:** mDNS Announcement Implementation
-  - [ ] Device info announcement (automatic on startup)
-  - [ ] Re-announcement on network changes
-  - [ ] Graceful shutdown (unregister)
-  - [ ] Multicast group joining
-  - [ ] **Tests:** Multi-device mutual discovery test
+- [x] **Task 1.1.2:** mDNS Announcement Implementation ✅ 2025-10-04
+  - [x] Device info announcement (automatic on startup)
+  - [x] Re-announcement on network changes (5-second polling)
+  - [x] Graceful shutdown (unregister)
+  - [x] Network interface monitoring (if-addrs crate)
+  - [x] Auto re-registration on IP address changes
+  - [x] **Module:** network_monitor.rs (NetworkMonitor, NetworkEvent)
+  - [x] **Tests:** Network monitor unit tests (3 tests added)
 
 ### 1.2 BLE Discovery Implementation
 - [ ] **Task 1.2.1:** `crates/physical-adapter/ble.rs` Implementation

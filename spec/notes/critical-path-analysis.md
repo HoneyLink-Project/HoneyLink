@@ -292,4 +292,3 @@ T2.6,Telemetry & Insights,8,T2.1,FALSE,OPS-LEAD-02
 - [TODO.md](../../TODO.md) - 実装タスクリスト
 - [spec/notes/phase-criteria.md](phase-criteria.md) - エントリ/エグジット基準
 - [spec/testing/metrics.md](../testing/metrics.md) - スケジュール遵守率の測定方法
-

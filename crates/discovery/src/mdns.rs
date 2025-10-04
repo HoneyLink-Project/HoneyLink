@@ -36,6 +36,9 @@ pub struct MdnsDiscovery {
 
     /// Running state
     running: Arc<Mutex<bool>>,
+    
+    /// Network monitor task handle
+    network_monitor_handle: Option<tokio::task::JoinHandle<()>>,
 }
 
 impl MdnsDiscovery {
@@ -56,6 +59,7 @@ impl MdnsDiscovery {
             devices: Arc::new(Mutex::new(HashMap::new())),
             event_tx,
             running: Arc::new(Mutex::new(false)),
+            network_monitor_handle: None,
         })
     }
 
@@ -168,6 +172,117 @@ impl MdnsDiscovery {
         Ok(())
     }
 
+    /// Start network monitoring for automatic re-announcement
+    ///
+    /// Monitors network interface changes and re-announces service when IP changes
+    pub async fn start_network_monitoring(&mut self) -> Result<()> {
+        use crate::network_monitor::NetworkMonitor;
+        use std::time::Duration;
+
+        let (net_tx, mut net_rx) = mpsc::channel(10);
+        let monitor = NetworkMonitor::new(net_tx);
+
+        // Start monitoring task (check every 5 seconds)
+        let handle = tokio::spawn(async move {
+            let mut monitor = monitor;
+            if let Err(e) = monitor.start().await {
+                warn!("Failed to start network monitor: {}", e);
+                return;
+            }
+
+            loop {
+                tokio::time::sleep(Duration::from_secs(5)).await;
+                if let Err(e) = monitor.check_changes().await {
+                    warn!("Error checking network changes: {}", e);
+                }
+            }
+        });
+
+        self.network_monitor_handle = Some(handle);
+
+        // Spawn task to handle network events
+        let device_id = self.device_id.clone();
+        let device_name = self.device_name.clone();
+        let device_type = self.device_type.clone();
+        let daemon = Arc::clone(&self.daemon);
+        let event_tx = self.event_tx.clone();
+
+        tokio::spawn(async move {
+            while let Some(net_event) = net_rx.recv().await {
+                info!("Network change detected: {:?}", net_event);
+                
+                // Re-announce service
+                if let Err(e) = Self::re_announce_internal(
+                    &device_id,
+                    &device_name,
+                    &device_type,
+                    &daemon,
+                ).await {
+                    error!("Failed to re-announce service: {}", e);
+                }
+
+                // Notify subscribers
+                if let Err(e) = event_tx.send(DiscoveryEvent::NetworkChanged).await {
+                    warn!("Failed to send NetworkChanged event: {}", e);
+                }
+            }
+        });
+
+        info!("Network monitoring started");
+        Ok(())
+    }
+
+    /// Re-announce service (internal helper)
+    async fn re_announce_internal(
+        device_id: &str,
+        device_name: &str,
+        device_type: &DeviceType,
+        daemon: &Arc<Mutex<Option<ServiceDaemon>>>,
+    ) -> Result<()> {
+        info!("Re-announcing service after network change");
+
+        let daemon_guard = daemon.lock().await;
+        let daemon_ref = daemon_guard
+            .as_ref()
+            .ok_or(DiscoveryError::NotStarted)?;
+
+        // Unregister old service
+        let fullname = format!("{}.{}", device_id, SERVICE_TYPE);
+        if let Err(e) = daemon_ref.unregister(&fullname) {
+            warn!("Failed to unregister old service: {}", e);
+        }
+
+        // Get new local IP
+        let host_ipv4 = local_ip_address::local_ip()
+            .unwrap_or_else(|_| "127.0.0.1".parse().unwrap());
+
+        // Create TXT records
+        let mut properties = HashMap::new();
+        properties.insert("device_id".to_string(), device_id.to_string());
+        properties.insert("device_name".to_string(), device_name.to_string());
+        properties.insert("device_type".to_string(), device_type.as_str().to_string());
+        properties.insert("version".to_string(), env!("CARGO_PKG_VERSION").to_string());
+
+        // Register new service
+        let service_hostname = format!("{}.local.", device_id.replace('-', ""));
+        let service_info = ServiceInfo::new(
+            SERVICE_TYPE,
+            device_id,
+            &service_hostname,
+            host_ipv4,
+            DEFAULT_PORT,
+            Some(properties),
+        )
+        .map_err(|e| DiscoveryError::MdnsError(format!("Failed to create service: {}", e)))?;
+
+        daemon_ref
+            .register(service_info)
+            .map_err(|e| DiscoveryError::MdnsError(format!("Failed to re-register: {}", e)))?;
+
+        info!("Service re-announced successfully");
+        Ok(())
+    }
+
     /// Handle mDNS service event
     async fn handle_service_event(
         event: ServiceEvent,
@@ -245,6 +360,12 @@ impl MdnsDiscovery {
         info!(device_id = %self.device_id, "Stopping mDNS service");
 
         *self.running.lock().await = false;
+
+        // Stop network monitor task
+        if let Some(handle) = self.network_monitor_handle.take() {
+            handle.abort();
+            info!("Network monitor task stopped");
+        }
 
         if let Some(daemon) = self.daemon.lock().await.take() {
             daemon.shutdown().map_err(|e| {
