@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { handlers } from './fixtures/api-handlers';

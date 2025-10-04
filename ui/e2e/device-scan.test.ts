@@ -1,8 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { handlers } from './fixtures/api-handlers';
-import { mockDevices } from './fixtures/mock-data';
 import { DeviceListPage } from './pages';
 
 // Setup MSW server for API mocking

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { setupServer } from 'msw/node';
 import { handlers } from './fixtures/api-handlers';
 
@@ -200,7 +200,7 @@ test.describe('Language Switching (i18n)', () => {
       // Verify language selector is present
       const languageSelector = page.locator('[data-testid="language-selector"], select[name="language"], button[aria-label*="language"]').first();
       const isVisible = await languageSelector.isVisible();
-      
+
       // Language selector should be visible or at least exist in DOM
       expect(isVisible || await languageSelector.count() > 0).toBeTruthy();
     }

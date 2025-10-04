@@ -162,35 +162,49 @@
 1. 「Add Step」→「Wait for a response」(24時間)
 2. 応答がない場合 → Chair へ通知 + 該当メンバーへリマインダーDM再送
 
-### 6.2 GitHub Actions による自動化（オプション）
+### 6.2 GitHub Actions による自動化 ✅ **実装完了**
 
-`.github/workflows/meeting-reminder.yml` の例:
-```yaml
-name: WG Meeting Reminder
+**実装ファイル**:
+- `.github/workflows/attendance-reminder.yml` - 6時間毎に実行される自動リマインダー
+- `scripts/attendance-reminder.ts` - TypeScriptベースの統合システム (420行)
+- `scripts/package.json` - Node.js依存関係定義
+- `scripts/.env.attendance.example` - 環境変数テンプレート
+- `.github/ISSUE_TEMPLATE/補完レビュー計画書.md` - 補完レビュー用GitHubイシューテンプレート
 
-on:
-  schedule:
-    # 毎週火曜 15:00 JST (06:00 UTC) の48時間前 = 日曜 15:00 JST
-    - cron: '0 6 * * 0'  # Architecture WG
-    - cron: '0 1 * * 1'  # Protocol WG (水曜10:00の48h前)
-    # 他のWGも同様に設定
+**セットアップ手順**:
+1. GitHubリポジトリのSecretsに以下を登録:
+   - `SLACK_BOT_TOKEN` (xoxb-... 形式のBot Token)
+   - `SLACK_WEBHOOK_URL` (失敗通知用)
+   - `GITHUB_TOKEN` (エスカレーションイシュー作成用、自動設定済み)
 
-jobs:
-  send-reminder:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Slack Reminder
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          curl -X POST $SLACK_WEBHOOK_URL \
-            -H 'Content-Type: application/json' \
-            -d '{
-              "text": "📅 [HoneyLink WG] Architecture WG 定例会議リマインダー\n日時: 2025-10-07 15:00 JST\nアジェンダ: https://github.com/<org>/<repo>/blob/master/spec/notes/meeting-notes.md"
-            }'
-```
+2. Slackワークスペースでアプリを作成:
+   - Bot Token Scopes: `chat:write`, `chat:write.public`, `users:read`
+   - 各WGチャンネルにBotを招待
 
-**注意**: Slack Webhook URL は GitHub Secrets で管理し、決してコードに埋め込まないこと。
+3. 初回実行テスト:
+   ```powershell
+   cd scripts
+   npm install
+   copy .env.attendance.example .env
+   # .envに実際のトークンを設定
+   npm run reminder
+   ```
+
+4. GitHub Actionsが自動的に6時間毎に実行を開始
+
+**機能**:
+- ✅ 48時間前リマインダー (チャンネル全体へ通知)
+- ✅ 24時間前DM (未応答者へ個別通知)
+- ✅ 2時間前最終リマインダー
+- ✅ 出席率90%未達時の自動エスカレーションイシュー作成
+- ✅ 失敗時のSlack通知
+
+**技術スタック**:
+- Pure Node.js/TypeScript実装 (C/C++依存なし)
+- @octokit/rest 20.0.2 (GitHub API, Pure JS)
+- @slack/web-api 7.0.2 (Slack API, Pure JS)
+- Idempotent設計 (複数回実行しても安全)
+- JST (Asia/Tokyo) タイムゾーン対応
 
 ---
 
