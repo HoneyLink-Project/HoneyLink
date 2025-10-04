@@ -3,7 +3,7 @@
  * Provides consistent test fixtures for API responses
  */
 
-import type { Device, StreamStatus, PolicyTemplate, KPIMetric, AlertEntry } from '../api/hooks';
+import type { AlertEntry, Device, KPIMetric, PolicyTemplate, StreamStatus } from '../api/hooks';
 
 /**
  * Mock devices for testing

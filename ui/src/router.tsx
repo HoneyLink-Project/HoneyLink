@@ -1,5 +1,5 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { DeviceListPage } from './pages/DeviceListPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -26,7 +26,7 @@ const SuspenseFallback = () => (
 /**
  * React Router configuration for HoneyLink UI
  * Implements routing structure from spec/ui/wireframes.md
- * 
+ *
  * Code Splitting Strategy:
  * - WF-01/02/04: Eagerly loaded (no charts, smaller bundle)
  * - WF-03/05: Lazy loaded (recharts dependency, ~50 kB each)

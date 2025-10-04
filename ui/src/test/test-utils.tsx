@@ -3,11 +3,11 @@
  * Provides React Query and i18n context for testing
  */
 
-import { ReactElement, ReactNode } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter } from 'react-router-dom';
+import { render, RenderOptions } from '@testing-library/react';
+import { ReactElement, ReactNode } from 'react';
 import { I18nextProvider } from 'react-i18next';
+import { BrowserRouter } from 'react-router-dom';
 import i18n from '../i18n';
 
 /**
