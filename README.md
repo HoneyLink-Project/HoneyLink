@@ -160,6 +160,7 @@ HoneyLink/
 - **Rust**: 1.89.0 以降 (LTS)
 - **Node.js**: 22.15.0 以降 (LTS)
 - **pnpm**: 10.x 以降
+- **Docker & Docker Compose**: Database development (TimescaleDB)
 
 ### 推奨開発環境
 
@@ -218,7 +219,24 @@ rustup component add clippy rustfmt
 cargo install cargo-llvm-cov cargo-audit cargo-deny
 ```
 
-### 2. Node.js 環境のセットアップ
+### 2. Database Setup (TimescaleDB)
+
+詳細は [`docs/DATABASE_SETUP.md`](./docs/DATABASE_SETUP.md) を参照してください。
+
+```bash
+# Install sqlx-cli
+cargo install sqlx-cli --no-default-features --features postgres
+
+# Start TimescaleDB
+docker compose -f infrastructure/docker-compose.db.yml up -d
+
+# Run migrations
+cd backend
+sqlx migrate run
+cargo sqlx prepare
+```
+
+### 3. Node.js 環境のセットアップ
 
 詳細は [`docs/NODE_SETUP.md`](./docs/NODE_SETUP.md) を参照してください。
 
@@ -234,7 +252,7 @@ pnpm install
 node ../scripts/audit-native-deps.js
 ```
 
-### 3. VS Code 拡張機能のインストール
+### 4. VS Code 拡張機能のインストール
 
 VS Code で開いた際、推奨拡張機能のインストールを促すプロンプトが表示されます。  
 または、コマンドパレット (`Ctrl+Shift+P`) から:
