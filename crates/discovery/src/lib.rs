@@ -1,14 +1,15 @@
 //! HoneyLink P2P Device Discovery
 //!
-//! Pure Rust implementation of device discovery using mDNS-SD (_honeylink._tcp.local).
+//! Pure Rust implementation of device discovery using mDNS-SD and BLE.
 //! Provides Bluetooth-compatible UX: nearby devices discovered in 3-5 seconds.
 //!
 //! # Architecture
 //!
-//! - **No servers**: Devices discover each other via local multicast
+//! - **No servers**: Devices discover each other via local multicast (mDNS) or BLE
 //! - **Automatic announcement**: Devices announce themselves on startup
 //! - **Graceful shutdown**: Unregister on app close
 //! - **Network resilience**: Re-announce on network changes
+//! - **Mobile support**: BLE discovery for devices without mDNS
 //!
 //! # Examples
 //!
@@ -33,23 +34,27 @@
 //! }
 //! ```
 
+pub mod ble;
 pub mod error;
 pub mod mdns;
 pub mod network_monitor;
 pub mod types;
 
+pub use ble::BleDiscovery;
 pub use error::{DiscoveryError, Result};
 pub use mdns::MdnsDiscovery;
 pub use network_monitor::{NetworkEvent, NetworkMonitor};
 pub use types::{DeviceInfo, DeviceType, DiscoveryEvent};
 
 use tokio::sync::mpsc;
+use tracing::info;
 
 /// P2P Discovery Service (mDNS + BLE)
 ///
 /// Provides automatic device discovery with Bluetooth-compatible UX.
 pub struct DiscoveryService {
     mdns: MdnsDiscovery,
+    ble: Option<BleDiscovery>,
     event_rx: mpsc::Receiver<DiscoveryEvent>,
 }
 
@@ -71,9 +76,14 @@ impl DiscoveryService {
     /// ```
     pub fn new(device_id: &str, device_name: &str, device_type: &str) -> Result<Self> {
         let (event_tx, event_rx) = mpsc::channel(100);
-        let mdns = MdnsDiscovery::new(device_id, device_name, device_type, event_tx)?;
+        let mdns = MdnsDiscovery::new(device_id, device_name, device_type, event_tx.clone())?;
+        let ble = BleDiscovery::new(device_id, device_name, device_type, event_tx)?;
 
-        Ok(Self { mdns, event_rx })
+        Ok(Self {
+            mdns,
+            ble: Some(ble),
+            event_rx,
+        })
     }
 
     /// Start discovery service
@@ -81,10 +91,23 @@ impl DiscoveryService {
     /// - Announces device via mDNS (_honeylink._tcp.local)
     /// - Starts browsing for nearby devices
     /// - Spawns background task for network monitoring
+    /// - Optionally starts BLE advertising/scanning (if enabled)
     pub async fn start(&mut self) -> Result<()> {
         self.mdns.announce().await?;
         self.mdns.start_browsing().await?;
         self.mdns.start_network_monitoring().await?;
+        Ok(())
+    }
+
+    /// Enable BLE discovery (mobile device support)
+    ///
+    /// Starts BLE advertising and scanning for devices where mDNS is unavailable
+    pub async fn enable_ble(&mut self) -> Result<()> {
+        if let Some(ble) = &mut self.ble {
+            ble.start_advertising().await?;
+            ble.start_scanning().await?;
+            info!("BLE discovery enabled");
+        }
         Ok(())
     }
 
@@ -125,9 +148,15 @@ impl DiscoveryService {
     ///
     /// - Unregisters mDNS service
     /// - Stops browsing
+    /// - Stops BLE (if enabled)
     /// - Cleans up resources
     pub async fn stop(&mut self) -> Result<()> {
         self.mdns.stop().await?;
+        
+        if let Some(ble) = &mut self.ble {
+            ble.stop().await?;
+        }
+        
         Ok(())
     }
 }

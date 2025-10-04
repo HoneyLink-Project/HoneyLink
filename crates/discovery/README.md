@@ -12,7 +12,7 @@ Pure Rust implementation of device discovery using mDNS-SD and BLE. Provides Blu
 - ✅ **Graceful Shutdown** - Proper service unregistration
 - ✅ **Async API** - Tokio-based async/await
 - ✅ **Pure Rust** - Zero C/C++ dependencies
-- 🚧 **BLE Discovery** - Bluetooth Low Energy scanning (Phase 1.2)
+- ✅ **BLE Discovery Skeleton** - Foundation for Bluetooth Low Energy (Phase 1.2)
 
 ## Architecture
 
@@ -175,11 +175,13 @@ cargo run --example device_b
 - [x] Error handling
 - [x] Unit tests (10 tests)
 
-### Phase 1.2: BLE Discovery 🚧
-- [ ] BLE Peripheral (advertising)
-- [ ] BLE Central (scanning)
-- [ ] RSSI measurement
-- [ ] GATT characteristics
+### Phase 1.2: BLE Discovery ✅ (Skeleton)
+- [x] BLE module skeleton (ble.rs)
+- [x] BleDiscovery struct with advertising/scanning placeholders
+- [x] UUID definitions (HoneyLink service, device info characteristic)
+- [x] Integration with DiscoveryService
+- [x] Unit tests (3 tests)
+- [ ] Full btleplug implementation (deferred to Phase 2)
 - [ ] Integration tests
 
 ## Dependencies
