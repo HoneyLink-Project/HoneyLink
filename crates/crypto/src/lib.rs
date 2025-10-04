@@ -23,6 +23,7 @@ pub mod key_management;
 pub mod pop_token;
 pub mod rotation;
 pub mod signing;
+pub mod telemetry;
 
 #[cfg(feature = "vault")]
 pub mod rotation_scheduler;
@@ -39,6 +40,7 @@ pub use key_derivation::{DeriveContext, KeyDerivation};
 pub use key_management::{KeyHierarchy, KeyScope};
 pub use pop_token::{PopClaims, PopToken, PopTokenGenerator, MAX_TOKEN_TTL_SECONDS};
 pub use rotation::{KeyRotationManager, RotationPolicy, RotationStatus, VersionedKey, KeyVersion};
+pub use telemetry::CryptoTelemetry;
 
 #[cfg(feature = "vault")]
 pub use vault::{VaultClient, VaultError, KeyMaterial, KeyMetadata};

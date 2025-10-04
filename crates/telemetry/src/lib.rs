@@ -30,6 +30,7 @@
 pub mod alert;
 pub mod collector;
 pub mod crypto_metrics;
+pub mod crypto_telemetry_impl;
 pub mod otel;
 pub mod sli;
 pub mod storage;
@@ -39,6 +40,7 @@ pub mod types;
 
 // Re-exports
 pub use collector::{TelemetryCollector, TelemetryConfig};
+pub use crypto_telemetry_impl::CryptoTelemetryImpl;
 pub use transport_events::{
     FecStrategyChangeEvent, LinkStateChangeEvent, PacketReceiveFailedEvent, PacketSentEvent,
     PowerModeChangeEvent, QueueDepthWarningEvent, TransportEvent, TransportMetrics,

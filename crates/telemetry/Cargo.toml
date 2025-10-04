@@ -9,6 +9,7 @@ repository.workspace = true
 
 [dependencies]
 honeylink-core = { path = "../core" }
+honeylink-crypto = { path = "../crypto" }
 honeylink-transport = { path = "../transport" }
 
 # OpenTelemetry (Pure Rust)
