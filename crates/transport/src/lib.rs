@@ -15,10 +15,12 @@ use thiserror::Error;
 pub mod fec;
 pub mod retry;
 pub mod wfq;
+pub mod telemetry;
 
 pub use fec::{FecEncoder, FecStrategy};
 pub use retry::{CircuitBreaker, CircuitState, RetryExecutor, RetryPolicy};
 pub use wfq::WeightedFairQueuing;
+pub use telemetry::TransportTelemetry;
 
 /// Error types for transport operations
 #[derive(Debug, Error, Clone, PartialEq, Eq)]

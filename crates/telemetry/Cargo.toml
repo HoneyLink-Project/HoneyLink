@@ -21,6 +21,7 @@ tracing-opentelemetry = { workspace = true }
 
 # Async runtime
 tokio = { workspace = true }
+async-trait = "0.1"
 
 # Serialization
 serde = { workspace = true }

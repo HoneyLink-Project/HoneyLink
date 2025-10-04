@@ -34,6 +34,7 @@ pub mod otel;
 pub mod sli;
 pub mod storage;
 pub mod transport_events;
+pub mod transport_telemetry_impl;
 pub mod types;
 
 // Re-exports
@@ -42,4 +43,5 @@ pub use transport_events::{
     FecStrategyChangeEvent, LinkStateChangeEvent, PacketReceiveFailedEvent, PacketSentEvent,
     PowerModeChangeEvent, QueueDepthWarningEvent, TransportEvent, TransportMetrics,
 };
+pub use transport_telemetry_impl::TransportTelemetryImpl;
 pub use types::{LogEvent, LogLevel, Metric, MetricType, TelemetryError, TelemetryResult};
