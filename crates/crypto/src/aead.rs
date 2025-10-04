@@ -1,40 +1,14 @@
-//! ChaCha20-Poly1305 Authenticated Encryption with Associated Data (AEAD).
+//! ChaCha20-Poly1305 AEAD encryption
 //!
-//! Implements the ChaCha20-Poly1305 AEAD cipher as specified in RFC 8439.
-//! Used for encrypting HoneyLink session data with integrity protection.
-//!
-//! # Security Properties
-//! - 256-bit key strength
-//! - 96-bit nonces (must never be reused with the same key)
-//! - 128-bit authentication tag (prevents tampering)
-//! - Constant-time operations (timing-attack resistant)
-//! - Associated Data (AAD) support for context binding
-//!
-//! # Example
-//! ```
-//! use honeylink_crypto::aead::ChaCha20Poly1305Cipher;
-//!
-//! let key = [42u8; 32];
-//! let cipher = ChaCha20Poly1305Cipher::new(&key).unwrap();
-//!
-//! let plaintext = b"Hello, HoneyLink!";
-//! let aad = b"session_12345";
-//!
-//! // Encrypt
-//! let (nonce, ciphertext) = cipher.encrypt(plaintext, aad).unwrap();
-//!
-//! // Decrypt
-//! let decrypted = cipher.decrypt(&nonce, &ciphertext, aad).unwrap();
-//! assert_eq!(plaintext, &decrypted[..]);
-//! ```
+//! Implements authenticated encryption with associated data (AEAD)
+//! per spec/security/encryption.md Section 4.2
 
-use chacha20poly1305::{
-    aead::{Aead, KeyInit, Payload},
-    ChaCha20Poly1305, Nonce,
-};
-use honeylink_core::Result;
+use chacha20poly1305::aead::{Aead, AeadInPlace, Payload};
+use chacha20poly1305::{ChaCha20Poly1305, KeyInit, Nonce};
 use rand::Rng;
 use zeroize::{Zeroize, ZeroizeOnDrop};
+
+use honeylink_core::Result;
 
 /// Maximum plaintext size: 1 MB (as per spec/modules/crypto-trust-anchor.md)
 pub const MAX_PLAINTEXT_SIZE: usize = 1024 * 1024;

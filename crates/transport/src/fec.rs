@@ -13,7 +13,6 @@
 
 use crate::TransportError;
 use reed_solomon_erasure::galois_8::ReedSolomon;
-use std::sync::Arc;
 
 /// FEC strategy modes with different redundancy levels
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

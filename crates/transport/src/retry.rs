@@ -10,14 +10,14 @@
 //! - Circuit breaker pattern for persistent failures
 //! - Telemetry integration for retry monitoring
 
-use crate::{Packet, TransportError};
+use crate::TransportError;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
 /// Retry policy for send operations
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct RetryPolicy {
     /// Maximum number of retry attempts
     pub max_retries: u32,
@@ -104,14 +104,14 @@ impl RetryExecutor {
         F: FnMut() -> Fut,
         Fut: std::future::Future<Output = Result<T, TransportError>>,
     {
-        let mut attempt = 0;
+        let mut attempt: u32 = 0;
 
         loop {
             match operation().await {
                 Ok(result) => {
                     self.success_count.fetch_add(1, Ordering::Relaxed);
                     if attempt > 0 {
-                        self.retry_count.fetch_add(attempt, Ordering::Relaxed);
+                        self.retry_count.fetch_add(attempt as u64, Ordering::Relaxed);
                     }
                     return Ok(result);
                 }

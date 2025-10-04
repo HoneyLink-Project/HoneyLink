@@ -26,12 +26,11 @@
 //! ```
 
 use base64::Engine;
-use chrono::{DateTime, Duration, Utc};
-use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
+use chrono::{Duration, Utc};
+use ed25519_dalek::{Signature, Signer, SigningKey, Verifier};
 use honeylink_core::Result;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use zeroize::{Zeroize, ZeroizeOnDrop};
 
 /// Maximum token validity period (5 minutes as per spec)
 pub const MAX_TOKEN_TTL_SECONDS: i64 = 300;

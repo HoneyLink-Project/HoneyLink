@@ -26,16 +26,22 @@
 //! assert_eq!(alice_shared.as_bytes(), bob_shared.as_bytes());
 //! ```
 
+use curve25519_dalek::montgomery::MontgomeryPoint;
+use curve25519_dalek::scalar::Scalar;
 use honeylink_core::Result;
-use x25519_dalek::{PublicKey, StaticSecret};
+use rand::RngCore;
+use x25519_dalek::PublicKey;
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
 /// A zeroizing wrapper for X25519 static secret keys.
 ///
 /// Automatically zeroes memory on drop to prevent key material leakage.
+///
+/// Note: x25519-dalek 2.0 removed StaticSecret. We use curve25519-dalek's
+/// Scalar directly for reusable keys.
 #[derive(Zeroize, ZeroizeOnDrop)]
 pub struct SecretKey {
-    inner: StaticSecret,
+    scalar: Scalar,
 }
 
 impl SecretKey {
@@ -56,25 +62,32 @@ impl SecretKey {
 
         let mut array = [0u8; 32];
         array.copy_from_slice(bytes);
-        let inner = StaticSecret::from(array);
+        
+        // Apply clamping for X25519
+        array[0] &= 248;
+        array[31] &= 127;
+        array[31] |= 64;
+        
+        let scalar = Scalar::from_bytes_mod_order(array);
 
         // Zeroize the temporary array
         array.zeroize();
 
-        Ok(Self { inner })
+        Ok(Self { scalar })
     }
 
     /// Returns the public key corresponding to this secret key.
     pub fn public_key(&self) -> PublicKey {
-        PublicKey::from(&self.inner)
+        let public_point = &self.scalar * &curve25519_dalek::constants::X25519_BASEPOINT;
+        PublicKey::from(*public_point.as_bytes())
     }
 
-    /// Returns a reference to the inner secret for cryptographic operations.
+    /// Returns a reference to the inner scalar for cryptographic operations.
     ///
     /// # Security
     /// This method is internal and should not expose the secret beyond this module.
-    pub(crate) fn as_dalek(&self) -> &StaticSecret {
-        &self.inner
+    pub(crate) fn as_scalar(&self) -> &Scalar {
+        &self.scalar
     }
 }
 
@@ -100,7 +113,7 @@ impl SharedSecret {
     ///
     /// # Security
     /// Caller is responsible for zeroizing the returned array.
-    pub fn into_bytes(mut self) -> [u8; 32] {
+    pub fn into_bytes(self) -> [u8; 32] {
         let bytes = self.bytes;
         // Prevent double-zeroization (moved out)
         std::mem::forget(self);
@@ -138,11 +151,20 @@ impl KeyAgreement {
     /// // Send `public` to peer, keep `secret` private
     /// ```
     pub fn generate_keypair() -> (SecretKey, PublicKey) {
-        let secret_inner = StaticSecret::random_from_rng(rand::thread_rng());
-        let public = PublicKey::from(&secret_inner);
-        let secret = SecretKey {
-            inner: secret_inner,
-        };
+        let mut bytes = [0u8; 32];
+        rand::thread_rng().fill_bytes(&mut bytes);
+        
+        // Apply X25519 clamping
+        bytes[0] &= 248;
+        bytes[31] &= 127;
+        bytes[31] |= 64;
+        
+        let scalar = Scalar::from_bytes_mod_order(bytes);
+        let secret = SecretKey { scalar };
+        let public = secret.public_key();
+
+        // Zeroize the temporary array
+        bytes.zeroize();
 
         (secret, public)
     }
@@ -178,17 +200,19 @@ impl KeyAgreement {
         our_secret: &SecretKey,
         their_public: &PublicKey,
     ) -> Result<SharedSecret> {
-        let shared = our_secret.as_dalek().diffie_hellman(their_public);
+        let their_point = MontgomeryPoint(*their_public.as_bytes());
+        let shared_point = our_secret.as_scalar() * their_point;
+        let shared_bytes = *shared_point.as_bytes();
 
         // Check for low-order points (all-zeros shared secret indicates contributory behavior attack)
-        if shared.as_bytes() == &[0u8; 32] {
+        if shared_bytes == [0u8; 32] {
             return Err(honeylink_core::Error::Crypto(
                 "Key agreement failed: low-order point detected (possible attack)".to_string(),
             ));
         }
 
         Ok(SharedSecret {
-            bytes: *shared.as_bytes(),
+            bytes: shared_bytes,
         })
     }
 

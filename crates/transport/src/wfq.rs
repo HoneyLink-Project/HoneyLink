@@ -18,7 +18,6 @@
 //! - Thread-safe via tokio::sync::Mutex
 
 use crate::{Packet, TransportError};
-use std::collections::BinaryHeap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
