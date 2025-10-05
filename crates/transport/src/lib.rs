@@ -14,6 +14,7 @@ use std::time::Duration;
 use thiserror::Error;
 
 pub mod quic;
+pub mod webrtc;
 
 // Phase 4: Transport protocol abstraction (QUIC/WebRTC)
 pub mod protocol;

@@ -25,5 +25,9 @@ quinn = { version = "0.11", default-features = false, features = ["rustls-ring",
 rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
 rcgen = { version = "0.13", default-features = false, features = ["ring"] }  # Pure Rust certificate generation
 
+# WebRTC transport (Pure Rust implementation)
+# Check for C/C++ dependencies during build
+webrtc = "0.14"
+
 [dev-dependencies]
 proptest = { workspace = true }
