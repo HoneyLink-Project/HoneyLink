@@ -1,0 +1,87 @@
+# HoneyLink Configuration File
+# This file configures the HoneyLink P2P networking system.
+# Settings can be overridden using environment variables: HONEYLINK_<SECTION>_<KEY>
+# Example: HONEYLINK_TRANSPORT_LISTEN_ADDRESS="127.0.0.1:6000"
+
+[transport]
+# Address to listen on for incoming connections
+listen_address = "0.0.0.0:5000"
+
+# Maximum number of concurrent connections
+max_connections = 1000
+
+# Connection timeout in seconds
+connection_timeout_secs = 30
+
+# Enable QUIC transport protocol
+enable_quic = true
+
+# Enable WebRTC transport (not yet implemented)
+enable_webrtc = false
+
+# QUIC idle timeout in seconds (inactive connections will be closed)
+quic_idle_timeout_secs = 300
+
+# Maximum number of parallel streams per connection
+max_streams_per_connection = 100
+
+[qos]
+# Maximum bandwidth in Mbps (for QoS scheduling)
+max_bandwidth_mbps = 100
+
+# Number of priority levels (1-8)
+priority_levels = 8
+
+# Default priority for streams without explicit priority (1-8, lower = higher priority)
+default_priority = 4
+
+# Enable bandwidth enforcement (reject streams exceeding bandwidth limits)
+enable_bandwidth_enforcement = true
+
+[discovery]
+# Enable mDNS (multicast DNS) discovery for local network peers
+enable_mdns = true
+
+# Enable manual peer addition via API
+enable_manual = true
+
+# Discovery timeout in seconds
+discovery_timeout_secs = 10
+
+# Service name for mDNS advertisement
+mdns_service_name = "_honeylink._tcp"
+
+[logging]
+# Log level: error, warn, info, debug, trace
+level = "info"
+
+# Log format: compact, pretty, json
+format = "compact"
+
+# Enable logging to file (in addition to stdout)
+enable_file_logging = false
+
+# Log file path (only used if enable_file_logging = true)
+# log_file_path = "/var/log/honeylink.log"
+
+[telemetry]
+# Enable telemetry collection (OpenTelemetry)
+enabled = false
+
+# OTLP endpoint for telemetry export
+otlp_endpoint = "http://localhost:4317"
+
+# Service name (appears in traces/metrics)
+service_name = "honeylink"
+
+# Service version (appears in traces/metrics)
+service_version = "0.1.0"
+
+# Environment: development, staging, production
+environment = "development"
+
+# Metrics export interval in seconds
+metrics_export_interval_secs = 10
+
+# Trace sampling ratio (0.0 = no traces, 1.0 = all traces)
+trace_sampling_ratio = 1.0

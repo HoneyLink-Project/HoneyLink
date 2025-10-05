@@ -1,0 +1,23 @@
+[package]
+name = "honeylink-config"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.89.0"
+
+[dependencies]
+# Serialization (Pure Rust)
+serde = { workspace = true }
+toml = { workspace = true }
+
+# Error handling (Pure Rust)
+thiserror = { workspace = true }
+
+# Environment variables (Pure Rust)
+envy = "0.4" # Pure Rust environment variable deserializer
+
+# File system (Pure Rust, std)
+dirs = "5.0" # Pure Rust user directory lookup
+
+[dev-dependencies]
+# Testing utilities
+tempfile = "3.8" # Pure Rust temporary file handling

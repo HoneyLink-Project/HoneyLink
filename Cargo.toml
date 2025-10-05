@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     # P2P Core Crates (no centralized backend)
     "crates/core",
+    "crates/config",
     "crates/crypto",
     "crates/discovery",
     "crates/transport",

@@ -31,7 +31,7 @@
 | **Phase 5** | Multi-stream QoS | 100% | Complete ✅ |
 | **Phase 6** | Integration Tests | 100% | Complete ✅ |
 | **Phase 7** | Performance & Polish | 100% | Complete ✅ |
-| **Phase 8** | Beta Release | 20% | In Progress 🚧 |
+| **Phase 8** | Beta Release | 40% | In Progress 🚧 |
 
 ---
 
@@ -428,15 +428,16 @@
   - [x] **Completion:** 2025-01-XX - Structured logging infrastructure ready
 
 ### 8.2 Configuration Management
-- [ ] **Task 8.2.1:** TOML Configuration System
-  - [ ] Define config schema (honeylink.toml)
-  - [ ] Configuration struct with serde
-  - [ ] Default values for all settings
-  - [ ] Environment variable overrides
-  - [ ] Validation and error reporting
-  - [ ] **Dependencies:** toml 0.8, serde 1.0 (Pure Rust)
-  - [ ] **Tests:** Config loading, validation, defaults
-  - [ ] **Target:** User-friendly configuration
+- [x] **Task 8.2.1:** TOML Configuration System ✅
+  - [x] Define config schema (honeylink.toml.example)
+  - [x] Configuration struct with serde (Config, TransportConfig, QosConfig, etc.)
+  - [x] Default values for all settings (Default impl for all structs)
+  - [x] Environment variable overrides (HONEYLINK_* prefix support)
+  - [x] Validation and error reporting (ConfigError with thiserror)
+  - [x] **Dependencies:** toml 0.8, serde 1.0, envy 0.4, dirs 5.0 (All Pure Rust)
+  - [x] **Tests:** Config loading, validation, defaults, roundtrip (6 tests)
+  - [x] **Target:** User-friendly configuration with file + env var support
+  - [x] **Completion:** 2025-01-XX - Production-ready configuration system
 
 ### 8.3 CI/CD Pipeline
 - [ ] **Task 8.3.1:** GitHub Actions Workflow
