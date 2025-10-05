@@ -48,11 +48,11 @@ toml = "0.8"
 thiserror = "2.0"
 anyhow = "1.0"
 
-# Observability (OpenTelemetry)
+# Observability (OpenTelemetry + Pure Rust tracing)
 opentelemetry = "0.26"
 opentelemetry-otlp = "0.26"
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "fmt"] }
 tracing-opentelemetry = "0.26"
 
 # UUID generation

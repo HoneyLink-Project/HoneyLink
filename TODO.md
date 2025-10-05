@@ -31,7 +31,7 @@
 | **Phase 5** | Multi-stream QoS | 100% | Complete ✅ |
 | **Phase 6** | Integration Tests | 100% | Complete ✅ |
 | **Phase 7** | Performance & Polish | 100% | Complete ✅ |
-| **Phase 8** | Beta Release | 0% | Q4 2025 |
+| **Phase 8** | Beta Release | 20% | In Progress 🚧 |
 
 ---
 
@@ -402,6 +402,72 @@
   - [x] **Design Decision:** Phase 7 focuses on benchmarks + docs
   - [x] **Rationale:** Logging/config/CI better suited for Phase 8 Beta Release
   - [x] **Implementation:** docs/PRODUCTION_READINESS.md (audit policy documented)
+
+---
+
+## Phase 8: Beta Release (🚧 In Progress)
+
+**Goal:** Production-ready beta release with logging, configuration, CI/CD, and security validation
+
+**Phase 8 Assumptions:**
+- Phase 0-7 complete (all core functionality implemented)
+- Zero C/C++ dependencies requirement (verified during security audit)
+- OSS release target: v0.1.0-beta.1
+- Public API stability commitment for 0.1.x series
+
+### 8.1 Logging Infrastructure
+- [x] **Task 8.1.1:** tracing Integration ✅
+  - [x] Add tracing dependency (pure Rust)
+  - [x] Replace critical println! with structured logging in examples
+  - [x] Created logging utilities (init_tracing, custom filters)
+  - [x] Configure log levels (ERROR, WARN, INFO, DEBUG, TRACE) via RUST_LOG
+  - [x] Integration with TransportManager, DiscoveryManager (already instrumented)
+  - [x] **Dependencies:** tracing 0.1 (Pure Rust), tracing-subscriber 0.3
+  - [x] **Tests:** Verify log output in test environments (44/44 passed)
+  - [x] **Target:** Production-ready observability
+  - [x] **Completion:** 2025-01-XX - Structured logging infrastructure ready
+
+### 8.2 Configuration Management
+- [ ] **Task 8.2.1:** TOML Configuration System
+  - [ ] Define config schema (honeylink.toml)
+  - [ ] Configuration struct with serde
+  - [ ] Default values for all settings
+  - [ ] Environment variable overrides
+  - [ ] Validation and error reporting
+  - [ ] **Dependencies:** toml 0.8, serde 1.0 (Pure Rust)
+  - [ ] **Tests:** Config loading, validation, defaults
+  - [ ] **Target:** User-friendly configuration
+
+### 8.3 CI/CD Pipeline
+- [ ] **Task 8.3.1:** GitHub Actions Workflow
+  - [ ] Automated cargo test on push/PR
+  - [ ] cargo clippy with -D warnings
+  - [ ] cargo bench with regression detection
+  - [ ] Automated rustdoc deployment to GitHub Pages
+  - [ ] **Implementation:** .github/workflows/ci.yml
+  - [ ] **Tests:** Workflow validation on test PRs
+  - [ ] **Target:** Automated quality gates
+
+### 8.4 Security & Compliance
+- [ ] **Task 8.4.1:** Dependency Audit & Security Scan
+  - [ ] Verify zero C/C++ dependencies with cargo-tree
+  - [ ] Run cargo-audit for CVEs
+  - [ ] Document cryptographic primitives used
+  - [ ] Review security model documentation
+  - [ ] **Dependencies:** cargo-audit (audit only, not runtime)
+  - [ ] **Tests:** CI integration for automated scanning
+  - [ ] **Target:** Security compliance for beta release
+
+### 8.5 Beta Release Preparation
+- [ ] **Task 8.5.1:** OSS Release Checklist
+  - [ ] LICENSE file verification (MIT/Apache-2.0)
+  - [ ] CHANGELOG.md generation from commits
+  - [ ] Version bump to 0.1.0-beta.1
+  - [ ] GitHub Release with release notes
+  - [ ] crates.io publication plan
+  - [ ] **Dependencies:** None (documentation/process)
+  - [ ] **Tests:** Dry-run cargo publish --dry-run
+  - [ ] **Target:** Public beta release
 
 ---
 

@@ -11,6 +11,8 @@ publish = false
 [dependencies]
 honeylink-transport = { path = "../crates/transport" }
 tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
 
 [[bin]]
 name = "simple_chat"

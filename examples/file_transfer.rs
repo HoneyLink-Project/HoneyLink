@@ -13,8 +13,10 @@ use honeylink_transport::{
     manager::TransportManager,
     protocol::{ProtocolStrategy, ProtocolType, StreamPriority},
     quic::QuicTransport,
+    logging::init_tracing,
 };
 use std::sync::Arc;
+use tracing::info;
 
 /// File metadata sent over control stream
 #[derive(Debug)]
@@ -37,34 +39,36 @@ impl FileMetadata {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("📁 HoneyLink P2P File Transfer Example");
-    println!("=======================================\n");
+    // Initialize structured logging
+    init_tracing();
+
+    info!("📁 HoneyLink P2P File Transfer Example");
+    info!("=======================================");
 
     // Configuration
     const CHUNK_SIZE: usize = 1024 * 1024; // 1 MB chunks
     const FILE_SIZE: u64 = 10 * 1024 * 1024; // 10 MB file (simulated)
-    
+
     let metadata = FileMetadata::new("example_file.bin", FILE_SIZE, CHUNK_SIZE);
-    println!("📋 File Transfer Configuration:");
-    println!("   - File: {}", metadata.name);
-    println!("   - Size: {} MB", metadata.size / (1024 * 1024));
-    println!("   - Chunks: {}", metadata.chunks);
-    println!();
+    info!("📋 File Transfer Configuration:");
+    info!("   - File: {}", metadata.name);
+    info!("   - Size: {} MB", metadata.size / (1024 * 1024));
+    info!("   - Chunks: {}", metadata.chunks);
 
     // Step 1: Setup transport
-    println!("1. Setting up transport...");
+    info!("1. Setting up transport...");
     let mut transport = TransportManager::new(ProtocolStrategy::PreferQuic);
     let quic = Arc::new(QuicTransport::new()?);
     transport.register_protocol(ProtocolType::Quic, quic).await;
-    
+
     // Step 2: Connect to peer
     let peer_addr = "127.0.0.1:8081".parse()?;
-    println!("2. Connecting to peer at {}...", peer_addr);
-    
+    info!("2. Connecting to peer at {}", peer_addr);
+
     match transport.connect(peer_addr).await {
         Ok(connection) => {
             println!("   ✅ Connected!");
-            
+
             // Step 3: Open control stream (high priority, low bandwidth)
             println!("3. Opening control stream...");
             match transport
@@ -73,10 +77,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             {
                 Ok(_control_stream) => {
                     println!("   ✅ Control stream ready");
-                    
+
                     // Send file metadata (conceptual)
                     println!("   📤 Sending metadata (conceptual):");
-                    let metadata_msg = format!("FILE:{}:{}:{}", 
+                    let metadata_msg = format!("FILE:{}:{}:{}",
                         metadata.name, metadata.size, metadata.chunks);
                     println!("      Message: {}", metadata_msg);
                 }
@@ -85,24 +89,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     return Ok(());
                 }
             }
-            
+
             // Step 4: Open data streams (normal priority, higher bandwidth)
             println!("4. Opening {} data streams...", metadata.chunks.min(4));
             let concurrent_streams = metadata.chunks.min(4); // Max 4 concurrent chunks
             let bandwidth_per_stream = 10000 / concurrent_streams; // 10 Mbps total
-            
+
             for i in 0..concurrent_streams {
                 match transport
                     .open_prioritized_stream(
-                        &connection, 
-                        StreamPriority::Normal, 
+                        &connection,
+                        StreamPriority::Normal,
                         bandwidth_per_stream as u32
                     )
                     .await
                 {
                     Ok(_data_stream) => {
                         println!("   ✅ Data stream {} opened ({} kbps)", i, bandwidth_per_stream);
-                        
+
                         // Simulate sending chunk (conceptual)
                         let chunk_size_kb = CHUNK_SIZE.min(FILE_SIZE as usize) / 1024;
                         println!("   📤 Chunk {} ready to send ({} KB)", i, chunk_size_kb);
@@ -112,21 +116,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                 }
             }
-            
+
             // Step 5: Monitor QoS
             println!("5. QoS Statistics:");
             let stats = transport.qos_stats().await;
             println!("   📊 Total streams: {}", stats.total_streams);
-            println!("   📊 Allocated bandwidth: {} kbps ({} Mbps)", 
+            println!("   📊 Allocated bandwidth: {} kbps ({} Mbps)",
                 stats.allocated_bandwidth_kbps,
                 stats.allocated_bandwidth_kbps / 1000);
             println!("   📊 Available bandwidth: {} kbps", stats.available_bandwidth_kbps);
-            
+
             // Calculate transfer time estimate
-            let transfer_time_seconds = (FILE_SIZE as f64 * 8.0) / 
+            let transfer_time_seconds = (FILE_SIZE as f64 * 8.0) /
                 (stats.allocated_bandwidth_kbps as f64 * 1000.0);
             println!("   ⏱️  Estimated transfer time: {:.2} seconds", transfer_time_seconds);
-            
+
             // Step 6: Close connection
             println!("6. Closing connection...");
             if let Err(e) = connection.close().await {
@@ -146,13 +150,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             eprintln!("   - Bandwidth throttling based on network conditions");
         }
     }
-    
+
     println!("\n✨ Example complete!");
     println!("\n📖 Key Takeaways:");
     println!("   - Control streams use high priority + low bandwidth");
     println!("   - Data streams use normal priority + high bandwidth");
     println!("   - QoS scheduler allocates bandwidth fairly");
     println!("   - Multiple concurrent streams improve throughput");
-    
+
     Ok(())
 }

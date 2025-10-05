@@ -217,7 +217,7 @@ mod tests {
     #[tokio::test]
     async fn test_record_packet_loss_rate() {
         let config = TelemetryConfig::default();
-        let collector = Arc::new(TelemetryCollector::new(config).unwrap());
+        let collector = Arc::new(TelemetryCollector::with_config(config));
         let telemetry = TransportTelemetryImpl::new(collector.clone());
 
         let result = telemetry.record_packet_loss_rate(0.005, "lora").await;
@@ -227,7 +227,7 @@ mod tests {
     #[tokio::test]
     async fn test_record_link_quality() {
         let config = TelemetryConfig::default();
-        let collector = Arc::new(TelemetryCollector::new(config).unwrap());
+        let collector = Arc::new(TelemetryCollector::with_config(config));
         let telemetry = TransportTelemetryImpl::new(collector.clone());
 
         let metrics = LinkQualityMetrics {
