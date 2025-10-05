@@ -157,7 +157,7 @@ impl ChaCha20Poly1305Cipher {
     /// - `aad`: Additional Authenticated Data (must match encryption AAD)
     ///
     /// # Returns
-    /// - `Vec<u8>`: Decrypted plaintext
+    /// - `Vec<u8>` - Decrypted plaintext
     ///
     /// # Security
     /// - Authentication is verified before decryption (AEAD property)

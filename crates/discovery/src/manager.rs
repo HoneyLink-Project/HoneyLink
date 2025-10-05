@@ -24,7 +24,7 @@ use tracing::{debug, info, warn};
 /// - Supports protocol selection strategies (prefer mDNS, fallback to BLE, etc.)
 ///
 /// # Thread Safety
-/// - All internal state is protected by Arc<RwLock> or Arc<Mutex>
+/// - All internal state is protected by `Arc<RwLock>` or `Arc<Mutex>`
 /// - Event channels use mpsc for cross-task communication
 /// - Protocol implementations must be Send + Sync
 pub struct DiscoveryManager {

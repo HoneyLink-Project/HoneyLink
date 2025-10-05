@@ -133,7 +133,7 @@ async fn test_discovery_timeout_e2e() {
 
     // Verify timeout
     assert!(result.is_err(), "Should fail to connect to unreachable address");
-    assert!(elapsed < Duration::from_secs(15), 
+    assert!(elapsed < Duration::from_secs(15),
         "Should timeout within 15 seconds");
 
     println!("Timeout handled in {:?}", elapsed);
@@ -202,7 +202,7 @@ async fn test_connection_recovery_e2e() {
     // Second connection attempt (recovery)
     let second_result = transport.connect(addr).await;
     let second_ok = second_result.is_ok();
-    
+
     // Both attempts should have same behavior (fail or succeed consistently)
     match (first_ok, second_ok) {
         (true, true) => println!("Both connections succeeded"),
@@ -338,7 +338,7 @@ async fn test_connection_churn_stress_e2e() {
     transport.register_protocol(ProtocolType::Quic, quic).await;
 
     let addr = "127.0.0.1:9010".parse().unwrap();
-    
+
     let start = Instant::now();
     let mut success_count = 0;
 
@@ -353,10 +353,10 @@ async fn test_connection_churn_stress_e2e() {
     let elapsed = start.elapsed();
 
     println!("Connection churn: {}/20 succeeded in {:?}", success_count, elapsed);
-    
+
     // Verify no panics or hangs
     // Note: Each failed connection may take ~5s timeout, so 20 attempts = ~100s worst case
-    assert!(elapsed < Duration::from_secs(120), 
+    assert!(elapsed < Duration::from_secs(120),
         "Should complete within 120 seconds");
 }
 
@@ -370,7 +370,7 @@ async fn test_performance_baseline_latency() {
     transport.register_protocol(ProtocolType::Quic, quic).await;
 
     let addr = "127.0.0.1:9011".parse().unwrap();
-    
+
     let mut latencies = Vec::new();
 
     // Measure 20 connection attempts

@@ -25,7 +25,7 @@ pub struct MdnsDiscovery {
     device_name: String,
     device_type: DeviceType,
 
-    /// mDNS daemon (wrapped in Arc<Mutex> for async access)
+    /// mDNS daemon (wrapped in `Arc<Mutex>` for async access)
     daemon: Arc<Mutex<Option<ServiceDaemon>>>,
 
     /// Discovered devices (device_id -> DeviceInfo)

@@ -1,0 +1,21 @@
+[package]
+name = "honeylink-examples"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+honeylink-transport = { path = "../crates/transport" }
+tokio = { workspace = true, features = ["full"] }
+
+[[bin]]
+name = "simple_chat"
+path = "simple_chat.rs"
+
+[[bin]]
+name = "file_transfer"
+path = "file_transfer.rs"

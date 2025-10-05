@@ -40,11 +40,11 @@ async fn test_priority_based_stream_allocation() {
         let high_result = transport
             .open_prioritized_stream(&conn, StreamPriority::High, 10000)
             .await;
-        
+
         let normal_result = transport
             .open_prioritized_stream(&conn, StreamPriority::Normal, 5000)
             .await;
-        
+
         let low_result = transport
             .open_prioritized_stream(&conn, StreamPriority::Low, 2000)
             .await;
@@ -52,15 +52,15 @@ async fn test_priority_based_stream_allocation() {
         // Verify allocation succeeded
         if high_result.is_ok() && normal_result.is_ok() && low_result.is_ok() {
             let stats = transport.qos_stats().await;
-            
+
             // Verify total bandwidth allocation
-            assert_eq!(stats.allocated_bandwidth_kbps, 17000, 
+            assert_eq!(stats.allocated_bandwidth_kbps, 17000,
                 "Total bandwidth should be 17Mbps (10+5+2)");
-            
+
             // Verify stream count
-            assert_eq!(stats.total_streams, 3, 
+            assert_eq!(stats.total_streams, 3,
                 "Should have 3 active streams");
-            
+
             // Verify available bandwidth
             assert_eq!(stats.available_bandwidth_kbps, 83000,
                 "Should have 83Mbps available (100-17)");
@@ -105,7 +105,7 @@ async fn test_bandwidth_constraint_enforcement() {
             .await;
 
         // Verify rejection
-        assert!(over_limit_result.is_err(), 
+        assert!(over_limit_result.is_err(),
             "Should reject stream allocation that exceeds bandwidth limit");
 
         conn.close().await.expect("Failed to close connection");
@@ -129,20 +129,20 @@ async fn test_priority_ordering_verification() {
         let _low = transport
             .open_prioritized_stream(&conn, StreamPriority::Low, 1000)
             .await;
-        
+
         let _normal = transport
             .open_prioritized_stream(&conn, StreamPriority::Normal, 1000)
             .await;
-        
+
         let _high = transport
             .open_prioritized_stream(&conn, StreamPriority::High, 1000)
             .await;
 
         // Verify all streams allocated
         let stats = transport.qos_stats().await;
-        assert_eq!(stats.total_streams, 3, 
+        assert_eq!(stats.total_streams, 3,
             "Should have 3 streams regardless of allocation order");
-        
+
         assert_eq!(stats.allocated_bandwidth_kbps, 3000,
             "Should allocate total 3Mbps");
 
@@ -179,7 +179,7 @@ async fn test_fairness_across_priority_levels() {
         let stats = transport.qos_stats().await;
         assert_eq!(stats.total_streams, 5,
             "Should allocate 5 streams");
-        
+
         assert_eq!(stats.allocated_bandwidth_kbps, 10000,
             "Should allocate 2Mbps × 5 = 10Mbps total");
 
@@ -237,11 +237,11 @@ async fn test_concurrent_stream_stress_test() {
 
     if let Ok(conn) = conn_result {
         let start = std::time::Instant::now();
-        
+
         // Allocate 100 streams (1Mbps each = 100Mbps total)
         let mut streams = Vec::new();
         let mut success_count = 0;
-        
+
         for i in 0..100 {
             let priority = match i % 3 {
                 0 => StreamPriority::High,
@@ -262,13 +262,13 @@ async fn test_concurrent_stream_stress_test() {
 
         // Verify allocations
         let stats = transport.qos_stats().await;
-        
+
         println!("Allocated {} streams in {:?}", success_count, elapsed);
         println!("QoS Stats: {:?}", stats);
 
         // Basic assertions (adjust based on scheduler limits)
         assert!(success_count > 0, "Should allocate at least some streams");
-        assert!(elapsed < Duration::from_secs(10), 
+        assert!(elapsed < Duration::from_secs(10),
             "Allocation should complete within 10 seconds");
 
         // Verify no resource leaks
@@ -292,11 +292,11 @@ async fn test_mixed_priority_stream_allocation() {
     let conn_result = transport.connect(addr).await;
 
     if let Ok(conn) = conn_result {
-        // Realistic scenario: 
+        // Realistic scenario:
         // - 2 high-priority video streams (5Mbps each)
         // - 5 normal telemetry streams (1Mbps each)
         // - 3 low-priority background streams (2Mbps each)
-        
+
         let mut streams = Vec::new();
 
         // High priority (video)
@@ -330,7 +330,7 @@ async fn test_mixed_priority_stream_allocation() {
         }
 
         let stats = transport.qos_stats().await;
-        
+
         // Verify allocation
         // Total: 2×5 + 5×1 + 3×2 = 10 + 5 + 6 = 21 Mbps
         if streams.len() == 10 {
@@ -370,14 +370,14 @@ async fn test_qos_stats_accuracy() {
             .await;
 
         let stats = transport.qos_stats().await;
-        
+
         if _stream.is_ok() {
             // Verify stats accuracy
             assert_eq!(stats.total_streams, 1, "Should track 1 stream");
             assert_eq!(stats.allocated_bandwidth_kbps, 15000, "Should track 15Mbps");
-            assert_eq!(stats.available_bandwidth_kbps, 85000, 
+            assert_eq!(stats.available_bandwidth_kbps, 85000,
                 "Should have 85Mbps available (100-15)");
-            
+
             // Verify consistency
             assert_eq!(
                 stats.total_bandwidth_kbps,

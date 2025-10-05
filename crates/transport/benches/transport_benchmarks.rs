@@ -26,14 +26,14 @@ use tokio::runtime::Runtime;
 /// Measures time to establish QUIC connection
 fn bench_connection_establishment(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
-    
+
     c.bench_function("connection_establishment", |b| {
         b.iter(|| {
             rt.block_on(async {
                 let mut transport = TransportManager::new(ProtocolStrategy::PreferQuic);
                 let quic = Arc::new(QuicTransport::new().expect("Failed to create QUIC"));
                 transport.register_protocol(ProtocolType::Quic, quic).await;
-                
+
                 let addr = "127.0.0.1:10000".parse().unwrap();
                 let _ = transport.connect(black_box(addr)).await;
             });
@@ -46,14 +46,14 @@ fn bench_connection_establishment(c: &mut Criterion) {
 /// Measures time to open a stream on established connection
 fn bench_stream_opening(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
-    
+
     c.bench_function("stream_opening", |b| {
         b.iter(|| {
             rt.block_on(async {
                 let mut transport = TransportManager::new(ProtocolStrategy::PreferQuic);
                 let quic = Arc::new(QuicTransport::new().expect("Failed to create QUIC"));
                 transport.register_protocol(ProtocolType::Quic, quic).await;
-                
+
                 let addr = "127.0.0.1:10001".parse().unwrap();
                 if let Ok(conn) = transport.connect(addr).await {
                     let _ = transport
@@ -72,7 +72,7 @@ fn bench_stream_opening(c: &mut Criterion) {
 fn bench_qos_priority_overhead(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
     let mut group = c.benchmark_group("qos_priority");
-    
+
     for priority in [StreamPriority::Low, StreamPriority::Normal, StreamPriority::High] {
         group.bench_with_input(
             BenchmarkId::from_parameter(format!("{:?}", priority)),
@@ -83,7 +83,7 @@ fn bench_qos_priority_overhead(c: &mut Criterion) {
                         let mut transport = TransportManager::new(ProtocolStrategy::PreferQuic);
                         let quic = Arc::new(QuicTransport::new().expect("Failed to create QUIC"));
                         transport.register_protocol(ProtocolType::Quic, quic).await;
-                        
+
                         let addr = "127.0.0.1:10002".parse().unwrap();
                         if let Ok(conn) = transport.connect(addr).await {
                             let _ = transport
@@ -96,7 +96,7 @@ fn bench_qos_priority_overhead(c: &mut Criterion) {
             },
         );
     }
-    
+
     group.finish();
 }
 
@@ -106,7 +106,7 @@ fn bench_qos_priority_overhead(c: &mut Criterion) {
 fn bench_multi_stream_scalability(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
     let mut group = c.benchmark_group("multi_stream_scalability");
-    
+
     for stream_count in [10, 50, 100] {
         group.throughput(Throughput::Elements(stream_count));
         group.bench_with_input(
@@ -118,7 +118,7 @@ fn bench_multi_stream_scalability(c: &mut Criterion) {
                         let mut transport = TransportManager::new(ProtocolStrategy::PreferQuic);
                         let quic = Arc::new(QuicTransport::new().expect("Failed to create QUIC"));
                         transport.register_protocol(ProtocolType::Quic, quic).await;
-                        
+
                         let addr = "127.0.0.1:10003".parse().unwrap();
                         if let Ok(conn) = transport.connect(addr).await {
                             let mut streams = Vec::new();
@@ -137,7 +137,7 @@ fn bench_multi_stream_scalability(c: &mut Criterion) {
             },
         );
     }
-    
+
     group.finish();
 }
 
@@ -146,14 +146,14 @@ fn bench_multi_stream_scalability(c: &mut Criterion) {
 /// Measures overhead of stats API
 fn bench_qos_stats_retrieval(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
-    
+
     c.bench_function("qos_stats_retrieval", |b| {
         b.iter(|| {
             rt.block_on(async {
                 let mut transport = TransportManager::new(ProtocolStrategy::PreferQuic);
                 let quic = Arc::new(QuicTransport::new().expect("Failed to create QUIC"));
                 transport.register_protocol(ProtocolType::Quic, quic).await;
-                
+
                 let _ = black_box(transport.qos_stats().await);
             });
         });
@@ -165,21 +165,21 @@ fn bench_qos_stats_retrieval(c: &mut Criterion) {
 /// Measures performance of connection reuse
 fn bench_connection_pooling(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
-    
+
     c.bench_function("connection_pooling", |b| {
         b.iter(|| {
             rt.block_on(async {
                 let mut transport = TransportManager::new(ProtocolStrategy::PreferQuic);
                 let quic = Arc::new(QuicTransport::new().expect("Failed to create QUIC"));
                 transport.register_protocol(ProtocolType::Quic, quic).await;
-                
+
                 let addr = "127.0.0.1:10004".parse().unwrap();
-                
+
                 // First connection
                 if let Ok(conn1) = transport.connect(black_box(addr)).await {
                     let _ = conn1.close().await;
                 }
-                
+
                 // Second connection (should reuse or be faster)
                 if let Ok(conn2) = transport.connect(black_box(addr)).await {
                     let _ = conn2.close().await;
@@ -194,14 +194,14 @@ fn bench_connection_pooling(c: &mut Criterion) {
 /// Measures cost of changing stream priorities
 fn bench_priority_switching(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
-    
+
     c.bench_function("priority_switching", |b| {
         b.iter(|| {
             rt.block_on(async {
                 let mut transport = TransportManager::new(ProtocolStrategy::PreferQuic);
                 let quic = Arc::new(QuicTransport::new().expect("Failed to create QUIC"));
                 transport.register_protocol(ProtocolType::Quic, quic).await;
-                
+
                 let addr = "127.0.0.1:10005".parse().unwrap();
                 if let Ok(conn) = transport.connect(addr).await {
                     // Open low priority stream
@@ -227,7 +227,7 @@ fn bench_priority_switching(c: &mut Criterion) {
 /// Measures overhead of manager setup
 fn bench_manager_initialization(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
-    
+
     c.bench_function("manager_initialization", |b| {
         b.iter(|| {
             rt.block_on(async {
@@ -244,7 +244,7 @@ criterion_group! {
     config = Criterion::default()
         .measurement_time(Duration::from_secs(10))
         .sample_size(50);
-    targets = 
+    targets =
         bench_connection_establishment,
         bench_stream_opening,
         bench_qos_priority_overhead,

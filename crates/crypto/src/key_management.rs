@@ -24,7 +24,7 @@ pub struct KeyHierarchy {
 }
 
 impl KeyHierarchy {
-    /// Create a new key hierarchy with a root key (Vec<u8>)
+    /// Create a new key hierarchy with a root key (`Vec<u8>`)
     pub fn new(root_key: Vec<u8>) -> Self {
         Self {
             root_key: Zeroizing::new(root_key),

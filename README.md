@@ -12,6 +12,7 @@
 
 ## 📋 目次
 
+- [Quick Start](#-quick-start)
 - [概要](#概要)
 - [P2Pアーキテクチャ](#p2pアーキテクチャ)
 - [Bluetoothとの比較](#bluetoothとの比較)
@@ -23,6 +24,66 @@
 - [コントリビューション](#コントリビューション)
 - [ドキュメント](#ドキュメント)
 - [ライセンス](#ライセンス)
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# 1. Clone repository
+git clone https://github.com/HoneyLink-Project/HoneyLink.git
+cd HoneyLink
+
+# 2. Install Rust (if not installed)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# 3. Build all crates
+cargo build --workspace
+
+# 4. Run tests
+cargo test --workspace
+
+# 5. Run benchmarks
+cargo bench -p honeylink-transport
+```
+
+### Using HoneyLink Transport API
+
+```rust
+use honeylink_transport::{
+    manager::TransportManager,
+    protocol::{ProtocolStrategy, ProtocolType, StreamPriority},
+    quic::QuicTransport,
+};
+use std::sync::Arc;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create Transport Manager with QUIC preference
+    let mut transport = TransportManager::new(ProtocolStrategy::PreferQuic);
+    
+    // Register QUIC protocol
+    let quic = Arc::new(QuicTransport::new()?);
+    transport.register_protocol(ProtocolType::Quic, quic).await;
+    
+    // Connect to peer
+    let peer_addr = "127.0.0.1:8080".parse()?;
+    let connection = transport.connect(peer_addr).await?;
+    
+    // Open prioritized stream (High priority, 5 Mbps)
+    let stream = transport
+        .open_prioritized_stream(&connection, StreamPriority::High, 5000)
+        .await?;
+    
+    println!("Connected! Stream opened with high priority");
+    
+    // Get QoS statistics
+    let stats = transport.qos_stats().await;
+    println!("QoS Stats: {:?}", stats);
+    
+    Ok(())
+}
+```
 
 ---
 
@@ -358,6 +419,59 @@ cargo run --package honeylink-crypto --features cli --bin honeylink-keygen statu
 - 🔒 本番環境では Vault/KMS から鍵を取得してください
 - 🚫 生成された鍵をバージョン管理システムにコミットしないでください
 - ✅ すべての暗号処理は RustCrypto クレートを使用 (C/C++ 依存ゼロ)
+
+---
+
+## 📚 Examples
+
+HoneyLink™ includes example applications demonstrating API usage:
+
+### Simple P2P Chat
+
+Demonstrates basic connection and stream usage:
+
+```bash
+# View source code
+cat examples/simple_chat.rs
+
+# Run example (requires QUIC server at 127.0.0.1:8080)
+cargo run --example simple_chat
+```
+
+**Features demonstrated:**
+- TransportManager creation
+- Protocol registration
+- Connection establishment
+- Prioritized stream opening
+- QoS statistics monitoring
+
+### File Transfer
+
+Shows multi-stream file transfer with QoS:
+
+```bash
+# View source code
+cat examples/file_transfer.rs
+
+# Run example (requires QUIC server at 127.0.0.1:8081)
+cargo run --example file_transfer
+```
+
+**Features demonstrated:**
+- Control stream (high priority, low bandwidth)
+- Multiple data streams (normal priority, high bandwidth)
+- Bandwidth allocation across streams
+- Progress tracking pattern
+- Transfer time estimation
+
+### Running Examples
+
+Examples are self-contained but require a QUIC server to fully function. In production use:
+
+1. Use `honeylink-discovery` to find nearby peers
+2. Display discovered devices in UI
+3. Connect after user selection
+4. Open streams with appropriate priorities
 
 ---
 

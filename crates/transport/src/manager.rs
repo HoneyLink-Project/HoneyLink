@@ -18,7 +18,7 @@
 //! - **Protocol abstraction**: TransportProtocol trait enables pluggable backends
 //! - **Connection pooling**: Reuses existing connections for performance
 //! - **Failover logic**: Automatic fallback when primary protocol fails
-//! - **Thread-safe**: All state protected by Arc<RwLock> and tokio::sync primitives
+//! - **Thread-safe**: All state protected by `Arc<RwLock>` and tokio::sync primitives
 
 use crate::protocol::{
     Connection, ProtocolStrategy, ProtocolType, Result, StreamPriority, TransportError, TransportProtocol,
@@ -38,7 +38,7 @@ use tracing::{debug, error, info, warn};
 /// for connection establishment, pooling, and lifecycle management.
 ///
 /// # Thread Safety
-/// - All internal state is protected by Arc<RwLock>
+/// - All internal state is protected by `Arc<RwLock>`
 /// - Protocol implementations must be Send + Sync
 /// - Safe to clone and share across tasks
 #[derive(Clone)]

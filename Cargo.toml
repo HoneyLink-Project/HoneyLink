@@ -12,6 +12,8 @@ members = [
     "crates/telemetry",
     "crates/physical-adapter",
     "crates/experience",
+    # Example applications
+    "examples",
 ]
 
 [workspace.package]
