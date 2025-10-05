@@ -214,16 +214,18 @@
 
 **Architecture:** Trait-based design (similar to Phase 1 DiscoveryProtocol)
 
-### 4.1 Transport Protocol Abstraction
-- [ ] **Task 4.1.1:** Transport Trait Definition (`crates/transport/src/protocol.rs`)
-  - [ ] TransportProtocol trait with async methods
-  - [ ] Connection establishment (connect/listen)
-  - [ ] Data send/receive API (stream-based)
-  - [ ] Connection lifecycle management (close/timeout)
-  - [ ] Error handling (connection failures, network errors)
-  - [ ] Pluggable backend support (QUIC, WebRTC)
-  - [ ] **Dependencies:** async-trait 0.1 (Pure Rust)
-  - [ ] **Tests:** Trait-based mock tests
+### 4.1 Transport Protocol Abstraction ✅
+- [x] **Task 4.1.1:** Transport Trait Definition (`crates/transport/src/protocol.rs`) ✅
+  - [x] TransportProtocol trait with async methods ✅
+  - [x] Connection establishment (connect/listen) ✅
+  - [x] Data send/receive API (stream-based) ✅
+  - [x] Connection lifecycle management (close/timeout) ✅
+  - [x] Error handling (connection failures, network errors) ✅
+  - [x] Pluggable backend support (QUIC, WebRTC) ✅
+  - [x] **Dependencies:** async-trait 0.1 (Pure Rust) ✅
+  - [x] **Tests:** 20 unit tests (19 passed, 1 ignored) ✅
+  - [x] **Build:** WSL Linux環境で成功 (Rust 1.89.0 GNU) ✅
+  - [x] **Commit:** 4cfae59 ✅
 
 ### 4.2 QUIC Implementation (Primary Transport)
 - [ ] **Task 4.2.1:** QUIC Backend (`crates/transport/src/quic.rs`)
