@@ -90,7 +90,7 @@ impl TransportManager {
         // - 100 Mbps total bandwidth (100,000 kbps)
         // - 100 parallel streams (project requirement)
         let qos_scheduler = QoSScheduler::with_limits(100_000, 100);
-        
+
         Self {
             protocols: Arc::new(RwLock::new(HashMap::new())),
             connections: Arc::new(RwLock::new(HashMap::new())),
@@ -524,11 +524,11 @@ impl TransportManager {
     ///     let manager = TransportManager::new(ProtocolStrategy::PreferQuic);
     ///     let addr = "127.0.0.1:8080".parse()?;
     ///     let conn = manager.connect(addr).await?;
-    ///     
+    ///
     ///     // Open high-priority video stream (5000 kbps)
     ///     let stream = manager.open_prioritized_stream(
-    ///         &conn, 
-    ///         StreamPriority::High, 
+    ///         &conn,
+    ///         StreamPriority::High,
     ///         5000
     ///     ).await?;
     ///     Ok(())
@@ -601,7 +601,7 @@ impl TransportManager {
     pub async fn release_stream(&self, stream_id: honeylink_core::types::StreamId, bandwidth_kbps: u32) {
         let mut scheduler = self.qos_scheduler.lock().await;
         scheduler.release_stream(stream_id, bandwidth_kbps);
-        
+
         debug!("Released stream {:?} with bandwidth {} kbps", stream_id, bandwidth_kbps);
     }
 

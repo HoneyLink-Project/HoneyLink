@@ -29,8 +29,9 @@
 | **Phase 3** | Unit Tests | 100% | Complete ✅ |
 | **Phase 4** | P2P Transport | 100% | Complete ✅ |
 | **Phase 5** | Multi-stream QoS | 100% | Q3 2025 |
-| **Phase 6** | Integration Tests | 0% | Q3 2025 |
-| **Phase 7** | Beta Release | 0% | Q4 2025 |
+| **Phase 6** | Integration Tests | 33% | Q3 2025 |
+| **Phase 7** | Performance & Polish | 0% | Q3 2025 |
+| **Phase 8** | Beta Release | 0% | Q4 2025 |
 
 ---
 
@@ -298,7 +299,45 @@
 
 ---
 
-## Phase 6-7: [Detailed tasks to be defined]
+## Phase 6: Integration Tests (Next)
+
+**Goal:** End-to-end integration tests across Discovery, Transport, and QoS modules
+
+### 6.1 Discovery + Transport Integration
+- [x] **Task 6.1.1:** Discovery to Transport Integration Test ✅
+  - [x] Simulated discovery → QUIC connection flow
+  - [x] Multi-peer connection management
+  - [x] QoS integration after connection
+  - [x] Connection timeout handling
+  - [x] Discovery result processing
+  - [x] Connection pooling with discovery
+  - [x] **Dependencies:** crates/discovery, crates/transport
+  - [x] **Tests:** 6 integration tests (all passed)
+  - [x] **Implementation:** crates/transport/tests/integration_discovery_transport.rs
+
+### 6.2 Transport + QoS Integration
+- [ ] **Task 6.2.1:** Multi-stream QoS Integration Test
+  - [ ] Priority-based stream allocation across multiple connections
+  - [ ] Bandwidth fairness verification under constraints
+  - [ ] Stream switching smoothness (priority changes)
+  - [ ] Concurrent stream stress test (100 streams)
+  - [ ] **Dependencies:** crates/transport, crates/qos-scheduler
+  - [ ] **Tests:** QoS fairness, bandwidth allocation, priority ordering
+  - [ ] **Target:** 100 parallel streams with fair bandwidth distribution
+
+### 6.3 Full-Stack E2E Tests
+- [ ] **Task 6.3.1:** Complete Flow Integration Test
+  - [ ] Device discovery (mDNS/BLE) → Pairing → Multi-stream → Disconnect
+  - [ ] Simulated 2-device environment (localhost)
+  - [ ] CI/CD integration (automated test suite)
+  - [ ] Performance validation (latency, throughput, success rate)
+  - [ ] **Dependencies:** All Phase 0-5 modules
+  - [ ] **Tests:** E2E test suite with realistic scenarios
+  - [ ] **Target:** 99% success rate, P95 latency <15ms
+
+---
+
+## Phase 7: [Detailed tasks to be defined]
 
 ---
 
