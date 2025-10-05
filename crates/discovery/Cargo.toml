@@ -1,10 +1,16 @@
 [package]
 name = "honeylink-discovery"
-version = "0.1.0"
-edition = "2021"
-authors = ["HoneyLink Project"]
-license = "MIT"
-description = "P2P device discovery (mDNS + BLE) for HoneyLink"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "P2P peer discovery with mDNS and manual peer addition"
 
 [dependencies]
 # mDNS-SD Pure Rust implementation

@@ -19,15 +19,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-      
+
       - name: Build rustdoc
         run: |
           cargo doc --workspace --no-deps --all-features
           echo '<meta http-equiv="refresh" content="0; url=honeylink_transport/index.html">' > target/doc/index.html
-      
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

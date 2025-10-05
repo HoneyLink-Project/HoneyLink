@@ -6,6 +6,11 @@ rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "QoS scheduler with weighted fair queuing and 8 priority levels"
 
 [dependencies]
 honeylink-core = { path = "../core" }

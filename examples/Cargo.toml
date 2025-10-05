@@ -6,6 +6,7 @@ rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "Example applications demonstrating HoneyLink P2P features"
 publish = false
 
 [dependencies]
