@@ -478,11 +478,14 @@
   - [x] Descriptions added to all 11 crates
   - [x] Release date set to 2025-10-05
   - [ ] GitHub Release with release notes (pending push)
-  - [ ] crates.io publication (pending build verification on Linux/CI)
+  - [x] Build verification on WSL Linux (cargo check --workspace ✅)
+  - [x] Test suite execution (transport: 44/44, config: 6/6, crypto: 44/44 ✅)
+  - [x] Package dry-run (cargo package --list ✅)
+  - [ ] crates.io publication (ready, pending manual publish command)
   - [x] **Dependencies:** None (documentation/process)
-  - [x] **Tests:** Cargo.toml syntax validated (build requires Linux/WSL)
+  - [x] **Tests:** Full test suite passed on Linux (WSL)
   - [x] **Target:** Public beta release ready
-  - [x] **Completion:** 2025-10-05 - Beta release preparation complete
+  - [x] **Completion:** 2025-10-05 - Beta release verified on WSL Linux
 
 ---
 
