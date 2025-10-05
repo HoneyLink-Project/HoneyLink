@@ -347,7 +347,43 @@
 
 ---
 
-## Phase 7: [Detailed tasks to be defined]
+## Phase 7: Performance & Polish (Next)
+
+**Goal:** Performance benchmarking, documentation polish, and production readiness
+
+**Phase 7 Assumptions (execute.prompt.md 原則 - 合理的な仮定を明示):**
+- Phase 0-6で基本機能完成 (Discovery, Transport, QoS, Integration Tests完了)
+- TODO.md表記「Performance & Polish」に従い、性能測定と本番準備を優先
+- spec/performance/benchmark.md要件: P99 ≤ 120ms, スループット ≥ 95%, パケット損失 ≤ 0.2%
+- requirements.md「性能 (Bluetooth超越)」要件を満たす
+
+### 7.1 Performance Benchmarking
+- [ ] **Task 7.1.1:** Criterion.rs Benchmark Suite
+  - [ ] Connection establishment latency (P50/P95/P99)
+  - [ ] Stream throughput measurement (single/multi-stream)
+  - [ ] QoS overhead analysis (priority switching cost)
+  - [ ] Multi-stream scalability (10/50/100 concurrent streams)
+  - [ ] **Dependencies:** Criterion 0.5 (Pure Rust), honeylink-transport
+  - [ ] **Target:** P99 ≤ 120ms (spec/performance/benchmark.md)
+  - [ ] **Implementation:** benches/ directory with comparison reports
+
+### 7.2 Documentation & Examples
+- [ ] **Task 7.2.1:** Core Documentation Polish
+  - [ ] README.md: Project overview, build instructions, quick start
+  - [ ] CONTRIBUTING.md: Contribution guidelines, PR workflow
+  - [ ] API documentation: Complete rustdoc for all public APIs
+  - [ ] Example applications: P2P chat demo, file transfer demo
+  - [ ] **Dependencies:** None (documentation only)
+  - [ ] **Target:** OSS-ready documentation for beta release
+
+### 7.3 Production Readiness
+- [ ] **Task 7.3.1:** Production Infrastructure
+  - [ ] Error handling audit (all unwrap() replaced with proper errors)
+  - [ ] Logging infrastructure (tracing + OpenTelemetry integration)
+  - [ ] Configuration management (TOML-based config files)
+  - [ ] CI/CD enhancements (GitHub Actions, automated benchmarks)
+  - [ ] **Dependencies:** tracing 0.1, opentelemetry 0.20, serde 1.0
+  - [ ] **Target:** Production-ready codebase for Phase 8 beta
 
 ---
 
