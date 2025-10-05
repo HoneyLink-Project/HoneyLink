@@ -15,6 +15,7 @@ use thiserror::Error;
 
 pub mod quic;
 pub mod webrtc;
+pub mod manager;
 
 // Phase 4: Transport protocol abstraction (QUIC/WebRTC)
 pub mod protocol;
