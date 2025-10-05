@@ -25,6 +25,20 @@ quic_idle_timeout_secs = 300
 # Maximum number of parallel streams per connection
 max_streams_per_connection = 100
 
+# Certificate pinning (Phase 9.1 - Production Security)
+# SHA-256 fingerprints of trusted server certificates (hex-encoded, case-insensitive)
+# Empty list = no pinning (accept any valid certificate, backward compatible)
+# Multiple pins = support certificate rotation (any match succeeds)
+#
+# To generate a fingerprint:
+#   openssl x509 -in cert.pem -noout -fingerprint -sha256 | sed 's/://g'
+#
+# Example (dummy fingerprint):
+# pinned_certs = [
+#     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+# ]
+pinned_certs = []
+
 [qos]
 # Maximum bandwidth in Mbps (for QoS scheduling)
 max_bandwidth_mbps = 100

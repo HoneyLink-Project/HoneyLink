@@ -26,6 +26,11 @@ async-trait = "0.1"
 reed-solomon-erasure = "6.0"
 crc32fast = "1.4"
 
+# Certificate pinning (Pure Rust)
+sha2 = "0.10"         # SHA-256 fingerprint calculation
+hex = "0.4"           # Hex encoding/decoding
+webpki-roots = "0.26" # Mozilla's CA root certificates
+
 # QUIC transport (Pure Rust implementation)
 # CRITICAL: Disable default features to avoid aws-lc-sys (C/C++ dependency)
 # Use ring-based crypto provider instead (Pure Rust)

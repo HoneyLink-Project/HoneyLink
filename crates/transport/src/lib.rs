@@ -13,6 +13,7 @@ use async_trait::async_trait;
 use std::time::Duration;
 use thiserror::Error;
 
+pub mod cert_pinning;
 pub mod quic;
 pub mod webrtc;
 pub mod manager;

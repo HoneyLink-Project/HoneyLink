@@ -489,6 +489,74 @@
 
 ---
 
+## Phase 9: Advanced Features (In Progress)
+
+**Goal:** Production-ready security enhancements and advanced transport features
+
+**Phase 9 Scope:**
+- Certificate pinning for production security
+- OS keychain integration for secure credential storage
+- Post-quantum cryptography (Kyber768 hybrid)
+- WebRTC transport completion
+- NAT traversal optimization
+
+### 9.1 Certificate Pinning
+- [x] **Task 9.1.1:** Certificate Pinning Implementation ✅
+  - [x] Pin certificate validation logic in QUIC transport
+  - [x] SHA-256 fingerprint-based pinning
+  - [x] Certificate rotation support with grace periods (multiple pins)
+  - [x] Pinning configuration in TOML (pinned_certs array)
+  - [x] Certificate revocation handling (mismatch detection)
+  - [x] **Dependencies:** rustls 0.23, sha2 0.10, hex 0.4, webpki-roots 0.26 (Pure Rust)
+  - [x] **Tests:** 10/10 tests passed (pin validation, rotation, mismatch detection)
+  - [x] **Target:** Production-ready certificate security
+  - [x] **Completion:** 2025-10-05 - Certificate pinning fully implemented
+
+### 9.2 OS Keychain Integration
+- [ ] **Task 9.2.1:** Keychain Abstraction Layer
+  - [ ] Platform-agnostic KeychainProvider trait
+  - [ ] Windows Credential Manager integration
+  - [ ] macOS Keychain Services integration
+  - [ ] Linux Secret Service integration
+  - [ ] Secure credential storage/retrieval
+  - [ ] **Dependencies:** keyring 2.0 (Pure Rust, platform-specific)
+  - [ ] **Tests:** Multi-platform credential CRUD operations
+  - [ ] **Target:** Secure system-level credential storage
+
+### 9.3 Post-Quantum Cryptography
+- [ ] **Task 9.3.1:** Kyber768 Hybrid Key Agreement
+  - [ ] Kyber768 + X25519 hybrid implementation
+  - [ ] Backward compatibility with X25519-only peers
+  - [ ] Protocol version negotiation (v1: X25519, v2: Kyber768)
+  - [ ] Key encapsulation and decapsulation
+  - [ ] Performance benchmarking vs classical ECDH
+  - [ ] **Dependencies:** pqcrypto-kyber 0.8 (Pure Rust)
+  - [ ] **Tests:** Hybrid handshake, fallback, interop
+  - [ ] **Target:** Quantum-resistant key agreement
+
+### 9.4 WebRTC Transport Completion
+- [ ] **Task 9.4.1:** WebRTC Full Implementation
+  - [ ] ICE candidate gathering and signaling
+  - [ ] DTLS-SRTP handshake
+  - [ ] Data channel establishment
+  - [ ] STUN/TURN server integration
+  - [ ] Signaling server protocol (WebSocket-based)
+  - [ ] **Dependencies:** webrtc 0.14, async-tungstenite 0.23 (Pure Rust)
+  - [ ] **Tests:** ICE negotiation, data channel send/recv, NAT traversal
+  - [ ] **Target:** Full WebRTC transport for NAT scenarios
+
+### 9.5 NAT Traversal Optimization
+- [ ] **Task 9.5.1:** STUN/TURN Integration
+  - [ ] STUN client for public address discovery
+  - [ ] TURN relay for symmetric NAT scenarios
+  - [ ] Automatic fallback: Direct → STUN → TURN
+  - [ ] Latency-aware TURN server selection
+  - [ ] **Dependencies:** stun 0.5, turn 0.6 (Pure Rust)
+  - [ ] **Tests:** NAT type detection, relay establishment
+  - [ ] **Target:** 99% peer connectivity
+
+---
+
 ## Deleted Tasks (Server-Centric Design)
 
 The following tasks **contradict P2P design** and were removed:

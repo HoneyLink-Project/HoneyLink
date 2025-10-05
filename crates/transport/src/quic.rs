@@ -151,6 +151,89 @@ impl QuicTransport {
         client_config
     }
 
+    /// Builds client configuration with certificate pinning (Phase 9.1 - Production)
+    ///
+    /// # Arguments
+    /// - `pinned_certs`: SHA-256 fingerprints of trusted certificates (hex strings)
+    ///
+    /// # Security
+    /// If `pinned_certs` is empty, falls back to standard WebPKI validation.
+    /// If pins are provided, the server certificate MUST match at least one pin.
+    ///
+    /// # Example
+    /// ```no_run
+    /// use honeylink_transport::quic::QuicTransport;
+    /// let pins = vec!["e3b0c44...".to_string()];
+    /// let transport = QuicTransport::with_cert_pinning(pins).unwrap();
+    /// ```
+    fn build_client_config_with_pinning(pinned_certs: Vec<String>) -> ClientConfig {
+        use crate::cert_pinning::PinnedCertVerifier;
+
+        let verifier = Arc::new(PinnedCertVerifier::new(pinned_certs));
+
+        let mut client_crypto = rustls::ClientConfig::builder()
+            .dangerous()
+            .with_custom_certificate_verifier(verifier)
+            .with_no_client_auth();
+
+        client_crypto.alpn_protocols = vec![b"hq-29".to_vec()];
+
+        let mut client_config = ClientConfig::new(Arc::new(
+            quinn::crypto::rustls::QuicClientConfig::try_from(client_crypto)
+                .expect("QUIC client configuration should be valid (internal error)"),
+        ));
+
+        // Same performance tuning as server
+        let mut transport_config = quinn::TransportConfig::default();
+        transport_config.max_concurrent_bidi_streams(100u32.into());
+        transport_config.max_concurrent_uni_streams(100u32.into());
+        transport_config.keep_alive_interval(Some(Duration::from_secs(5)));
+
+        client_config.transport_config(Arc::new(transport_config));
+
+        client_config
+    }
+
+    /// Creates a new QUIC transport with certificate pinning (Phase 9.1 - Production)
+    ///
+    /// # Arguments
+    /// - `pinned_certs`: SHA-256 fingerprints of trusted certificates (hex strings)
+    ///
+    /// # Security Model
+    /// - Empty list: Standard WebPKI validation (backward compatible)
+    /// - With pins: Certificate MUST match at least one pin (MITM protection)
+    /// - Multiple pins: Enables certificate rotation (grace period support)
+    ///
+    /// # Example
+    /// ```no_run
+    /// use honeylink_transport::quic::QuicTransport;
+    ///
+    /// // Production mode with pinning
+    /// let pins = vec![
+    ///     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855".to_string(),
+    /// ];
+    /// let transport = QuicTransport::with_cert_pinning(pins).unwrap();
+    ///
+    /// // Development mode (no pinning)
+    /// let transport = QuicTransport::with_cert_pinning(vec![]).unwrap();
+    /// ```
+    pub fn with_cert_pinning(pinned_certs: Vec<String>) -> Result<Self> {
+        // Generate self-signed certificate for testing
+        let (cert, key) = Self::generate_self_signed_cert()?;
+
+        // Server configuration: accept connections with TLS 1.3
+        let server_config = Self::build_server_config(cert.clone(), key)?;
+
+        // Client configuration: use certificate pinning
+        let client_config = Self::build_client_config_with_pinning(pinned_certs);
+
+        Ok(Self {
+            endpoint: Arc::new(Mutex::new(None)),
+            server_config,
+            client_config,
+        })
+    }
+
     /// Initializes endpoint if not already initialized
     async fn ensure_endpoint(&self, addr: SocketAddr) -> Result<Endpoint> {
         let mut endpoint_guard = self.endpoint.lock().await;

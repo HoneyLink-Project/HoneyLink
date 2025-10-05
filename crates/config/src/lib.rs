@@ -116,6 +116,14 @@ pub struct TransportConfig {
     pub quic_idle_timeout_secs: u64,
     /// Maximum number of streams per connection
     pub max_streams_per_connection: u64,
+    /// Certificate pinning: SHA-256 fingerprints of trusted certificates (Phase 9.1)
+    ///
+    /// When configured, only certificates matching these fingerprints will be accepted.
+    /// Empty list = no pinning (backward compatible).
+    /// Multiple pins = support certificate rotation (OR logic).
+    ///
+    /// Example: ["e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"]
+    pub pinned_certs: Vec<String>,
 }
 
 /// QoS scheduler configuration
@@ -203,6 +211,7 @@ impl Default for TransportConfig {
             enable_webrtc: false,
             quic_idle_timeout_secs: 300,
             max_streams_per_connection: 100,
+            pinned_certs: Vec::new(), // No pinning by default (backward compatible)
         }
     }
 }
