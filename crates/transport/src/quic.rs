@@ -136,7 +136,8 @@ impl QuicTransport {
         client_crypto.alpn_protocols = vec![b"hq-29".to_vec()];
 
         let mut client_config = ClientConfig::new(Arc::new(
-            quinn::crypto::rustls::QuicClientConfig::try_from(client_crypto).unwrap(),
+            quinn::crypto::rustls::QuicClientConfig::try_from(client_crypto)
+                .expect("QUIC client configuration should be valid (internal error)"),
         ));
 
         // Same performance tuning as server
