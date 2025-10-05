@@ -18,5 +18,12 @@ async-trait = "0.1"
 reed-solomon-erasure = "6.0"
 crc32fast = "1.4"
 
+# QUIC transport (Pure Rust implementation)
+# CRITICAL: Disable default features to avoid aws-lc-sys (C/C++ dependency)
+# Use ring-based crypto provider instead (Pure Rust)
+quinn = { version = "0.11", default-features = false, features = ["rustls-ring", "runtime-tokio"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
+rcgen = { version = "0.13", default-features = false, features = ["ring"] }  # Pure Rust certificate generation
+
 [dev-dependencies]
 proptest = { workspace = true }
