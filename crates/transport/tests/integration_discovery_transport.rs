@@ -126,7 +126,7 @@ async fn test_qos_integration_after_discovery() {
 
     if let Ok(conn) = connection_result {
         // Connection succeeded, test QoS stream allocation
-        
+
         // Open high-priority stream
         let high_stream_result = transport
             .open_prioritized_stream(&conn, StreamPriority::High, 5000)
@@ -160,7 +160,7 @@ async fn test_connection_timeout_handling() {
 
     // Attempt connection to TEST-NET-1 address (RFC 5737 - guaranteed unreachable)
     let unreachable_addr = "192.0.2.1:9999".parse().unwrap();
-    
+
     let start = std::time::Instant::now();
     let result = transport.connect(unreachable_addr).await;
     let elapsed = start.elapsed();
@@ -177,7 +177,7 @@ async fn test_connection_timeout_handling() {
         Err(e) => {
             let error_str = e.to_string();
             assert!(
-                error_str.contains("Connection failed") || 
+                error_str.contains("Connection failed") ||
                 error_str.contains("timed out") ||
                 error_str.contains("No protocols available"),
                 "Expected timeout error, got: {}", error_str
@@ -222,7 +222,7 @@ async fn test_discovery_result_processing() {
     for device in discovered_devices {
         // In real application, user would select device to connect
         println!("Discovered device: {} at {}", device.name, device.address);
-        
+
         // Attempt connection
         let result = transport.connect(device.address).await;
         connections.push((device.id, result));
@@ -253,7 +253,7 @@ async fn test_connection_pooling_with_discovery() {
 
     // First connection attempt
     let result1 = transport.connect(peer_addr).await;
-    
+
     // Second connection attempt to same peer
     let result2 = transport.connect(peer_addr).await;
 

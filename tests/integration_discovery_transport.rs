@@ -11,7 +11,7 @@
 
 use honeylink_discovery::{DiscoveryManager, DiscoveryProtocol, mdns::MdnsDiscovery};
 use honeylink_transport::{
-    TransportManager, 
+    TransportManager,
     protocol::{ProtocolStrategy, ProtocolType, StreamPriority},
     quic::QuicTransport,
 };
@@ -35,7 +35,7 @@ async fn test_mdns_discovery_to_quic_connection() {
         "TestDevice".to_string(),
         "1.0.0".to_string(),
     ).expect("Failed to create mDNS discovery"));
-    
+
     // Register mDNS protocol
     let mut device_a_discovery_mut = device_a_discovery.clone();
     device_a_discovery_mut.register_protocol(
@@ -54,7 +54,7 @@ async fn test_mdns_discovery_to_quic_connection() {
     // Start listening on Device A
     let listen_addr = "127.0.0.1:0".parse().unwrap();
     let _incoming = quic_a.listen(listen_addr).await.expect("Failed to start listening");
-    
+
     // Get actual listening address
     let server_addr = {
         // In a real scenario, this would be discovered via mDNS
@@ -88,7 +88,7 @@ async fn test_mdns_discovery_to_quic_connection() {
 
     // Get discovered peers
     let discovered_peers = device_b_discovery.get_discovered_peers().await;
-    
+
     // In a real test, we would verify Device A is discovered
     // For now, we proceed with known address
 
@@ -99,17 +99,17 @@ async fn test_mdns_discovery_to_quic_connection() {
 
     // Connect Device B to Device A
     let connection = transport_b.connect(server_addr).await;
-    
+
     // Verify connection establishment
     match connection {
         Ok(conn) => {
             assert!(conn.is_connected(), "Connection should be established");
-            
+
             // Test data transfer
             let test_data = b"Hello from Device B";
             let send_result = conn.send(test_data).await;
             assert!(send_result.is_ok(), "Failed to send data");
-            
+
             // Clean up
             conn.close().await.expect("Failed to close connection");
         }
@@ -168,7 +168,7 @@ async fn test_multi_peer_discovery() {
 
     // Get discovered peers
     let peers = discovery.get_discovered_peers().await;
-    
+
     // In a real environment with multiple HoneyLink devices, this would return multiple peers
     // For unit test environment, we verify the API works
     assert!(peers.len() >= 0, "Peer discovery should return valid result");
@@ -203,13 +203,13 @@ async fn test_qos_stream_establishment() {
 
     // Client connects
     let connection_result = transport.connect(server_addr).await;
-    
+
     if let Ok(conn) = connection_result {
         // Open prioritized streams
         let high_priority_stream = transport
             .open_prioritized_stream(&conn, StreamPriority::High, 5000)
             .await;
-        
+
         let normal_priority_stream = transport
             .open_prioritized_stream(&conn, StreamPriority::Normal, 1000)
             .await;
