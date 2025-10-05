@@ -13,6 +13,7 @@ members = [
     "crates/telemetry",
     "crates/physical-adapter",
     "crates/experience",
+    "crates/keychain",
     # Example applications
     "examples",
 ]
