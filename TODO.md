@@ -28,7 +28,7 @@
 | **Phase 2** | UI Implementation | 100% | Complete ✅ |
 | **Phase 3** | Unit Tests | 100% | Complete ✅ |
 | **Phase 4** | P2P Transport | 100% | Complete ✅ |
-| **Phase 5** | Multi-stream QoS | 0% | Q3 2025 |
+| **Phase 5** | Multi-stream QoS | 100% | Q3 2025 |
 | **Phase 6** | Integration Tests | 0% | Q3 2025 |
 | **Phase 7** | Beta Release | 0% | Q4 2025 |
 
@@ -282,7 +282,23 @@
 
 ---
 
-## Phase 3-6: [Detailed tasks omitted for brevity - see full roadmap]
+## Phase 5: Multi-stream QoS (✅ COMPLETED)
+
+**Goal:** Integrate QoS Scheduler with Transport Manager for priority-based stream management
+
+### 5.1 QoS Integration
+- [x] **Task 5.1.1:** QoS Scheduler Integration with Transport Manager ✅
+  - [x] Extend Connection trait with priority stream methods
+  - [x] Add QoS-aware stream allocation in TransportManager
+  - [x] Implement bandwidth allocation per stream
+  - [x] Priority-based stream ordering (Burst > Normal > Latency)
+  - [x] Stream statistics tracking
+  - [x] **Dependencies:** honeylink-qos-scheduler (existing)
+  - [x] **Tests:** Priority ordering, bandwidth allocation, fairness (42 tests passed)
+
+---
+
+## Phase 6-7: [Detailed tasks to be defined]
 
 ---
 

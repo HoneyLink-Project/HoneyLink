@@ -4,7 +4,6 @@
 //! Implements in-process allocation API for Control Plane integration.
 
 use honeylink_core::types::StreamId;
-use std::collections::HashMap;
 
 /// QoS priority levels for stream allocation
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

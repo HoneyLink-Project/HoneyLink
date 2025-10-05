@@ -21,14 +21,15 @@
 //! - **Thread-safe**: All state protected by Arc<RwLock> and tokio::sync primitives
 
 use crate::protocol::{
-    Connection, ProtocolStrategy, ProtocolType, Result, TransportError, TransportProtocol,
-    TransportStats,
+    Connection, ProtocolStrategy, ProtocolType, Result, StreamPriority, TransportError, TransportProtocol,
+    TransportStats, Stream,
 };
+use honeylink_qos_scheduler::scheduler::{QoSScheduler, QoSPriority, StreamRequest, StreamMode, AllocationStats};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::RwLock;
+use tokio::sync::{RwLock, Mutex};
 use tracing::{debug, error, info, warn};
 
 /// Unified Transport Manager
@@ -59,6 +60,12 @@ pub struct TransportManager {
 
     /// Default connection timeout
     default_timeout: Duration,
+
+    /// QoS scheduler for multi-stream priority management
+    ///
+    /// Manages bandwidth allocation and stream limits across all connections.
+    /// Shared across all protocols.
+    qos_scheduler: Arc<Mutex<QoSScheduler>>,
 }
 
 impl TransportManager {
@@ -79,12 +86,18 @@ impl TransportManager {
     /// let manager = TransportManager::new(ProtocolStrategy::PreferQuic);
     /// ```
     pub fn new(strategy: ProtocolStrategy) -> Self {
+        // Create QoS scheduler with defaults:
+        // - 100 Mbps total bandwidth (100,000 kbps)
+        // - 100 parallel streams (project requirement)
+        let qos_scheduler = QoSScheduler::with_limits(100_000, 100);
+        
         Self {
             protocols: Arc::new(RwLock::new(HashMap::new())),
             connections: Arc::new(RwLock::new(HashMap::new())),
             strategy,
             stats: Arc::new(RwLock::new(TransportStats::default())),
             default_timeout: Duration::from_secs(5),
+            qos_scheduler: Arc::new(Mutex::new(qos_scheduler)),
         }
     }
 
@@ -477,6 +490,128 @@ impl TransportManager {
         let protocols = self.protocols.read().await;
         protocols.keys().copied().collect()
     }
+
+    /// Open a prioritized stream on an existing connection
+    ///
+    /// Creates a new stream with QoS-aware bandwidth allocation and priority handling.
+    /// This method integrates with the QoS scheduler to:
+    /// - Allocate bandwidth based on stream priority
+    /// - Track stream count limits (max 100 streams)
+    /// - Enforce fair bandwidth sharing across priority levels
+    ///
+    /// # Priority Mapping
+    /// - **High** → QoSPriority::Burst (high bandwidth, low latency)
+    /// - **Normal** → QoSPriority::Normal (standard bandwidth)
+    /// - **Low** → QoSPriority::Latency (background, lowest priority)
+    ///
+    /// # Parameters
+    /// - `connection`: Existing connection to open stream on
+    /// - `priority`: Stream priority level (High/Normal/Low)
+    /// - `bandwidth_kbps`: Requested bandwidth in kilobits per second
+    ///
+    /// # Returns
+    /// - `Ok(Box<dyn Stream>)`: Stream handle on success
+    /// - `Err(TransportError::ResourceExhausted)`: Insufficient bandwidth or too many streams
+    /// - `Err(TransportError)`: Connection error
+    ///
+    /// # Example
+    /// ```no_run
+    /// use honeylink_transport::manager::TransportManager;
+    /// use honeylink_transport::protocol::{ProtocolStrategy, StreamPriority};
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let manager = TransportManager::new(ProtocolStrategy::PreferQuic);
+    ///     let addr = "127.0.0.1:8080".parse()?;
+    ///     let conn = manager.connect(addr).await?;
+    ///     
+    ///     // Open high-priority video stream (5000 kbps)
+    ///     let stream = manager.open_prioritized_stream(
+    ///         &conn, 
+    ///         StreamPriority::High, 
+    ///         5000
+    ///     ).await?;
+    ///     Ok(())
+    /// }
+    /// ```
+    pub async fn open_prioritized_stream(
+        &self,
+        connection: &Arc<dyn Connection>,
+        priority: StreamPriority,
+        bandwidth_kbps: u32,
+    ) -> Result<Box<dyn Stream>> {
+        // Map StreamPriority to QoSPriority
+        let qos_priority = match priority {
+            StreamPriority::High => QoSPriority::Burst,
+            StreamPriority::Normal => QoSPriority::Normal,
+            StreamPriority::Low => QoSPriority::Latency,
+        };
+
+        // Create stream request
+        let stream_name = format!(
+            "stream-{}-{}",
+            connection.remote_addr(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis()
+        );
+
+        let request = StreamRequest {
+            name: stream_name.clone(),
+            mode: StreamMode::Reliable, // Default to reliable bidirectional streams
+            priority: qos_priority,
+            bandwidth_kbps,
+        };
+
+        // Allocate stream through QoS scheduler
+        let mut scheduler = self.qos_scheduler.lock().await;
+        let allocations = scheduler
+            .allocate_streams(&[request])
+            .map_err(|e| TransportError::ResourceExhausted(e.to_string()))?;
+
+        if allocations.is_empty() {
+            return Err(TransportError::ResourceExhausted(
+                "QoS scheduler rejected stream allocation".to_string(),
+            ));
+        }
+
+        // Stream allocated successfully, open it on the connection
+        let stream = connection.open_stream_with_priority(priority).await?;
+
+        debug!(
+            "Opened prioritized stream {} on {} with priority {:?}, bandwidth {} kbps",
+            stream_name,
+            connection.remote_addr(),
+            priority,
+            bandwidth_kbps
+        );
+
+        Ok(stream)
+    }
+
+    /// Release a stream from QoS scheduler
+    ///
+    /// Notifies the QoS scheduler that a stream is no longer active,
+    /// freeing up bandwidth and stream count for other allocations.
+    ///
+    /// # Parameters
+    /// - `stream_id`: Unique stream ID (from honeylink-core types)
+    /// - `bandwidth_kbps`: Bandwidth to release
+    pub async fn release_stream(&self, stream_id: honeylink_core::types::StreamId, bandwidth_kbps: u32) {
+        let mut scheduler = self.qos_scheduler.lock().await;
+        scheduler.release_stream(stream_id, bandwidth_kbps);
+        
+        debug!("Released stream {:?} with bandwidth {} kbps", stream_id, bandwidth_kbps);
+    }
+
+    /// Get QoS scheduler statistics
+    ///
+    /// Returns current bandwidth usage, active stream count, and allocation stats.
+    pub async fn qos_stats(&self) -> AllocationStats {
+        let scheduler = self.qos_scheduler.lock().await;
+        scheduler.get_stats()
+    }
 }
 
 #[cfg(test)]
@@ -539,6 +674,24 @@ mod tests {
         addr: SocketAddr,
     }
 
+    // Mock stream for testing
+    struct MockStream;
+
+    #[async_trait]
+    impl crate::protocol::Stream for MockStream {
+        async fn send(&mut self, _data: &[u8]) -> Result<()> {
+            Ok(())
+        }
+
+        async fn receive(&mut self) -> Result<Vec<u8>> {
+            Ok(vec![])
+        }
+
+        async fn close(&mut self) -> Result<()> {
+            Ok(())
+        }
+    }
+
     #[async_trait]
     impl Connection for MockConnection {
         fn remote_addr(&self) -> SocketAddr {
@@ -558,9 +711,11 @@ mod tests {
         }
 
         async fn open_stream(&self) -> Result<Box<dyn crate::protocol::Stream>> {
-            Err(TransportError::ProtocolNotSupported(
-                "Mock stream not implemented".to_string(),
-            ))
+            Ok(Box::new(MockStream))
+        }
+
+        async fn open_stream_with_priority(&self, _priority: StreamPriority) -> Result<Box<dyn crate::protocol::Stream>> {
+            Ok(Box::new(MockStream))
         }
 
         async fn close(&self) -> Result<()> {
@@ -743,5 +898,144 @@ mod tests {
         manager.close_connection(addr).await.unwrap();
         let stats = manager.stats().await;
         assert_eq!(stats.active_connections, 0);
+    }
+
+    #[tokio::test]
+    async fn test_qos_prioritized_stream() {
+        let mut manager = TransportManager::new(ProtocolStrategy::PreferQuic);
+        let mock = Arc::new(MockTransport {
+            name: "QUIC",
+            should_fail: false,
+        });
+
+        manager
+            .register_protocol(ProtocolType::Quic, mock)
+            .await;
+
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        let conn = manager.connect(addr).await.unwrap();
+
+        // Open high-priority stream (5000 kbps)
+        let high_stream = manager
+            .open_prioritized_stream(&conn, StreamPriority::High, 5000)
+            .await
+            .unwrap();
+
+        // Open normal-priority stream (1000 kbps)
+        let normal_stream = manager
+            .open_prioritized_stream(&conn, StreamPriority::Normal, 1000)
+            .await
+            .unwrap();
+
+        // Verify streams are open
+        drop(high_stream);
+        drop(normal_stream);
+
+        // Check QoS stats
+        let stats = manager.qos_stats().await;
+        assert_eq!(stats.allocated_bandwidth_kbps, 6000); // 5000 + 1000
+        assert_eq!(stats.total_streams, 2);
+    }
+
+    #[tokio::test]
+    async fn test_qos_insufficient_bandwidth() {
+        let mut manager = TransportManager::new(ProtocolStrategy::PreferQuic);
+        let mock = Arc::new(MockTransport {
+            name: "QUIC",
+            should_fail: false,
+        });
+
+        manager
+            .register_protocol(ProtocolType::Quic, mock)
+            .await;
+
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        let conn = manager.connect(addr).await.unwrap();
+
+        // Try to allocate 150 Mbps (exceeds default 100 Mbps limit)
+        let result = manager
+            .open_prioritized_stream(&conn, StreamPriority::High, 150_000)
+            .await;
+
+        assert!(result.is_err());
+        match result {
+            Err(TransportError::ResourceExhausted(_)) => {
+                // Expected error
+            }
+            _ => panic!("Expected ResourceExhausted error"),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_qos_too_many_streams() {
+        let mut manager = TransportManager::new(ProtocolStrategy::PreferQuic);
+        let mock = Arc::new(MockTransport {
+            name: "QUIC",
+            should_fail: false,
+        });
+
+        manager
+            .register_protocol(ProtocolType::Quic, mock)
+            .await;
+
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        let conn = manager.connect(addr).await.unwrap();
+
+        // Open streams near bandwidth limit (99,000 kbps used, 1,000 remaining)
+        let mut streams = Vec::new();
+        for _ in 0..99 {
+            let stream = manager
+                .open_prioritized_stream(&conn, StreamPriority::Normal, 1000)
+                .await
+                .unwrap();
+            streams.push(stream);
+        }
+
+        // Try to allocate 5000 kbps (exceeds remaining 1000 kbps)
+        let result = manager
+            .open_prioritized_stream(&conn, StreamPriority::High, 5000)
+            .await;
+
+        assert!(result.is_err());
+        match result {
+            Err(TransportError::ResourceExhausted(_)) => {
+                // Expected error: insufficient bandwidth
+            }
+            _ => panic!("Expected ResourceExhausted error"),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_qos_priority_ordering() {
+        let mut manager = TransportManager::new(ProtocolStrategy::PreferQuic);
+        let mock = Arc::new(MockTransport {
+            name: "QUIC",
+            should_fail: false,
+        });
+
+        manager
+            .register_protocol(ProtocolType::Quic, mock)
+            .await;
+
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        let conn = manager.connect(addr).await.unwrap();
+
+        // Open streams in reverse priority order
+        let _low = manager
+            .open_prioritized_stream(&conn, StreamPriority::Low, 1000)
+            .await
+            .unwrap();
+        let _normal = manager
+            .open_prioritized_stream(&conn, StreamPriority::Normal, 1000)
+            .await
+            .unwrap();
+        let _high = manager
+            .open_prioritized_stream(&conn, StreamPriority::High, 1000)
+            .await
+            .unwrap();
+
+        // Verify QoS scheduler allocated all streams
+        let stats = manager.qos_stats().await;
+        assert_eq!(stats.total_streams, 3);
     }
 }

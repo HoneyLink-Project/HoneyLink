@@ -60,6 +60,10 @@ pub enum TransportError {
     #[error("Protocol not supported: {0}")]
     ProtocolNotSupported(String),
 
+    /// Resource exhausted (bandwidth or streams)
+    #[error("Resource exhausted: {0}")]
+    ResourceExhausted(String),
+
     /// TLS/DTLS error
     #[error("Encryption error: {0}")]
     EncryptionError(String),
@@ -172,6 +176,27 @@ pub trait Connection: Send + Sync {
     /// * `Err(TransportError)` - Failed to open stream
     async fn open_stream(&self) -> Result<Box<dyn Stream>>;
 
+    /// Open a bidirectional stream with priority
+    ///
+    /// Creates a new stream with QoS priority for bandwidth allocation
+    /// and latency optimization. Priority affects:
+    /// - Bandwidth allocation (High priority gets more bandwidth)
+    /// - Latency (High priority streams processed first)
+    /// - Congestion control (High priority less affected by backpressure)
+    ///
+    /// # Arguments
+    /// * `priority` - Stream priority level (High/Normal/Low)
+    ///
+    /// # Returns
+    /// * `Ok(Stream)` - Stream handle with priority
+    /// * `Err(TransportError)` - Failed to open stream
+    ///
+    /// # Default Implementation
+    /// Falls back to `open_stream()` for protocols without QoS support.
+    async fn open_stream_with_priority(&self, _priority: StreamPriority) -> Result<Box<dyn Stream>> {
+        self.open_stream().await
+    }
+
     /// Close the connection gracefully
     ///
     /// Sends close signal to peer and waits for acknowledgment.
@@ -274,6 +299,28 @@ impl ProtocolType {
             Self::Quic => "QUIC",
             Self::WebRtc => "WebRTC",
         }
+    }
+}
+
+/// Stream priority for QoS-aware stream allocation
+///
+/// Priority levels map to QoS Scheduler's QoSPriority:
+/// - High: Burst traffic (video streaming, high bandwidth)
+/// - Normal: Standard traffic (telemetry, control messages)
+/// - Low: Background traffic (bulk transfers, low latency)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum StreamPriority {
+    /// High priority (burst traffic)
+    High,
+    /// Normal priority (standard traffic)
+    Normal,
+    /// Low priority (background traffic)
+    Low,
+}
+
+impl Default for StreamPriority {
+    fn default() -> Self {
+        Self::Normal
     }
 }
 

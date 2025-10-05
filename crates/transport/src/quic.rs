@@ -27,7 +27,7 @@
 //! - Certificate validation configurable (skip for testing, enforce for production)
 //! - No support for insecure protocols
 
-use crate::protocol::{Connection, Result, Stream, TransportError, TransportProtocol};
+use crate::protocol::{Connection, Result, Stream, StreamPriority, TransportError, TransportProtocol};
 use async_trait::async_trait;
 use quinn::{ClientConfig, Endpoint, RecvStream, SendStream, ServerConfig};
 use rustls::pki_types::{CertificateDer, PrivateKeyDer};
@@ -117,7 +117,7 @@ impl QuicTransport {
         transport_config.max_concurrent_bidi_streams(100u32.into());
         transport_config.max_concurrent_uni_streams(100u32.into());
         transport_config.keep_alive_interval(Some(Duration::from_secs(5)));
-        
+
         server_config.transport_config(Arc::new(transport_config));
 
         Ok(server_config)
@@ -144,7 +144,7 @@ impl QuicTransport {
         transport_config.max_concurrent_bidi_streams(100u32.into());
         transport_config.max_concurrent_uni_streams(100u32.into());
         transport_config.keep_alive_interval(Some(Duration::from_secs(5)));
-        
+
         client_config.transport_config(Arc::new(transport_config));
 
         client_config
@@ -291,6 +291,25 @@ impl Connection for QuicConnection {
         Ok(Box::new(QuicStream { send, recv }))
     }
 
+    async fn open_stream_with_priority(&self, priority: StreamPriority) -> Result<Box<dyn Stream>> {
+        let (send, recv) = self.connection.open_bi().await
+            .map_err(|e| TransportError::SendFailed(format!("Failed to open stream: {}", e)))?;
+
+        // Map StreamPriority to quinn stream priority
+        // quinn uses i32 priority: higher values = higher priority
+        let quinn_priority = match priority {
+            StreamPriority::High => 100,   // Burst traffic, highest priority
+            StreamPriority::Normal => 50,  // Standard traffic, medium priority
+            StreamPriority::Low => 0,      // Background traffic, lowest priority
+        };
+
+        // Set stream priority in quinn
+        send.set_priority(quinn_priority)
+            .map_err(|e| TransportError::SendFailed(format!("Failed to set priority: {}", e)))?;
+
+        Ok(Box::new(QuicStream { send, recv }))
+    }
+
     async fn close(&self) -> Result<()> {
         self.connection.close(0u32.into(), b"closed");
         Ok(())
@@ -413,7 +432,7 @@ mod tests {
     async fn test_quic_connect_timeout() {
         let transport = QuicTransport::new().unwrap();
         let addr: SocketAddr = "127.0.0.1:9999".parse().unwrap();
-        
+
         // Should timeout since no server is listening
         let result = transport.connect(addr, Duration::from_millis(100)).await;
         assert!(result.is_err());
@@ -449,6 +468,42 @@ mod tests {
         // Clean up
         client_conn.close().await.unwrap();
         server_conn.close().await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_quic_prioritized_stream() {
+        let server = QuicTransport::new().unwrap();
+        let client = QuicTransport::new().unwrap();
+
+        let addr: SocketAddr = "127.0.0.1:0".parse().unwrap();
+        let mut incoming = server.listen(addr).await.unwrap();
+
+        let server_addr = {
+            let endpoint_guard = server.endpoint.lock().await;
+            endpoint_guard.as_ref().unwrap().local_addr().unwrap()
+        };
+
+        // Client connects
+        let client_conn = client.connect(server_addr, Duration::from_secs(5)).await.unwrap();
+
+        // Server accepts
+        let _server_conn = tokio::time::timeout(Duration::from_secs(5), incoming.recv())
+            .await
+            .unwrap()
+            .unwrap();
+
+        // Open streams with different priorities
+        let high_stream = client_conn.open_stream_with_priority(StreamPriority::High).await.unwrap();
+        let normal_stream = client_conn.open_stream_with_priority(StreamPriority::Normal).await.unwrap();
+        let low_stream = client_conn.open_stream_with_priority(StreamPriority::Low).await.unwrap();
+
+        // Verify streams are open (basic smoke test)
+        // In production, priority would affect congestion control and bandwidth allocation
+        drop(high_stream);
+        drop(normal_stream);
+        drop(low_stream);
+
+        client_conn.close().await.unwrap();
     }
 
     #[tokio::test]

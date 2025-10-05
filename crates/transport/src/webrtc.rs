@@ -85,10 +85,10 @@ impl WebRtcTransport {
     /// ```ignore
     /// let mut media_engine = MediaEngine::default();
     /// media_engine.register_default_codecs()?;
-    /// 
+    ///
     /// let mut setting_engine = SettingEngine::default();
     /// setting_engine.set_ice_timeouts(...);
-    /// 
+    ///
     /// let api = APIBuilder::new()
     ///     .with_media_engine(media_engine)
     ///     .with_setting_engine(setting_engine)
@@ -249,10 +249,10 @@ mod tests {
     async fn test_webrtc_connect_returns_not_supported() {
         let transport = WebRtcTransport::new().unwrap();
         let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
-        
+
         let result = transport.connect(addr, Duration::from_secs(5)).await;
         assert!(result.is_err());
-        
+
         match result {
             Err(TransportError::ProtocolNotSupported(msg)) => {
                 assert!(msg.contains("not implemented"));
@@ -265,10 +265,10 @@ mod tests {
     async fn test_webrtc_listen_returns_not_supported() {
         let transport = WebRtcTransport::new().unwrap();
         let addr: SocketAddr = "0.0.0.0:8080".parse().unwrap();
-        
+
         let result = transport.listen(addr).await;
         assert!(result.is_err());
-        
+
         match result {
             Err(TransportError::ProtocolNotSupported(msg)) => {
                 assert!(msg.contains("not implemented"));
