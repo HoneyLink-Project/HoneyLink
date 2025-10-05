@@ -5,8 +5,8 @@
 
 [toolchain]
 # Lock to specific stable version for reproducibility
-# Using MSVC toolchain for Windows compatibility (avoids dlltool issues)
-channel = "1.89.0-x86_64-pc-windows-msvc"
+# Using Linux GNU toolchain for WSL/Linux native builds
+channel = "1.89.0"
 
 # Essential components for development and CI
 components = [
@@ -17,8 +17,7 @@ components = [
 
 # Target platforms
 targets = [
-    "x86_64-unknown-linux-gnu",    # Primary Linux target for backend services
-    "x86_64-pc-windows-gnu",       # Windows GNU target (no MSVC linker required)
+    "x86_64-unknown-linux-gnu",    # Primary Linux target for backend services (WSL)
     "wasm32-unknown-unknown",      # WebAssembly target for UI integration
 ]
 

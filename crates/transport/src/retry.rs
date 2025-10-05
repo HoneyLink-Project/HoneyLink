@@ -329,14 +329,18 @@ mod tests {
     async fn test_retry_executor_success() {
         let executor = RetryExecutor::new(RetryPolicy::default_transport());
 
-        let mut attempt = 0;
+        let attempt = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let attempt_clone = attempt.clone();
         let result = executor
-            .execute(|| async {
-                attempt += 1;
-                if attempt < 2 {
-                    Err(TransportError::Timeout(Duration::from_secs(5)))
-                } else {
-                    Ok(42)
+            .execute(move || {
+                let attempt = attempt_clone.clone();
+                async move {
+                    let count = attempt.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                    if count < 1 {
+                        Err(TransportError::Timeout(Duration::from_secs(5)))
+                    } else {
+                        Ok(42)
+                    }
                 }
             })
             .await;
@@ -350,7 +354,7 @@ mod tests {
     async fn test_retry_executor_failure() {
         let executor = RetryExecutor::new(RetryPolicy::default_transport());
 
-        let result = executor
+        let result: Result<i32, TransportError> = executor
             .execute(|| async { Err(TransportError::Timeout(Duration::from_secs(5))) })
             .await;
 

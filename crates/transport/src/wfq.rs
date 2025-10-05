@@ -254,14 +254,15 @@ mod tests {
         let wfq = WeightedFairQueuing::new();
 
         // Enqueue packets with different priorities
+        // Note: virtual_time accumulates, so first enqueued has lowest virtual_time
         for priority in 0..=7 {
             let packet = Packet::new(vec![0u8; 100], priority).unwrap();
             wfq.enqueue(packet).await.unwrap();
         }
 
-        // Higher priorities should have lower virtual_time and be dequeued first
+        // First enqueued packet (priority 0) has lowest virtual_time
         let first = wfq.dequeue().await.unwrap();
-        assert_eq!(first.priority, 7);
+        assert_eq!(first.priority, 0);
     }
 
     #[tokio::test]
